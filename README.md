@@ -14,7 +14,7 @@ Pools
 
 Account
 
-- RiskConfiguration.sol (1)
+- RiskConfiguration.sol (1) -> how do we set this, same goes for collateral configuration
 - Introduce liquidator deposit logic or propose an alternative (2)
 - Add settlement token related logic (setting, checks, etc) (3)
 

@@ -23,11 +23,11 @@ library RiskConfiguration {
          * @dev IM Multipliers are used to introduce a buffer between the liquidation and initial margin requirements
          * where IM = imMultiplier * LM
          */
-        int256 imMultiplier;
+        uint256 imMultiplier;
         /**
          * @dev Liquidator reward parameters are multiplied by the im delta caused by the liquidation to get the liquidator reward amount
          */
-        int256 liquidatorRewardParameter;
+        uint256 liquidatorRewardParameter;
     }
 
     /**
