@@ -8,6 +8,21 @@ Math
 - PRB Math V3
 - User Defined Types
 
+Pools
+
+- create a new repo for vamms asap
+
+Account
+
+- RiskConfiguration.sol (1)
+- Introduce liquidator deposit logic or propose an alternative (2)
+- Add settlement token related logic (setting, checks, etc) (3)
+
+Liquidation Engine
+
+- reverts and liquidator deposits (4)
+- introduce LiquidationData (5)
+
 Products - IRS
 
 - note, pool ids are no a much broader concept, this needs to be elaborated in the architecture diagram and docs
@@ -26,11 +41,9 @@ minor
 - what if pools propagated locked trades to the product instead of the product having to request them, similar to a notify transfer in the account object
 -  glp as a service = composability = lp token wars
 -  permissonless product creation with isolated pool of collateral
-
-Pools
-
-- [...]
-
+- can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
+- consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
+  
 Oracles
 
 - oracle registraion
@@ -38,32 +51,6 @@ Oracles
 - introduce gwap oracle manager (internal)
 
 - Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
-
-
-Liquidation Engine
-
-- liquidate --> also check the liquidation deposit logic (consider removing or simplifying the logic to avoid the need for a separate storage for liquidation deposits)
-
-
-Collateral Engine
-
-minor 
-- introduce liquidator deposit logic or propose an alternative
-
-Account
-
-- introduce lens like interfaces to liquidation and collateral engines, already started this process in the collateral engine
-- parametrisation smth like RiskConfiguration.sol
-
-minor
-- add settlement token checks
-- can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
-- consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
-
-minor
-- introduce LiquidationData
-- introduce ERC20Helper
-
 
 Feature Flags
 
