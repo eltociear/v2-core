@@ -4,6 +4,8 @@ pragma solidity >=0.8.13;
 import "../accounts/storage/Account.sol";
 import "../utils/errors/ParameterError.sol";
 import "../interfaces/ILiquidationEngine.sol";
+import "../utils/helpers/SafeCast.sol";
+import "./storage/Collateral.sol";
 
 /**
  * @title Module for liquidated accounts
@@ -12,6 +14,9 @@ import "../interfaces/ILiquidationEngine.sol";
 
 contract LiquidationEngine is ILiquidationEngine {
     using Account for Account.Data;
+    using SafeCastU256 for uint256;
+    using SafeCastI256 for int256;
+    using Collateral for Collateral.Data;
 
     /**
      * @inheritdoc ILiquidationEngine
@@ -35,6 +40,8 @@ contract LiquidationEngine is ILiquidationEngine {
         if (deltaIM <= 0) {
             // todo: revert
         }
+
+        // todo: liquidator deposit logic vs. alternatives (P1)
 
         liquidatorRewardAmount = deltaIM.toUint() * getLiquidatorRewardParameter();
         Account.Data storage liquidatorAccount = Account.load(liquidatorAccountId);
