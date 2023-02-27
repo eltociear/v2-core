@@ -11,11 +11,39 @@ import "../interfaces/ILiquidationEngine.sol";
  */
 
 contract LiquidationEngine is ILiquidationEngine {
+    using Account for Account.Data;
+
     /**
      * @inheritdoc ILiquidationEngine
      */
-    function liquidate(uint128 accountId, uint128 liquidateAsAccountId)
+    function liquidate(uint128 liquidatedAccountId, uint128 liquidatorAccountId)
         external
-        returns (LiquidationData memory liquidationData)
-    {}
+        returns (uint256 liquidatorRewardAmount)
+    {
+        Account.exists(liquidatedAccountId);
+        Account.Data storage account = Account.load(liquidatedAccountId);
+        address liquidatorRewardToken = account.settlementToken;
+        (bool liquidatable, uint256 imPreClose,) = account.isLiquidatable();
+
+        if (!liquidatable) {
+            // todo: revert
+        }
+        account.closeAccount();
+        (uint256 imPostClose,) = account.getMarginRequirements();
+        int256 deltaIM = imPostClose.toInt() - imPreClose.toInt();
+
+        if (deltaIM <= 0) {
+            // todo: revert
+        }
+
+        liquidatorRewardAmount = deltaIM.toUint() * getLiquidatorRewardParameter();
+        Account.Data storage liquidatorAccount = Account.load(liquidatorAccountId);
+
+        account.collaterals[liquidatorRewardToken].decreaseCollateralBalance(liquidatorRewardAmount);
+        liquidatorAccount.collaterals[liquidatorRewardToken].increaseCollateralBalance(liquidatorRewardAmount);
+    }
+
+    function getLiquidatorRewardParameter() internal returns (uint256 liquidatorRewardParameter) {
+        return 1;
+    }
 }
