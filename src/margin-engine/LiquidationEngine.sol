@@ -18,28 +18,4 @@ contract LiquidationEngine is ILiquidationEngine {
         external
         returns (LiquidationData memory liquidationData)
     {}
-
-    /**
-     * @inheritdoc ILiquidationEngine
-     */
-    function isAccountLiquidatable(uint128 accountId) external returns (bool canLiquidate) {
-        // todo: consider moving it away from here into the account manager given that this is calculated by Account.sol now
-    }
-    /**
-     * @inheritdoc ILiquidationEngine
-     */
-
-    function getAccountMarginRequirements(uint128 accountId)
-        external
-        view
-        returns (uint256 initialMarginRequirementD18, uint256 liquidationMarginRequirementD18)
-    {
-        // todo: consider moving it away from here into the account manager given that this is calculated by Account.sol now
-    }
-    /**
-     * @inheritdoc ILiquidationEngine
-     */
-    function isAccountIMSatisfied(uint128 accountID) external view returns (bool isIMSatisfied) {
-        // todo: consider moving it away from here into the account manager given that this is calculated by Account.sol now
-    }
 }

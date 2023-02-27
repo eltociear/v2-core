@@ -47,18 +47,4 @@ interface ILiquidationEngine {
     function liquidate(uint128 accountId, uint128 liquidateAsAccountId)
         external
         returns (LiquidationData memory liquidationData);
-
-    /**
-     * @notice Determines whether a specified account is liquidatable
-     * @param accountId The id of the account that is being queried for liquidation.
-     * @return canLiquidate A boolean with the response to the query.
-     */
-    function isAccountLiquidatable(uint128 accountId) external returns (bool canLiquidate);
-
-    function getAccountMarginRequirements(uint128 accountId)
-        external
-        view
-        returns (uint256 initialMarginRequirementD18, uint256 liquidationMarginRequirementD18);
-
-    function isAccountIMSatisfied(uint128 accountID) external view returns (bool isIMSatisfied);
 }
