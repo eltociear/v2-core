@@ -1,22 +1,37 @@
 # TODOs
 
+IRS Product & Pool
+
+- aggregated data from pools: exposures, pnls, closeAccount (1)
+- create a pool manager (2)
+- create a new repo for vamms (Ioana)
+
+Rate Oracle Manager
+- implement a simple mock rate oracle
+
+Account
+
+- Market and risk configuration setting process (3)
+- Add settlement token related logic (setting, checks, etc) (4)
+- Introduce liquidator deposit logic or propose an alternative
+
+Liquidation Engine
+
+- reverts and liquidator deposits (4)
+- introduce LiquidationData (5)
+
+Fee Logic
+- product implementation needs to include fee distribution logic, must be smth the interface supports
+
 Deployment
 - sooner rather than later
 
 Macro
 - reshuffle files: storage into one folder, core modules into another, external into another, etc
 
-Products - IRS [P1]
+Associated Systems Manager
 
-Dated IRS Pool
-
-- annualized exposures
-
-
-- generalise the signature for pools to also include the productId -> creates the ability to have many to many relationships
-- check if we need a pool manager
-- product implementation needs to include fee distribution logic, must be smth the interface supports
-- build out dated irs pool without vamm logic, then consider migrating some or all of it into a new repo
+- [...]
 
 CI
 - initial unit tests
@@ -25,33 +40,6 @@ CI
 Math
 - PRB Math V3
 - User Defined Types
-
-Pools
-
-- create a new repo for vamms asap
-
-Associated Systems Manager
-
-- [...]
-
-Account
-
-- Introduce liquidator deposit logic or propose an alternative (2)
-- Add settlement token related logic (setting, checks, etc) (3)
-- market and risk configuration setting process
-
-Liquidation Engine
-
-- reverts and liquidator deposits (4)
-- introduce LiquidationData (5)
-  
-Oracles
-
-- oracle registraion
-- introduce a rate oracle manager (external)
-- introduce gwap oracle manager (internal)
-
-- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
 
 Feature Flags
 
@@ -77,6 +65,7 @@ minor
 - note, pool ids are no a much broader concept, this needs to be elaborated in the architecture diagram and docs
 - layer in pool logic and think about how it'd impact the gas costs
 - don't think we need cashflow propagation in the collateral engine
+- generalise the signature for pools to also include the productId -> creates the ability to have many to many relationships
 
 # Summary
 This project uses foundry. Licensing is not finalised yet, as a placeholder using MIT in a few places to keep the linter happy.
