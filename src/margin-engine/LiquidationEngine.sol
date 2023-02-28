@@ -2,6 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "../accounts/storage/Account.sol";
+import "../accounts/storage/ProtocolRiskConfiguration.sol";
 import "../utils/errors/ParameterError.sol";
 import "../interfaces/ILiquidationEngine.sol";
 import "../utils/helpers/SafeCast.sol";
@@ -13,6 +14,7 @@ import "./storage/Collateral.sol";
  */
 
 contract LiquidationEngine is ILiquidationEngine {
+    using ProtocolRiskConfiguration for ProtocolRiskConfiguration.Data;
     using Account for Account.Data;
     using SafeCastU256 for uint256;
     using SafeCastI256 for int256;
@@ -43,14 +45,10 @@ contract LiquidationEngine is ILiquidationEngine {
 
         // todo: liquidator deposit logic vs. alternatives (P1)
 
-        liquidatorRewardAmount = deltaIM.toUint() * getLiquidatorRewardParameter();
+        liquidatorRewardAmount = deltaIM.toUint() * ProtocolRiskConfiguration.load().liquidatorRewardParameter;
         Account.Data storage liquidatorAccount = Account.load(liquidatorAccountId);
 
         account.collaterals[liquidatorRewardToken].decreaseCollateralBalance(liquidatorRewardAmount);
         liquidatorAccount.collaterals[liquidatorRewardToken].increaseCollateralBalance(liquidatorRewardAmount);
-    }
-
-    function getLiquidatorRewardParameter() internal returns (uint256 liquidatorRewardParameter) {
-        return 1;
     }
 }

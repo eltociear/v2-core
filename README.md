@@ -1,5 +1,9 @@
 # TODOs
 
+Macro
+- reshuffle files: storage into one folder, core modules into another, external into another, etc
+
+
 CI
 - initial unit tests
 - github flows
@@ -12,11 +16,15 @@ Pools
 
 - create a new repo for vamms asap
 
+Associated Systems Manager
+
+- [...]
+
 Account
 
-- RiskConfiguration.sol (1) -> how do we set this, same goes for collateral configuration
 - Introduce liquidator deposit logic or propose an alternative (2)
 - Add settlement token related logic (setting, checks, etc) (3)
+- market and risk configuration setting process
 
 Liquidation Engine
 
