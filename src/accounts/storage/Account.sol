@@ -114,7 +114,7 @@ library Account {
      */
     function closeAccount(Data storage self) internal {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
-        for (uint256 i = 1; i < _activeProducts.length(); i++) {
+        for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productIndex = _activeProducts.valueAt(i).to128();
             Product.Data storage _product = Product.load(productIndex);
             _product.closeAccount(self.id);
@@ -153,10 +153,15 @@ library Account {
         view
         returns (uint256 collateralBalanceAvailableD18)
     {
-        (uint256 im,) = self.getMarginRequirements();
-        uint256 collateralBalance = self.getCollateralBalance(collateralType);
-        if (collateralBalance > im) {
-            collateralBalanceAvailableD18 = collateralBalance - im;
+        if (collateralType == self.settlementToken) {
+            (uint256 im,) = self.getMarginRequirements();
+            int256 collateralBalance = self.getTotalAccountValue();
+            if (collateralBalance > im.toInt()) {
+                collateralBalanceAvailableD18 = collateralBalance.toUint() - im;
+            }
+        }
+        else {
+            collateralBalanceAvailableD18 = self.getCollateralBalance(collateralType);
         }
     }
 
@@ -194,7 +199,7 @@ library Account {
      */
     function getUnrealizedPnL(Data storage self) internal view returns (int256 unrealizedPnL) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
-        for (uint256 i = 1; i < _activeProducts.length(); i++) {
+        for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productIndex = _activeProducts.valueAt(i).to128();
             Product.Data storage _product = Product.load(productIndex);
             unrealizedPnL += _product.getAccountUnrealizedPnL(self.id);
@@ -213,7 +218,7 @@ library Account {
 
     function getRiskParameter(uint128 productId, uint128 marketId) internal pure returns (int256 riskParameter) {
         // todo: add implementation with the RiskConfiguration.sol storage migrated into the accounts storage
-        return 1;
+        return 1e18;
     }
 
     /**
@@ -222,7 +227,7 @@ library Account {
     function getIMMultiplier() internal pure returns (uint256 imMultiplier) {
         // todo: add implementation with the RiskConfiguration.sol storage migrated into the accounts storage
         // todo: prb, user defined type
-        return 2;
+        return 2e18;
     }
 
     function imCheck(Data storage self) internal view {
@@ -258,12 +263,14 @@ library Account {
 
     function getMarginRequirements(Data storage self) internal view returns (uint256 im, uint256 lm) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
-        for (uint256 i = 1; i < _activeProducts.length(); i++) {
+
+        int256 worstCashflowUp;
+        int256 worstCashflowDown;
+        for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
             Exposure[] memory annualizedProductMarketExposures = self.getAnnualizedProductExposures(productId);
-            int256 worstCashflowUp;
-            int256 worstCashflowDown;
-            for (uint256 j = 1; i < annualizedProductMarketExposures.length; i++) {
+            
+            for (uint256 j = 0; j < annualizedProductMarketExposures.length; j++) {
                 Exposure memory exposure = annualizedProductMarketExposures[j];
                 uint128 marketId = exposure.marketId;
                 int256 riskParameter = getRiskParameter(productId, marketId);
@@ -274,14 +281,14 @@ library Account {
                 int256 worstFilledUp = riskParameter > 0 ? maxLong : maxShort;
                 int256 worstFilledDown = riskParameter > 0 ? maxShort : maxLong;
 
-                worstCashflowUp += worstFilledUp * riskParameter;
-                worstCashflowDown += worstFilledDown * riskParameter;
+                worstCashflowUp += worstFilledUp * riskParameter / 1e18;
+                worstCashflowDown += worstFilledDown * riskParameter / 1e18;
             }
-
-            (worstCashflowUp, worstCashflowDown) = (abs(worstCashflowUp), abs(worstCashflowDown));
-            lm += max(worstCashflowUp, worstCashflowDown).toUint();
         }
-        im = lm * getIMMultiplier();
+        (worstCashflowUp, worstCashflowDown) = (abs(worstCashflowUp), abs(worstCashflowDown));
+        lm = max(worstCashflowUp, worstCashflowDown).toUint();
+
+        im = lm * getIMMultiplier() / 1e18;
     }
 
     function max(int256 a, int256 b) internal pure returns (int256) {
