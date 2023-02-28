@@ -126,7 +126,6 @@ library DatedIRSPortfolio {
     /**
      * @dev note: given that all the accounts are single-token, annualized exposures for a given account are in terms
      * of the settlement token of that account
-     * todo: introduce exposures from pool as well
      */
     function getAccountAnnualizedExposures(Data storage self, address poolAddress)
         internal
@@ -161,8 +160,10 @@ library DatedIRSPortfolio {
 
     /**
      * @dev Fully Close all the positions owned by the account within the dated irs portfolio
-     * poolId in which to close the account, note in the beginning we'll only have a single pool
+     * poolAddress in which to close the account, note in the beginning we'll only have a single pool
      * todo: layer in position closing in the pool
+     * todo: pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance); -> consider passing a list of
+     * structs such that there is only a single external call done to the poolAddress?
      */
     function closeAccount(Data storage self, address poolAddress) internal {
         SetUtil.UintSet storage _activeMarkets = self.activeMarkets;
@@ -172,6 +173,11 @@ library DatedIRSPortfolio {
             SetUtil.UintSet storage _activeMaturities = self.activeMaturitiesPerMarket[marketId];
             for (uint256 j = 1; i < _activeMaturities.length(); j++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
+
+                
+                
+
+
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
             }

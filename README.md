@@ -4,7 +4,11 @@ Distributions of tasks below
 
 IRS Product & Pool
 
-- aggregated data from pools: pnls, exposures, closeAccount (1)
+- keep products in the core because of the tight dependency with account? -> need to assess pros and cons in more detail
+
+
+
+- aggregated data from pools: closeAccount, adjust interfaces (1)
 - create a pool manager (2)
 - create a new repo for vamms (Ioana)
 

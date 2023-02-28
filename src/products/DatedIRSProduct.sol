@@ -8,6 +8,7 @@ import "./storage/DatedIRSMarketConfiguration.sol";
 import "../utils/helpers/SafeCast.sol";
 import "../margin-engine/storage/Collateral.sol";
 import "../pools/interfaces/IDatedIRSVAMMPool.sol";
+import "../interfaces/IProductManager.sol";
 
 /**
  * @title Dated Interest Rate Swap Product
@@ -15,10 +16,16 @@ import "../pools/interfaces/IDatedIRSVAMMPool.sol";
  */
 
 contract DatedIRSProduct is IDatedIRSProduct {
-    using Account for Account.Data;
     using DatedIRSPortfolio for DatedIRSPortfolio.Data;
     using SafeCastI256 for int256;
-    using Collateral for Collateral.Data;
+
+    address private _proxy;
+    uint128 private _productId;
+
+    function initialize(address proxy, uint128 productId) external {
+        _proxy = proxy;
+        _productId = productId;
+    }
 
     /**
      * @inheritdoc IDatedIRSProduct
@@ -30,18 +37,12 @@ contract DatedIRSProduct is IDatedIRSProduct {
         uint256 maturityTimestamp,
         int256 baseAmount
     ) external override returns (int256 executedBaseAmount, int256 executedQuoteAmount) {
-        // note, in the beginning will just have a single pool id
-        // in the future, products and pools should have a many to many relationship
-        // check if account exists
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
-        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
         IDatedIRSVAMMPool pool = IDatedIRSVAMMPool(poolAddress);
         (executedBaseAmount, executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
-        // todo: mark product in the account object (see python implementation for more details, solidity uses setutil though)
-        // todo: process taker fees (these should also be returned)
-        account.imCheck();
+        IProductManager(_proxy).propagateTakerOrder(accountId);
     }
 
     /**
@@ -56,13 +57,11 @@ contract DatedIRSProduct is IDatedIRSProduct {
         uint256 priceUpper,
         int256 requestedBaseAmount
     ) external override returns (int256 executedBaseAmount) {
-        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
         IDatedIRSVAMMPool pool = IDatedIRSVAMMPool(poolAddress);
         executedBaseAmount =
             pool.executeDatedMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, requestedBaseAmount);
-        // todo: mark product
-        // todo: process maker fees (these should also be returned)
-        account.imCheck();
+
+        IProductManager(_proxy).propagateMakerOrder(accountId);
     }
     /**
      * @inheritdoc IDatedIRSProduct
@@ -75,11 +74,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
 
         address quoteToken = DatedIRSMarketConfiguration.load(marketId).quoteToken;
 
-        if (settlementCashflowInQuote > 0) {
-            account.collaterals[quoteToken].increaseCollateralBalance(settlementCashflowInQuote.toUint());
-        } else {
-            account.collaterals[quoteToken].decreaseCollateralBalance((-settlementCashflowInQuote).toUint());
-        }
+        IProductManager(_proxy).propagateCashflow(accountId, quoteToken, settlementCashflowInQuote);
     }
 
     /**

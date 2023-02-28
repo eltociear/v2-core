@@ -171,10 +171,14 @@ library Account {
      * because loading an account and checking for ownership is a very
      * common use case in other parts of the code.
      */
-    function loadAccountAndValidateOwnership(uint128 accountId) internal view returns (Data storage account) {
+    function loadAccountAndValidateOwnership(uint128 accountId, address senderAddress)
+        internal
+        view
+        returns (Data storage account)
+    {
         account = Account.load(accountId);
-        if (!account.rbac.authorized(msg.sender)) {
-            revert PermissionDenied(accountId, msg.sender);
+        if (!account.rbac.authorized(senderAddress)) {
+            revert PermissionDenied(accountId, senderAddress);
         }
     }
 
