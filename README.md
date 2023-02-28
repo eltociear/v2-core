@@ -1,8 +1,10 @@
 # TODOs
 
+Distributions of tasks below
+
 IRS Product & Pool
 
-- aggregated data from pools: exposures, pnls, closeAccount (1)
+- aggregated data from pools: pnls, exposures, closeAccount (1)
 - create a pool manager (2)
 - create a new repo for vamms (Ioana)
 

@@ -67,10 +67,14 @@ library DatedIRSPortfolio {
     /**
      * @dev note: given that all the accounts are single-token, unrealizedPnL for a given account is in terms
      * of the settlement token of that account
-     * todo: introduce unrealized pnl from pool as well
+     * todo: introduce unrealized pnl from pool as well (avoid pool if account is purely taker to save gas?)
      * todo: this function looks expesive and feels like there's room for optimisations
      */
-    function getAccountUnrealizedPnL(Data storage self) internal view returns (int256 unrealizedPnL) {
+    function getAccountUnrealizedPnL(Data storage self, address poolAddress)
+        internal
+        view
+        returns (int256 unrealizedPnL)
+    {
         SetUtil.UintSet storage _activeMarkets = self.activeMarkets;
         for (uint256 i = 1; i < _activeMarkets.length(); i++) {
             uint128 marketId = _activeMarkets.valueAt(i).to128();
@@ -78,6 +82,12 @@ library DatedIRSPortfolio {
             for (uint256 j = 1; i < _activeMaturities.length(); i++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
+
+                IPool pool = IPool(poolAddress);
+
+                (int256 baseBalancePool, int256 quoteBalancePool) =
+                    pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+
                 int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
                 RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
@@ -88,8 +98,9 @@ library DatedIRSPortfolio {
                     marketId, maturityTimestamp
                 ).toInt();
 
-                int256 unwindQuote = position.baseBalance * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
-                unrealizedPnL += (unwindQuote + position.quoteBalance);
+                int256 unwindQuote =
+                    (position.baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
+                unrealizedPnL += (unwindQuote + position.quoteBalance + quoteBalancePool);
             }
         }
     }
