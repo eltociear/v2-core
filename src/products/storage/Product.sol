@@ -4,7 +4,6 @@ pragma solidity >=0.8.13;
 import "../../utils/errors/AccessError.sol";
 import "../../interfaces/IProduct.sol";
 import "../../accounts/storage/Account.sol";
-import "../../pools/storage/Pool.sol";
 
 /**
  * @title Connects external contracts that implement the `IProduct` interface to the protocol.
@@ -40,10 +39,6 @@ library Product {
          * See onlyProductOwner.
          */
         address owner;
-        /**
-         * Id of the pool attached to this product
-         */
-        uint128 poolId;
     }
 
     /**
@@ -76,8 +71,7 @@ library Product {
         view
         returns (int256 accountUnrealizedPnL)
     {
-        address poolAddress = Pool.load(self.poolId).poolAddress;
-        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId, poolAddress);
+        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId);
     }
 
     /**
@@ -89,15 +83,13 @@ library Product {
         view
         returns (Account.Exposure[] memory exposures)
     {
-        address poolAddress = Pool.load(self.poolId).poolAddress;
-        return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId, poolAddress);
+        return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId);
     }
 
     /**
      * @dev The product at self.productAddress is expected to close filled and unfilled positions for all maturities and pools
      */
     function closeAccount(Data storage self, uint128 accountId) internal {
-        address poolAddress = Pool.load(self.poolId).poolAddress;
-        IProduct(self.productAddress).closeAccount(accountId, poolAddress);
+        IProduct(self.productAddress).closeAccount(accountId);
     }
 }

@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../interfaces/IPool.sol";
+import "./IPool.sol";
 
 /**
  * @title Dated Interest Rate Swap VAMM Pool
  * @dev Implementation of DatedIRSVAMMPool is in a separate repo
+ * @dev Can be thought of as a vamm router that can take marketId + maturityTimestamp pair and route the order via the relevant vamm
  * @dev See IDatedIRSVAMMPool
  */
 

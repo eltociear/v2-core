@@ -4,6 +4,10 @@ Distributions of tasks below
 
 IRS Product & Pool
 
+- because we still haven't fully figured out pools, consider descoping them from mvp
+- create a diagram of alternatives for how pools could work vs. mvp
+- a product is free to choose what exchange / exchanges to use
+
 - keep products in the core because of the tight dependency with account? -> need to assess pros and cons in more detail
 - consider storing the pool address independently in the product contract as a private var or smth and, do we need a pool manager in that instance or just a simple setter within the product  will do -> worth thinking this through.
 

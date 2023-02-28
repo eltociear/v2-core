@@ -6,7 +6,7 @@ import "../../utils/helpers/SafeCast.sol";
 import "./DatedIRSPosition.sol";
 import "./RateOracleManagerStorage.sol";
 import "../interfaces/IRateOracleManager.sol";
-import "../../interfaces/IPool.sol";
+import "../interfaces/IPool.sol";
 // todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface)
 import "../../accounts/storage/Account.sol";
 
@@ -173,10 +173,6 @@ library DatedIRSPortfolio {
             SetUtil.UintSet storage _activeMaturities = self.activeMaturitiesPerMarket[marketId];
             for (uint256 j = 1; i < _activeMaturities.length(); j++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
-
-                
-                
-
 
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);

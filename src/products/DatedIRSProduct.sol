@@ -7,7 +7,7 @@ import "./storage/DatedIRSPortfolio.sol";
 import "./storage/DatedIRSMarketConfiguration.sol";
 import "../utils/helpers/SafeCast.sol";
 import "../margin-engine/storage/Collateral.sol";
-import "../pools/interfaces/IDatedIRSVAMMPool.sol";
+import "./interfaces/IDatedIRSVAMMPool.sol";
 import "../interfaces/IProductManager.sol";
 
 /**
