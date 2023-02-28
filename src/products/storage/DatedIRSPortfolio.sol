@@ -33,6 +33,9 @@ library DatedIRSPortfolio {
         /**
          * @dev Ids of all the markets in which the account has active positions
          * todo: needs logic to mark active markets
+         * todo: consider just maintaining a single SetUtil which is a set of structs of the form (marketId, maturityTimestamp)
+         * meaning the need for double for loops below disappears + the need for activeMaturitiesPerMarket + extra marking should
+         * disappear as well
          */
         SetUtil.UintSet activeMarkets;
         /**
@@ -100,7 +103,25 @@ library DatedIRSPortfolio {
         internal
         view
         returns (Account.Exposure[] memory exposures)
-    {}
+    {
+        SetUtil.UintSet storage _activeMarkets = self.activeMarkets;
+        uint256 counter = 0;
+        for (uint256 i = 1; i < _activeMarkets.length(); i++) {
+            uint128 marketId = _activeMarkets.valueAt(i).to128();
+            SetUtil.UintSet storage _activeMaturities = self.activeMaturitiesPerMarket[marketId];
+            for (uint256 j = 1; i < _activeMaturities.length(); j++) {
+                uint256 maturityTimestamp = _activeMaturities.valueAt(j);
+                DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
+                exposures[counter] = Account.Exposure({
+                    marketId: marketId,
+                    filled: position.baseBalance,
+                    unfilledLong: 0,
+                    unfilledShort: 0
+                });
+                counter++;
+            }
+        }
+    }
 
     /**
      * @dev Fully Close all the positions owned by the account within the dated irs portfolio
@@ -113,7 +134,7 @@ library DatedIRSPortfolio {
         for (uint256 i = 1; i < _activeMarkets.length(); i++) {
             uint128 marketId = _activeMarkets.valueAt(i).to128();
             SetUtil.UintSet storage _activeMaturities = self.activeMaturitiesPerMarket[marketId];
-            for (uint256 j = 1; i < _activeMaturities.length(); i++) {
+            for (uint256 j = 1; i < _activeMaturities.length(); j++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
