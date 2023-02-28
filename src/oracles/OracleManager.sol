@@ -24,9 +24,9 @@ contract OracleManager is IOracleManager {
     /**
      * @inheritdoc IOracleManager
      */
-    function getGwap(uint128 productId, uint128 marketId, uint256 maturityTimestamp)
+    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp)
         external
         view
-        returns (uint256 gwap)
+        returns (uint256 datedIRSGwap)
     {}
 }

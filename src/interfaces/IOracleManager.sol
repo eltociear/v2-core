@@ -8,7 +8,7 @@ interface IOracleManager {
         view
         returns (uint256 rateIndexSnapshot);
     function getRateIndexCurrent(uint128 marketId) external view returns (uint256 rateIndexCurrent);
-    function getGwap(uint128 productId, uint128 marketId, uint256 maturityTimestamp)
+    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp)
         external
         view
         returns (uint256 datedIRSGwap);

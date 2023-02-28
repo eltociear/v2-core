@@ -73,14 +73,15 @@ library DatedIRSPortfolio {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
                 // time_delta = max(0, (maturity - self.block.timestamp) / YEAR_IN_SECONDS)
-                uint256 timeDeltaAnnualized = (maturityTimestamp - block.timestamp) / 31540000;
+                int256 timeDeltaAnnualized = ((maturityTimestamp - block.timestamp) / 31540000).toInt();
 
                 OracleManagerStorage.Data memory oracleManager = OracleManagerStorage.load();
                 int256 currentLiquidityIndex =
-                    IOracleManager(oracleManager.oracleManagerAddress).rateIndexCurrent(marketId).toInt();
+                    IOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
 
-                int256 gwap =
-                    IOracleManager(oracleManager.oracleManagerAddress).datedIRSGwap(marketId, maturityTimestamp);
+                int256 gwap = IOracleManager(oracleManager.oracleManagerAddress).getDatedIRSGwap(
+                    marketId, maturityTimestamp
+                ).toInt();
 
                 int256 unwindQuote = position.baseBalance * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
             }
@@ -112,7 +113,7 @@ library DatedIRSPortfolio {
 
         OracleManagerStorage.Data memory oracleManager = OracleManagerStorage.load();
         int256 liquidityIndexMaturity =
-            IOracleManager(oracleManager.oracleManagerAddress).rateIndexSnapshot(marketId, maturityTimestamp).toInt();
+            IOracleManager(oracleManager.oracleManagerAddress).getRateIndexSnapshot(marketId, maturityTimestamp).toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();
