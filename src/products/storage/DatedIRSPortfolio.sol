@@ -100,12 +100,16 @@ library DatedIRSPortfolio {
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
-    function baseToAnnualizedExposure(int256 baseAmount, uint256 maturityTimestamp)
+    function baseToAnnualizedExposure(uint128 marketId, int256 baseAmount, uint256 maturityTimestamp)
         internal
         view
         returns (int256 exposure)
     {
+        RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
+        int256 currentLiquidityIndex =
+            IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
+        exposure = baseAmount * currentLiquidityIndex * timeDeltaAnnualized;
     }
 
     /**
