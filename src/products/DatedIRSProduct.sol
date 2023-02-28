@@ -7,7 +7,7 @@ import "./storage/DatedIRSPortfolio.sol";
 import "./storage/DatedIRSMarketConfiguration.sol";
 import "../utils/helpers/SafeCast.sol";
 import "../margin-engine/storage/Collateral.sol";
-import "../pools/interfaces/DatedIRSPool.sol";
+import "../pools/interfaces/IDatedIRSVAMMPool.sol";
 
 /**
  * @title Dated Interest Rate Swap Product
@@ -36,7 +36,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        IPool pool = IDatedIRSPool(poolAddress);
+        IPool pool = IDatedIRSVAMMPool(poolAddress);
         (executedBaseAmount, executedQuoteAmount) =
             pool.executeDatedTakerOrder(marketId, maturityTimestamp, notionalAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
@@ -58,7 +58,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
         int256 notionalAmount
     ) external override returns (int256 executedBaseAmount) {
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
-        IPool pool = IDatedIRSPool(poolAddress);
+        IPool pool = IDatedIRSVAMMPool(poolAddress);
         executedBaseAmount = pool.executeMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, notionalAmount);
         // todo: mark product
         // todo: process maker fees (these should also be returned)
