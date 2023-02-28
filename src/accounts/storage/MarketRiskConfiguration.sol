@@ -2,11 +2,10 @@
 pragma solidity >=0.8.13;
 
 /**
- * @title Tracks protocol-wide risk settings
+ * @title Tracks market-level risk settings
  */
-library RiskConfiguration {
+library MarketRiskConfiguration {
     struct Data {
-        // todo: can we pack parameters in a more gas/storage efficient way?
         /**
          * @dev Id of the product for which we store risk configurations
          */
@@ -19,28 +18,18 @@ library RiskConfiguration {
          * @dev Risk Parameters are multiplied by notional exposures to derived shocked cashflow calculations
          */
         int256 riskParameter;
-        /**
-         * @dev IM Multipliers are used to introduce a buffer between the liquidation and initial margin requirements
-         * where IM = imMultiplier * LM
-         */
-        uint256 imMultiplier;
-        /**
-         * @dev Liquidator reward parameters are multiplied by the im delta caused by the liquidation to get the liquidator reward amount
-         */
-        uint256 liquidatorRewardParameter;
     }
 
     /**
-     * @dev Loads the RiskConfiguration object for the given collateral type.
+     * @dev Loads the MarketRiskConfiguration object for the given collateral type.
      * @param productId Id of the product (e.g. IRS) for which we want to query the risk configuration
      * @param marketId Id of the market (e.g. aUSDC lend) for which we want to query the risk configuration
-     * @return riskConfiguration The RiskConfiguration object.
+     * @return config The MarketRiskConfiguration object.
      */
-    // todo: stopped here
-    function load(uint128 productId, uint128 marketId) internal pure returns (Data storage riskConfiguration) {
-        bytes32 s = keccak256(abi.encode("xyz.voltz.RiskConfiguration", productId, marketId));
+    function load(uint128 productId, uint128 marketId) internal pure returns (Data storage config) {
+        bytes32 s = keccak256(abi.encode("xyz.voltz.MarketRiskConfiguration", productId, marketId));
         assembly {
-            riskConfiguration.slot := s
+            config.slot := s
         }
     }
 
@@ -54,7 +43,5 @@ library RiskConfiguration {
         storedConfig.productId = config.productId;
         storedConfig.marketId = config.marketId;
         storedConfig.riskParameter = config.riskParameter;
-        storedConfig.imMultiplier = config.imMultiplier;
-        storedConfig.liquidatorRewardParameter = config.liquidatorRewardParameter;
     }
 }
