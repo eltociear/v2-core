@@ -8,8 +8,7 @@ IRS Product & Pool
 - consider storing the pool address independently in the product contract as a private var or smth and, do we need a pool manager in that instance or just a simple setter within the product  will do -> worth thinking this through.
 
 
-- aggregated data from pools: closeAccount, adjust interfaces (1)
-- create a pool manager (2)
+- create a pool manager (1)
 - create a new repo for vamms (Ioana)
 
 Rate Oracle Manager

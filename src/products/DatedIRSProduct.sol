@@ -80,7 +80,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
     /**
      * @inheritdoc IProduct
      */
-    function name(uint128 productId) external pure override returns (string memory) {
+    function name() external pure override returns (string memory) {
         return "Dated IRS Product";
     }
 
