@@ -19,12 +19,14 @@ contract DatedIRSProduct is IDatedIRSProduct {
     using DatedIRSPortfolio for DatedIRSPortfolio.Data;
     using SafeCastI256 for int256;
 
+    address private _poolAddress;
     address private _proxy;
     uint128 private _productId;
 
-    function initialize(address proxy, uint128 productId) external {
+    function initialize(address proxy, uint128 productId, address poolAddress) external {
         _proxy = proxy;
         _productId = productId;
+        _poolAddress = poolAddress;
     }
 
     /**
@@ -68,7 +70,6 @@ contract DatedIRSProduct is IDatedIRSProduct {
      */
 
     function settle(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {
-        Account.Data storage account = Account.load(accountId);
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
         int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp);
 
@@ -87,20 +88,15 @@ contract DatedIRSProduct is IDatedIRSProduct {
     /**
      * @inheritdoc IProduct
      */
-    function getAccountUnrealizedPnL(uint128 accountId, address poolAddress)
-        external
-        view
-        override
-        returns (int256 unrealizedPnL)
-    {
+    function getAccountUnrealizedPnL(uint128 accountId) external view override returns (int256 unrealizedPnL) {
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        return portfolio.getAccountUnrealizedPnL(poolAddress);
+        return portfolio.getAccountUnrealizedPnL(_poolAddress);
     }
 
     /**
      * @inheritdoc IProduct
      */
-    function getAccountAnnualizedExposures(uint128 accountId, address poolAddress)
+    function getAccountAnnualizedExposures(uint128 accountId)
         external
         view
         override
@@ -108,15 +104,15 @@ contract DatedIRSProduct is IDatedIRSProduct {
     {
         // todo: include exposures from pools
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        return portfolio.getAccountAnnualizedExposures(poolAddress);
+        return portfolio.getAccountAnnualizedExposures(_poolAddress);
     }
 
     /**
      * @inheritdoc IProduct
      */
-    function closeAccount(uint128 accountId, address poolAddress) external override {
+    function closeAccount(uint128 accountId) external override {
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        portfolio.closeAccount(poolAddress);
+        portfolio.closeAccount(_poolAddress);
     }
 
     /**
