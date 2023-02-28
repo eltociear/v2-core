@@ -100,7 +100,7 @@ library DatedIRSPortfolio {
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
-    function baseToAnnualizedExposure(uint128 marketId, int256 baseAmount, uint256 maturityTimestamp)
+    function baseToAnnualizedExposure(int256 baseAmount, uint128 marketId, uint256 maturityTimestamp)
         internal
         view
         returns (int256 exposure)
@@ -132,7 +132,7 @@ library DatedIRSPortfolio {
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
                 exposures[counter] = Account.Exposure({
                     marketId: marketId,
-                    filled: position.baseBalance,
+                    filled: baseToAnnualizedExposure(position.baseBalance, marketId, maturityTimestamp),
                     unfilledLong: 0,
                     unfilledShort: 0
                 });
