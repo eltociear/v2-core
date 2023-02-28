@@ -9,14 +9,14 @@ Macro
 Products - IRS [P1]
 
 Dated IRS Pool
-- check if we need a pool manager
-- generalise the signature for pools to also include the productId -> creates the ability to have many to many relationships
 
+- annualized exposures
+
+
+- generalise the signature for pools to also include the productId -> creates the ability to have many to many relationships
+- check if we need a pool manager
 - product implementation needs to include fee distribution logic, must be smth the interface supports
 - build out dated irs pool without vamm logic, then consider migrating some or all of it into a new repo
-pool.executeTakerOrder(marketId, maturityTimestamp, notionalAmount); -> notionalAmount should be replaced with baseAmount
-- close account
-- annualized exposures
 
 CI
 - initial unit tests

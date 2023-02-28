@@ -105,7 +105,11 @@ contract DatedIRSProduct is IDatedIRSProduct {
         view
         override
         returns (Account.Exposure[] memory exposures)
-    {}
+    {
+        // todo: include exposures from pools
+        DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
+        return portfolio.getAccountAnnualizedExposures();
+    }
 
     /**
      * @inheritdoc IProduct
