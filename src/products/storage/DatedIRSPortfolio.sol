@@ -84,6 +84,7 @@ library DatedIRSPortfolio {
                 ).toInt();
 
                 int256 unwindQuote = position.baseBalance * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
+                unrealizedPnL += (unwindQuote + position.quoteBalance);
             }
         }
     }
