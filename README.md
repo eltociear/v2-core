@@ -5,9 +5,8 @@ Macro
 
 Products - IRS [P1]
 
-- unrealized pnl
-- annualized exposures
 - close account
+- annualized exposures
 
 CI
 - initial unit tests

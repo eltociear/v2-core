@@ -94,7 +94,10 @@ contract DatedIRSProduct is IDatedIRSProduct {
     /**
      * @inheritdoc IProduct
      */
-    function getAccountUnrealizedPnL(uint128 accountId) external view override returns (int256 unrealizedPnL) {}
+    function getAccountUnrealizedPnL(uint128 accountId) external view override returns (int256 unrealizedPnL) {
+        DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
+        return portfolio.getAccountUnrealizedPnL();
+    }
 
     /**
      * @inheritdoc IProduct
