@@ -284,6 +284,7 @@ library Account {
         im = lm * getIMMultiplier();
     }
 
+    // todo: consider replacing with prb math
     function max(int256 a, int256 b) internal pure returns (int256) {
         return a >= b ? a : b;
     }

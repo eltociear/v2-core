@@ -72,8 +72,7 @@ library DatedIRSPortfolio {
             for (uint256 j = 1; i < _activeMaturities.length(); i++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
-                // time_delta = max(0, (maturity - self.block.timestamp) / YEAR_IN_SECONDS)
-                int256 timeDeltaAnnualized = ((maturityTimestamp - block.timestamp) / 31540000).toInt();
+                int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
                 OracleManagerStorage.Data memory oracleManager = OracleManagerStorage.load();
                 int256 currentLiquidityIndex =
@@ -118,5 +117,10 @@ library DatedIRSPortfolio {
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();
+    }
+
+    // todo: consider replacing with prb math
+    function max(int256 a, int256 b) internal pure returns (int256) {
+        return a >= b ? a : b;
     }
 }
