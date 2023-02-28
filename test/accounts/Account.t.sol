@@ -158,7 +158,6 @@ contract AccountTest is Test {
     ExposedAccounts accounts;
 
     address token = vm.addr(1);
-    address otherToken = vm.addr(2);
     address owner = vm.addr(3);
 
     uint128 constant accountId = 100;
@@ -284,7 +283,9 @@ contract AccountTest is Test {
         assertEq(collateralBalanceD18, 350e18);
     }
 
-    function test_GetCollateralBalance_NoCollateral() public {
+    function testFuzz_GetCollateralBalance_NoCollateral(address otherToken) public {
+        vm.assume(otherToken != token);
+
         uint256 collateralBalanceD18 = accounts.getCollateralBalance(accountId, otherToken);
         assertEq(collateralBalanceD18, 0);
     }
@@ -414,7 +415,9 @@ contract AccountTest is Test {
         assertEq(collateralBalanceAvailableD18, 0);
     }
 
-    function test_GetCollateralBalanceAvailable_NoSettlementToken() public {
+    function testFuzz_GetCollateralBalanceAvailable_NoSettlementToken(address otherToken) public {
+        vm.assume(otherToken != token);
+
         accounts.setCollateralBalance(accountId, otherToken, 100e18);
 
         uint256 collateralBalanceAvailableD18  = accounts.getCollateralBalanceAvailable(accountId, otherToken);
