@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../interfaces/IOracleManager.sol";
+import "./interfaces/IRateOracleManager.sol";
 
 /**
- * @title Module for managing oracles connected to the protocol
- * @dev See IOracleManager
+ * @title Module for managing rate oracles connected to the Dated IRS Product
+ * @dev See IRateOracleManager
  */
-contract OracleManager is IOracleManager {
+contract RateOracleManager is IRateOracleManager {
     /**
-     * @inheritdoc IOracleManager
+     * @inheritdoc IRateOracleManager
      */
     function getRateIndexSnapshot(uint128 marketId, uint256 maturityTimestamp)
         external
@@ -17,12 +17,12 @@ contract OracleManager is IOracleManager {
         returns (uint256 rateIndexSnapshot)
     {}
     /**
-     * @inheritdoc IOracleManager
+     * @inheritdoc IRateOracleManager
      */
     function getRateIndexCurrent(uint128 marketId) external view returns (uint256 rateIndexCurrent) {}
 
     /**
-     * @inheritdoc IOracleManager
+     * @inheritdoc IRateOracleManager
      */
     function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp)
         external

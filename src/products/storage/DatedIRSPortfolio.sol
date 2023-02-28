@@ -4,8 +4,8 @@ pragma solidity >=0.8.13;
 import "../../utils/helpers/SetUtil.sol";
 import "../../utils/helpers/SafeCast.sol";
 import "./DatedIRSPosition.sol";
-import "../../oracles/storage/OracleManagerStorage.sol";
-import "../../interfaces/IOracleManager.sol";
+import "./RateOracleManagerStorage.sol";
+import "../interfaces/IRateOracleManager.sol";
 import "../../interfaces/IPool.sol";
 // todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface)
 import "../../accounts/storage/Account.sol";
@@ -80,11 +80,11 @@ library DatedIRSPortfolio {
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
                 int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
-                OracleManagerStorage.Data memory oracleManager = OracleManagerStorage.load();
+                RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
                 int256 currentLiquidityIndex =
-                    IOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
+                    IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
 
-                int256 gwap = IOracleManager(oracleManager.oracleManagerAddress).getDatedIRSGwap(
+                int256 gwap = IRateOracleManager(oracleManager.oracleManagerAddress).getDatedIRSGwap(
                     marketId, maturityTimestamp
                 ).toInt();
 
@@ -100,7 +100,13 @@ library DatedIRSPortfolio {
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
-    function baseToAnnualizedExposure(int256 baseAmount) internal pure returns (int256 exposure) {}
+    function baseToAnnualizedExposure(int256 baseAmount, uint256 maturityTimestamp)
+        internal
+        view
+        returns (int256 exposure)
+    {
+        int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
+    }
 
     /**
      * @dev note: given that all the accounts are single-token, annualized exposures for a given account are in terms
@@ -173,9 +179,10 @@ library DatedIRSPortfolio {
     {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
 
-        OracleManagerStorage.Data memory oracleManager = OracleManagerStorage.load();
-        int256 liquidityIndexMaturity =
-            IOracleManager(oracleManager.oracleManagerAddress).getRateIndexSnapshot(marketId, maturityTimestamp).toInt();
+        RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
+        int256 liquidityIndexMaturity = IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexSnapshot(
+            marketId, maturityTimestamp
+        ).toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();

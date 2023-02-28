@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 /// @title Oracle Manager Interface
-interface IOracleManager {
+interface IRateOracleManager {
     function getRateIndexSnapshot(uint128 marketId, uint256 timestamp)
         external
         view
