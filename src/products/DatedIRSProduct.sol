@@ -24,11 +24,11 @@ contract DatedIRSProduct is IDatedIRSProduct {
      * @inheritdoc IDatedIRSProduct
      */
     function initiateTakerOrder(
-        uint128 poolAddress,
+        address poolAddress,
         uint128 accountId,
         uint128 marketId,
         uint256 maturityTimestamp,
-        int256 notionalAmount
+        int256 baseAmount
     ) external override returns (int256 executedBaseAmount, int256 executedQuoteAmount) {
         // note, in the beginning will just have a single pool id
         // in the future, products and pools should have a many to many relationship
@@ -36,9 +36,8 @@ contract DatedIRSProduct is IDatedIRSProduct {
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        IPool pool = IDatedIRSVAMMPool(poolAddress);
-        (executedBaseAmount, executedQuoteAmount) =
-            pool.executeDatedTakerOrder(marketId, maturityTimestamp, notionalAmount);
+        IDatedIRSVAMMPool pool = IDatedIRSVAMMPool(poolAddress);
+        (executedBaseAmount, executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
         // todo: mark product in the account object (see python implementation for more details, solidity uses setutil though)
         // todo: process taker fees (these should also be returned)
@@ -55,11 +54,12 @@ contract DatedIRSProduct is IDatedIRSProduct {
         uint256 maturityTimestamp,
         uint256 priceLower,
         uint256 priceUpper,
-        int256 notionalAmount
+        int256 requestedBaseAmount
     ) external override returns (int256 executedBaseAmount) {
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
-        IPool pool = IDatedIRSVAMMPool(poolAddress);
-        executedBaseAmount = pool.executeMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, notionalAmount);
+        IDatedIRSVAMMPool pool = IDatedIRSVAMMPool(poolAddress);
+        executedBaseAmount =
+            pool.executeDatedMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, requestedBaseAmount);
         // todo: mark product
         // todo: process maker fees (these should also be returned)
         account.imCheck();

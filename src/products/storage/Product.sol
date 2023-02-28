@@ -4,6 +4,7 @@ pragma solidity >=0.8.13;
 import "../../utils/errors/AccessError.sol";
 import "../../interfaces/IProduct.sol";
 import "../../accounts/storage/Account.sol";
+import "../../pools/storage/Pool.sol";
 
 /**
  * @title Connects external contracts that implement the `IProduct` interface to the protocol.
@@ -94,6 +95,7 @@ library Product {
      * @dev The product at self.productAddress is expected to close filled and unfilled positions for all maturities and pools
      */
     function closeAccount(Data storage self, uint128 accountId) internal {
-        IProduct(self.productAddress).closeAccount(accountId, self.poolId);
+        address poolAddress = Pool.load(self.poolId).poolAddress;
+        IProduct(self.productAddress).closeAccount(accountId, poolAddress);
     }
 }
