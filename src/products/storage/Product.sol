@@ -76,7 +76,8 @@ library Product {
         view
         returns (int256 accountUnrealizedPnL)
     {
-        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId);
+        address poolAddress = Pool.load(self.poolId).poolAddress;
+        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId, poolAddress);
     }
 
     /**
@@ -88,7 +89,8 @@ library Product {
         view
         returns (Account.Exposure[] memory exposures)
     {
-        return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId);
+        address poolAddress = Pool.load(self.poolId).poolAddress;
+        return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId, poolAddress);
     }
 
     /**

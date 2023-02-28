@@ -5,7 +5,7 @@ Distributions of tasks below
 IRS Product & Pool
 
 - keep products in the core because of the tight dependency with account? -> need to assess pros and cons in more detail
-
+- consider storing the pool address independently in the product contract as a private var or smth and, do we need a pool manager in that instance or just a simple setter within the product  will do -> worth thinking this through.
 
 
 - aggregated data from pools: closeAccount, adjust interfaces (1)

@@ -42,7 +42,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
         IDatedIRSVAMMPool pool = IDatedIRSVAMMPool(poolAddress);
         (executedBaseAmount, executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
-        IProductManager(_proxy).propagateTakerOrder(accountId);
+        IProductManager(_proxy).propagateTakerOrder(accountId, msg.sender);
     }
 
     /**
@@ -61,7 +61,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
         executedBaseAmount =
             pool.executeDatedMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, requestedBaseAmount);
 
-        IProductManager(_proxy).propagateMakerOrder(accountId);
+        IProductManager(_proxy).propagateMakerOrder(accountId, msg.sender);
     }
     /**
      * @inheritdoc IDatedIRSProduct
@@ -87,15 +87,20 @@ contract DatedIRSProduct is IDatedIRSProduct {
     /**
      * @inheritdoc IProduct
      */
-    function getAccountUnrealizedPnL(uint128 accountId) external view override returns (int256 unrealizedPnL) {
+    function getAccountUnrealizedPnL(uint128 accountId, address poolAddress)
+        external
+        view
+        override
+        returns (int256 unrealizedPnL)
+    {
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        return portfolio.getAccountUnrealizedPnL();
+        return portfolio.getAccountUnrealizedPnL(poolAddress);
     }
 
     /**
      * @inheritdoc IProduct
      */
-    function getAccountAnnualizedExposures(uint128 accountId)
+    function getAccountAnnualizedExposures(uint128 accountId, address poolAddress)
         external
         view
         override
@@ -103,7 +108,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
     {
         // todo: include exposures from pools
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        return portfolio.getAccountAnnualizedExposures();
+        return portfolio.getAccountAnnualizedExposures(poolAddress);
     }
 
     /**

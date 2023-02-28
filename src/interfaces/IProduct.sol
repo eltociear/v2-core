@@ -10,10 +10,13 @@ interface IProduct is IERC165 {
     function name(uint128 productId) external view returns (string memory);
 
     /// @notice returns the unrealized pnl in quote token terms for account
-    function getAccountUnrealizedPnL(uint128 accountId) external view returns (int256 unrealizedPnL);
+    function getAccountUnrealizedPnL(uint128 accountId, address poolAddress)
+        external
+        view
+        returns (int256 unrealizedPnL);
 
     /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
-    function getAccountAnnualizedExposures(uint128 accountId)
+    function getAccountAnnualizedExposures(uint128 accountId, address poolAddress)
         external
         view
         returns (Account.Exposure[] memory exposures);
