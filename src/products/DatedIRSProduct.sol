@@ -112,8 +112,9 @@ contract DatedIRSProduct is IDatedIRSProduct {
     /**
      * @inheritdoc IProduct
      */
-    function closeAccount(uint128 accountId) external override {
-        
+    function closeAccount(uint128 accountId, uint128 poolId) external override {
+        DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
+        portfolio.closeAccount(poolId);
     }
 
     /**

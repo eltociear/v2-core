@@ -40,7 +40,7 @@ library Product {
          */
         address owner;
         /**
-         * @dev Numeric identifier for the pool that's attached to this product
+         * Id of the pool attached to this product
          */
         uint128 poolId;
     }
@@ -94,6 +94,6 @@ library Product {
      * @dev The product at self.productAddress is expected to close filled and unfilled positions for all maturities and pools
      */
     function closeAccount(Data storage self, uint128 accountId) internal {
-        IProduct(self.productAddress).closeAccount(accountId);
+        IProduct(self.productAddress).closeAccount(accountId, self.poolId);
     }
 }
