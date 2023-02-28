@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./RiskConfiguration.sol";
+import "./MarketRiskConfiguration.sol";
+import "./ProtocolRiskConfiguration.sol";
 import "./AccountRBAC.sol";
 import "../../utils/helpers/SafeCast.sol";
 import "../../utils/helpers/SetUtil.sol";
@@ -12,8 +13,8 @@ import "../../products/storage/Product.sol";
  * @title Object for tracking accounts with access control and collateral tracking.
  */
 library Account {
-    // todo: this seems circular, having to use Account within the Account library, is there a cleaner way?
-    using RiskConfiguration for RiskConfiguration.Data;
+    using MarketRiskConfiguration for MarketRiskConfiguration.Data;
+    using ProtocolRiskConfiguration for ProtocolRiskConfiguration.Data;
     using Account for Account.Data;
     using AccountRBAC for AccountRBAC.Data;
     using Product for Product.Data;
@@ -214,14 +215,14 @@ library Account {
     }
 
     function getRiskParameter(uint128 productId, uint128 marketId) internal pure returns (int256 riskParameter) {
-        return RiskConfiguration.load(productId, marketId).riskParameter;
+        return MarketRiskConfiguration.load(productId, marketId).riskParameter;
     }
 
     /**
      * @dev Note, im multiplier is assumed to be the same across all products, markets and maturities
      */
-    function getIMMultiplier(uint128 productId, uint128 marketId) internal pure returns (uint256 imMultiplier) {
-        return RiskConfiguration.load(productId, marketId).imMultiplier;
+    function getIMMultiplier() internal pure returns (uint256 imMultiplier) {
+        return ProtocolRiskConfiguration.load(productId, marketId).imMultiplier;
     }
 
     function imCheck(Data storage self) internal view {
