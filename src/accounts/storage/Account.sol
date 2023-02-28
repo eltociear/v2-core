@@ -214,14 +214,14 @@ library Account {
         totalAccountValue = unrealizedPnL + collateralBalance;
     }
 
-    function getRiskParameter(uint128 productId, uint128 marketId) internal pure returns (int256 riskParameter) {
+    function getRiskParameter(uint128 productId, uint128 marketId) internal view returns (int256 riskParameter) {
         return MarketRiskConfiguration.load(productId, marketId).riskParameter;
     }
 
     /**
      * @dev Note, im multiplier is assumed to be the same across all products, markets and maturities
      */
-    function getIMMultiplier() internal pure returns (uint256 imMultiplier) {
+    function getIMMultiplier() internal view returns (uint256 imMultiplier) {
         return ProtocolRiskConfiguration.load().imMultiplier;
     }
 

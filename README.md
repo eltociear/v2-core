@@ -3,6 +3,11 @@
 Macro
 - reshuffle files: storage into one folder, core modules into another, external into another, etc
 
+Products - IRS [P1]
+
+- unrealized pnl
+- annualized exposures
+- close account
 
 CI
 - initial unit tests
@@ -30,27 +35,6 @@ Liquidation Engine
 
 - reverts and liquidator deposits (4)
 - introduce LiquidationData (5)
-
-Products - IRS
-
-- note, pool ids are no a much broader concept, this needs to be elaborated in the architecture diagram and docs
-- layer in pool logic and think about how it'd impact the gas costs
-- don't think we need cashflow propagation in the collateral engine
-
-- unrealized pnl
-- annualized exposures
-- close account
-
-minor
-- within each product an account has a portfolio
-- check how these base products can represent pools, maturities and markets (bases) as ids, define these in the base dated product contract
-- a product can act similar to a manager where it is managing maturities and pools and bases, the product is also a pool manager 
-- do a single pool for now
-- what if pools propagated locked trades to the product instead of the product having to request them, similar to a notify transfer in the account object
--  glp as a service = composability = lp token wars
--  permissonless product creation with isolated pool of collateral
-- can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
-- consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
   
 Oracles
 
@@ -70,6 +54,20 @@ Notes on Associated System
 -  Managed systems are connected via a proxy, which means that their implementation can be updated, and the system controls the execution context of the associated system. Example, an snxUSD token connected to the system, and controlled by the system.
 - Unmanaged systems are just addresses tracked by the system, for which it has no control whatsoever. Example, Uniswap v3, Curve, etc.
 
+
+minor
+- within each product an account has a portfolio
+- check how these base products can represent pools, maturities and markets (bases) as ids, define these in the base dated product contract
+- a product can act similar to a manager where it is managing maturities and pools and bases, the product is also a pool manager 
+- do a single pool for now
+- what if pools propagated locked trades to the product instead of the product having to request them, similar to a notify transfer in the account object
+-  glp as a service = composability = lp token wars
+-  permissonless product creation with isolated pool of collateral
+- can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
+- consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
+- note, pool ids are no a much broader concept, this needs to be elaborated in the architecture diagram and docs
+- layer in pool logic and think about how it'd impact the gas costs
+- don't think we need cashflow propagation in the collateral engine
 
 # Summary
 This project uses foundry. Licensing is not finalised yet, as a placeholder using MIT in a few places to keep the linter happy.
