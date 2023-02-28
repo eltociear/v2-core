@@ -7,6 +7,8 @@ import "./DatedIRSPosition.sol";
 import "../../oracles/storage/OracleManagerStorage.sol";
 import "../../interfaces/IOracleManager.sol";
 import "../../interfaces/IPool.sol";
+// todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface)
+import "../../accounts/storage/Account.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
@@ -88,6 +90,17 @@ library DatedIRSPortfolio {
             }
         }
     }
+
+    /**
+     * @dev note: given that all the accounts are single-token, annualized exposures for a given account are in terms
+     * of the settlement token of that account
+     * todo: introduce exposures from pool as well
+     */
+    function getAccountAnnualizedExposures(Data storage self)
+        internal
+        view
+        returns (Account.Exposure[] memory exposures)
+    {}
 
     /**
      * @dev Fully Close all the positions owned by the account within the dated irs portfolio
