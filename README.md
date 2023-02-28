@@ -1,10 +1,14 @@
 # TODOs
 
+Deployment
+- sooner rather than later
+
 Macro
 - reshuffle files: storage into one folder, core modules into another, external into another, etc
 
 Products - IRS [P1]
-closeAccount -> closePortfolio in DatedIRSPortfolio
+- product implementation needs to include fee distribution logic, must be smth the interface supports
+- build out dated irs pool without vamm logic, then consider migrating some or all of it into a new repo
 pool.executeTakerOrder(marketId, maturityTimestamp, notionalAmount); -> notionalAmount should be replaced with baseAmount
 - close account
 - annualized exposures

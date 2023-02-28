@@ -59,28 +59,28 @@ library Pool {
         }
     }
 
-    /**
-     * @dev Executes a taker order in a given market with a given maturityTimestamp
-     * @dev The notional amount refers to the amount of long (if positive) or short (if negative) exposure
-     * a given trader wants to consume from liquidity providers
-     */
-    function executeTakerOrder(Data storage self, uint128 marketId, uint256 maturityTimestamp, int256 notionalAmount)
-        internal
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount)
-    {
-        return IPool(self.poolAddress).executeTakerOrder(marketId, maturityTimestamp, notionalAmount);
-    }
+    // /**
+    //  * @dev Executes a taker order in a given market with a given maturityTimestamp
+    //  * @dev The notional amount refers to the amount of long (if positive) or short (if negative) exposure
+    //  * a given trader wants to consume from liquidity providers
+    //  */
+    // function executeTakerOrder(Data storage self, uint128 marketId, uint256 maturityTimestamp, int256 notionalAmount)
+    //     internal
+    //     returns (int256 executedBaseAmount, int256 executedQuoteAmount)
+    // {
+    //     return IPool(self.poolAddress).executeTakerOrder(marketId, maturityTimestamp, notionalAmount);
+    // }
 
-    function executeMakerOrder(
-        Data storage self,
-        uint128 marketId,
-        uint256 maturityTimestamp,
-        uint256 priceLower,
-        uint256 priceUpper,
-        int256 notionalAmount
-    ) internal returns (int256 executedBaseAmount) {
-        return IPool(self.poolAddress).executeMakerOrder(
-            marketId, maturityTimestamp, priceLower, priceUpper, notionalAmount
-        );
-    }
+    // function executeMakerOrder(
+    //     Data storage self,
+    //     uint128 marketId,
+    //     uint256 maturityTimestamp,
+    //     uint256 priceLower,
+    //     uint256 priceUpper,
+    //     int256 notionalAmount
+    // ) internal returns (int256 executedBaseAmount) {
+    //     return IPool(self.poolAddress).executeMakerOrder(
+    //         marketId, maturityTimestamp, priceLower, priceUpper, notionalAmount
+    //     );
+    // }
 }

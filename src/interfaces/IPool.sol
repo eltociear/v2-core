@@ -8,15 +8,13 @@ interface IPool is IERC165 {
     /// @notice returns a human-readable name for a given pool
     function name(uint128 poolId) external view returns (string memory);
 
-    function executeTakerOrder(uint128 marketId, uint256 maturityTimestamp, int256 notionalAmount)
+    /// @dev note, a pool needs to have this interface to enable account closures initiated by products
+    function executeDatedTakerOrder(uint128 marketId, uint256 maturityTimestamp, int256 baseAmount)
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount);
 
-    function executeMakerOrder(
-        uint128 marketId,
-        uint256 maturityTimestamp,
-        uint256 priceLower,
-        uint256 priceUpper,
-        int256 notionalAmount
-    ) external returns (int256 executedBaseAmount);
+    /// @dev note, pools that don't support perpetual products can just revert this function call
+    function executePerpetualTakerOrder(uint128 marketId, int256 baseAmount)
+        external
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount);
 }
