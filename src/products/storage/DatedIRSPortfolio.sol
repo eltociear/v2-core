@@ -67,7 +67,7 @@ library DatedIRSPortfolio {
     /**
      * @dev note: given that all the accounts are single-token, unrealizedPnL for a given account is in terms
      * of the settlement token of that account
-     * todo: introduce unrealized pnl from pool as well (avoid pool if account is purely taker to save gas?)
+     * consider avoiding pool if account is purely taker to save gas?
      * todo: this function looks expesive and feels like there's room for optimisations
      */
     function getAccountUnrealizedPnL(Data storage self, address poolAddress)
@@ -128,7 +128,7 @@ library DatedIRSPortfolio {
      * of the settlement token of that account
      * todo: introduce exposures from pool as well
      */
-    function getAccountAnnualizedExposures(Data storage self)
+    function getAccountAnnualizedExposures(Data storage self, address poolAddress)
         internal
         view
         returns (Account.Exposure[] memory exposures)
@@ -141,11 +141,18 @@ library DatedIRSPortfolio {
             for (uint256 j = 1; i < _activeMaturities.length(); j++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
+
+                IPool pool = IPool(poolAddress);
+
+                (int256 baseBalancePool,) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+                (int256 unfilledBaseLong, int256 unfilledBaseShort) =
+                    pool.getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
+
                 exposures[counter] = Account.Exposure({
                     marketId: marketId,
-                    filled: baseToAnnualizedExposure(position.baseBalance, marketId, maturityTimestamp),
-                    unfilledLong: 0,
-                    unfilledShort: 0
+                    filled: baseToAnnualizedExposure((position.baseBalance + baseBalancePool), marketId, maturityTimestamp),
+                    unfilledLong: baseToAnnualizedExposure(unfilledBaseLong, marketId, maturityTimestamp),
+                    unfilledShort: baseToAnnualizedExposure(unfilledBaseShort, marketId, maturityTimestamp)
                 });
                 counter++;
             }

@@ -85,6 +85,7 @@ library Account {
         uint128 marketId;
         int256 filled;
         // this value should technically be uint256, however using int256 to minimise need for casting
+        // todo: consider using uint256 for the below values since they should never be negative
         int256 unfilledLong;
         int256 unfilledShort;
     }
