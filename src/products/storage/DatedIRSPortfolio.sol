@@ -6,7 +6,7 @@ import "../../utils/helpers/SafeCast.sol";
 import "./DatedIRSPosition.sol";
 import "../../oracles/storage/OracleManagerStorage.sol";
 import "../../interfaces/IOracleManager.sol";
-import "../../pools/storage/Pool.sol";
+import "../../interfaces/IPool.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
@@ -15,7 +15,6 @@ library DatedIRSPortfolio {
     using DatedIRSPosition for DatedIRSPosition.Data;
     using SetUtil for SetUtil.UintSet;
     using SafeCastU256 for uint256;
-    using Pool for Pool.Data;
 
     struct Data {
         /**
@@ -95,16 +94,16 @@ library DatedIRSPortfolio {
      * poolId in which to close the account, note in the beginning we'll only have a single pool
      * todo: layer in position closing in the pool
      */
-    function closeAccount(Data storage self, uint128 poolId) internal {
+    function closeAccount(Data storage self, address poolAddress) internal {
         SetUtil.UintSet storage _activeMarkets = self.activeMarkets;
-        Pool.Data storage pool = Pool.load(poolId);
+        IPool pool = IPool(poolAddress);
         for (uint256 i = 1; i < _activeMarkets.length(); i++) {
             uint128 marketId = _activeMarkets.valueAt(i).to128();
             SetUtil.UintSet storage _activeMaturities = self.activeMaturitiesPerMarket[marketId];
             for (uint256 j = 1; i < _activeMaturities.length(); i++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
-                pool.executeTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
+                pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
             }
         }
     }

@@ -6,18 +6,15 @@ import "../accounts/storage/Account.sol";
 import "./storage/DatedIRSPortfolio.sol";
 import "./storage/DatedIRSMarketConfiguration.sol";
 import "../utils/helpers/SafeCast.sol";
-import "../pools/storage/Pool.sol";
 import "../margin-engine/storage/Collateral.sol";
-
-// todo: no need for base for no since not doing dated futures in the near future
+import "../pools/interfaces/DatedIRSPool.sol";
 
 /**
- * @title BaseDatedProduct abstract contract
+ * @title Dated Interest Rate Swap Product
  * @dev See IDatedIRSProduct
  */
 
 contract DatedIRSProduct is IDatedIRSProduct {
-    using Pool for Pool.Data;
     using Account for Account.Data;
     using DatedIRSPortfolio for DatedIRSPortfolio.Data;
     using SafeCastI256 for int256;
@@ -27,7 +24,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
      * @inheritdoc IDatedIRSProduct
      */
     function initiateTakerOrder(
-        uint128 poolId,
+        uint128 poolAddress,
         uint128 accountId,
         uint128 marketId,
         uint256 maturityTimestamp,
@@ -39,8 +36,9 @@ contract DatedIRSProduct is IDatedIRSProduct {
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        Pool.Data storage pool = Pool.load(poolId);
-        (executedBaseAmount, executedQuoteAmount) = pool.executeTakerOrder(marketId, maturityTimestamp, notionalAmount);
+        IPool pool = IDatedIRSPool(poolAddress);
+        (executedBaseAmount, executedQuoteAmount) =
+            pool.executeDatedTakerOrder(marketId, maturityTimestamp, notionalAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
         // todo: mark product in the account object (see python implementation for more details, solidity uses setutil though)
         // todo: process taker fees (these should also be returned)
@@ -51,7 +49,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
      * @inheritdoc IDatedIRSProduct
      */
     function initiateMakerOrder(
-        uint128 poolId,
+        address poolAddress,
         uint128 accountId,
         uint128 marketId,
         uint256 maturityTimestamp,
@@ -60,7 +58,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
         int256 notionalAmount
     ) external override returns (int256 executedBaseAmount) {
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
-        Pool.Data storage pool = Pool.load(poolId);
+        IPool pool = IDatedIRSPool(poolAddress);
         executedBaseAmount = pool.executeMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, notionalAmount);
         // todo: mark product
         // todo: process maker fees (these should also be returned)
@@ -112,9 +110,9 @@ contract DatedIRSProduct is IDatedIRSProduct {
     /**
      * @inheritdoc IProduct
      */
-    function closeAccount(uint128 accountId, uint128 poolId) external override {
+    function closeAccount(uint128 accountId, address poolAddress) external override {
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        portfolio.closeAccount(poolId);
+        portfolio.closeAccount(poolAddress);
     }
 
     /**
