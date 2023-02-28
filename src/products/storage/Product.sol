@@ -39,6 +39,10 @@ library Product {
          * See onlyProductOwner.
          */
         address owner;
+        /**
+         * @dev Numeric identifier for the pool that's attached to this product
+         */
+        uint128 poolId;
     }
 
     /**

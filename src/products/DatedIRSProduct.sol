@@ -112,7 +112,9 @@ contract DatedIRSProduct is IDatedIRSProduct {
     /**
      * @inheritdoc IProduct
      */
-    function closeAccount(uint128 accountId) external override {}
+    function closeAccount(uint128 accountId) external override {
+        
+    }
 
     /**
      * @inheritdoc IERC165

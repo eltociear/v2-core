@@ -4,7 +4,8 @@ Macro
 - reshuffle files: storage into one folder, core modules into another, external into another, etc
 
 Products - IRS [P1]
-
+closeAccount -> closePortfolio in DatedIRSPortfolio
+pool.executeTakerOrder(marketId, maturityTimestamp, notionalAmount); -> notionalAmount should be replaced with baseAmount
 - close account
 - annualized exposures
 
