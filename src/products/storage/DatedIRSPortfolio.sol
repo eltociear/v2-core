@@ -95,6 +95,14 @@ library DatedIRSPortfolio {
     }
 
     /**
+     * @dev in context of interest rate swaps, base refers to scaled variable tokens (e.g. scaled virtual aUSDC)
+     * @dev in order to derive the annualized exposure of base tokens in quote terms (i.e. USDC), we need to
+     * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
+     * underlying rate oracle (e.g. aUSDC lend rate oracle)
+     */
+    function baseToAnnualizedExposure(int256 baseAmount) internal pure returns (int256 exposure) {}
+
+    /**
      * @dev note: given that all the accounts are single-token, annualized exposures for a given account are in terms
      * of the settlement token of that account
      * todo: introduce exposures from pool as well
