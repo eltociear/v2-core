@@ -297,8 +297,11 @@ contract AccountTest is Test {
         assertEq(slot, accountSlot);
     }
 
-    function test_revertWhen_LoadAccountAndValidateOwnership() public {
-        vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, address(this)));
+    function testFuzz_revertWhen_LoadAccountAndValidateOwnership(address randomUser) public {
+        vm.assume(randomUser != owner);
+
+        vm.prank(randomUser);
+        vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
         accounts.loadAccountAndValidateOwnership(accountId);
     }
 
@@ -350,7 +353,10 @@ contract AccountTest is Test {
         assertEq(im, 1800e18);
     }
 
-    function test_IsLiquidatable_True() public {
+    function testFuzz_IsLiquidatable_True(uint256 balance) public {
+        vm.assume(balance < 1000e18);
+        accounts.setCollateralBalance(accountId, token, balance);
+
         (bool liquidatable, uint256 im, uint256 lm)  = accounts.isLiquidatable(accountId);
 
         assertEq(liquidatable, true);
@@ -358,8 +364,9 @@ contract AccountTest is Test {
         assertEq(im, 1800e18);
     }
 
-    function test_IsLiquidatable_False() public {
-        accounts.setCollateralBalance(accountId, token, 1050e18);
+    function testFuzz_IsLiquidatable_False(uint256 balance) public {
+        balance = bound(balance, 1000e18, 1000e27);
+        accounts.setCollateralBalance(accountId, token, balance);
 
         (bool liquidatable, uint256 im, uint256 lm)  = accounts.isLiquidatable(accountId);
 
@@ -368,8 +375,9 @@ contract AccountTest is Test {
         assertEq(im, 1800e18);
     }
 
-    function test_IsIMSatisfied_False() public {
-        accounts.setCollateralBalance(accountId, token, 1050e18);
+    function testFuzz_IsIMSatisfied_False(uint256 balance) public {
+        vm.assume(balance < 1900e18);
+        accounts.setCollateralBalance(accountId, token, balance);
 
         (bool imSatisfied, uint256 im)  = accounts.isIMSatisfied(accountId);
 
@@ -377,8 +385,9 @@ contract AccountTest is Test {
         assertEq(im, 1800e18);
     }
 
-    function test_IsIMSatisfied_True() public {
-        accounts.setCollateralBalance(accountId, token, 2050e18);
+    function testFuzz_IsIMSatisfied_True(uint256 balance) public {
+        balance = bound(balance, 1900e18, 1000e27);
+        accounts.setCollateralBalance(accountId, token, balance);
 
         (bool imSatisfied, uint256 im)  = accounts.isIMSatisfied(accountId);
 
@@ -386,29 +395,34 @@ contract AccountTest is Test {
         assertEq(im, 1800e18);
     }
 
-    function test_revertWhen_ImCheck_False() public {
-        accounts.setCollateralBalance(accountId, token, 1050e18);
+    function testFuzz_revertWhen_ImCheck_False(uint256 balance) public {
+        vm.assume(balance < 1900e18);
+        accounts.setCollateralBalance(accountId, token, balance);
+
         vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, accountId));
 
         accounts.imCheck(accountId);
     }
 
-    function test_ImCheck() public {
-        accounts.setCollateralBalance(accountId, token, 2050e18);
+    function testFuzz_ImCheck(uint256 balance) public {
+        balance = bound(balance, 1900e18, 1000e27);
+        accounts.setCollateralBalance(accountId, token, balance);
 
         accounts.imCheck(accountId);
     }
 
-    function test_GetCollateralBalanceAvailable_Positive() public {
-        accounts.setCollateralBalance(accountId, token, 2050e18);
+    function testFuzz_GetCollateralBalanceAvailable_Positive(uint256 balance) public {
+        balance = bound(balance, 1900e18, 1000e27);
+        accounts.setCollateralBalance(accountId, token, balance);
 
         uint256 collateralBalanceAvailableD18  = accounts.getCollateralBalanceAvailable(accountId, token);
 
-        assertEq(collateralBalanceAvailableD18, 150e18);
+        assertEq(collateralBalanceAvailableD18, balance - 1900e18);
     }
 
-    function test_GetCollateralBalanceAvailable_Zero() public {
-        accounts.setCollateralBalance(accountId, token, 1050e18);
+    function testFuzz_GetCollateralBalanceAvailable_Zero(uint256 balance) public {
+        vm.assume(balance <= 1900e18);
+        accounts.setCollateralBalance(accountId, token, balance);
 
         uint256 collateralBalanceAvailableD18  = accounts.getCollateralBalanceAvailable(accountId, token);
 
