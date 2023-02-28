@@ -1,7 +1,5 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
-//SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
 
 /**
  * @title Tracks protocol-wide risk settings
@@ -23,10 +21,10 @@ library ProtocolRiskConfiguration {
      * @dev Loads the ProtocolRiskConfiguration object.
      * @return config The ProtocolRiskConfiguration object.
      */
-    function load() internal pure returns (Data storage riskConfiguration) {
+    function load() internal pure returns (Data storage config) {
         bytes32 s = keccak256(abi.encode("xyz.voltz.ProtocolRiskConfiguration"));
         assembly {
-            riskConfiguration.slot := s
+            config.slot := s
         }
     }
 
