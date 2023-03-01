@@ -1,5 +1,7 @@
 # Router
 
+[NOTE: Currently Not Working, seem to be issues with dependencies and typescript]
+
 Solidity router generator (ref: https://github.com/Synthetixio/synthetix-v3/tree/main/utils/router)
 
 ## Description
