@@ -41,4 +41,21 @@ contract RateOracleManager is IRateOracleManager {
         override
         returns (uint256 datedIRSGwap)
     {}
+
+    // todo: do we want this function to return something?
+    // todo: needs a feature flag to check for permission to register new variable rate oracles
+    // todo: can we enable editing existing rate oracles?
+    function registerVariableOracle(uint128 marketId, address oracleAddress) external override {
+        if (_isVariableOracleRegistered(marketId)) {
+            return;
+        }
+
+        if (!_validateVariableOracleAddress(oracleAddress)) {
+            revert InvalidVariableOracleAddress(oracleAddress);
+        }
+
+        // register the variable rate oracle
+        VariableRateOracle.create(marketId, oracleAddress);
+        emit VariableRateOracleRegistered(marketId, oracleAddress);
+    }
 }
