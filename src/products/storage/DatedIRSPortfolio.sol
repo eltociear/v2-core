@@ -134,10 +134,10 @@ library DatedIRSPortfolio {
     {
         SetUtil.UintSet storage _activeMarkets = self.activeMarkets;
         uint256 counter = 0;
-        for (uint256 i = 1; i < _activeMarkets.length(); i++) {
+        for (uint256 i = 1; i <= _activeMarkets.length(); i++) {
             uint128 marketId = _activeMarkets.valueAt(i).to128();
             SetUtil.UintSet storage _activeMaturities = self.activeMaturitiesPerMarket[marketId];
-            for (uint256 j = 1; i < _activeMaturities.length(); j++) {
+            for (uint256 j = 1; i <= _activeMaturities.length(); j++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
 
