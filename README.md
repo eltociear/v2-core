@@ -8,7 +8,6 @@
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 [coverage-badge]: ./coverage.svg
 
-
 Account
 
 - Market and risk configuration setting process (1)
