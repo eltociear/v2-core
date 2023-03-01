@@ -6,8 +6,8 @@ import "./ProtocolRiskConfiguration.sol";
 import "./AccountRBAC.sol";
 import "../../utils/helpers/SafeCast.sol";
 import "../../utils/helpers/SetUtil.sol";
-import "../../margin-engine/storage/Collateral.sol";
-import "../../products/storage/Product.sol";
+import "./Collateral.sol";
+import "./Product.sol";
 
 /**
  * @title Object for tracking accounts with access control and collateral tracking.
@@ -163,8 +163,7 @@ library Account {
             if (totalAccountValue > im.toInt()) {
                 collateralBalanceAvailableD18 = totalAccountValue.toUint() - im;
             }
-        }
-        else {
+        } else {
             collateralBalanceAvailableD18 = self.getCollateralBalance(collateralType);
         }
     }
@@ -274,7 +273,7 @@ library Account {
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
             Exposure[] memory annualizedProductMarketExposures = self.getAnnualizedProductExposures(productId);
-            
+
             for (uint256 j = 0; j < annualizedProductMarketExposures.length; j++) {
                 Exposure memory exposure = annualizedProductMarketExposures[j];
                 uint128 marketId = exposure.marketId;

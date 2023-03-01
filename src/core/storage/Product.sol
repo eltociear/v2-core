@@ -2,8 +2,8 @@
 pragma solidity >=0.8.13;
 
 import "../../utils/errors/AccessError.sol";
-import "../../interfaces/IProduct.sol";
-import "../../accounts/storage/Account.sol";
+import "../interfaces/external/IProduct.sol";
+import "./Account.sol";
 
 /**
  * @title Connects external contracts that implement the `IProduct` interface to the protocol.
