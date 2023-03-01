@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity =0.8.17;
+pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import {console2} from "forge-std/console2.sol";
-import {StdCheats, StdStorage} from "forge-std/StdCheats.sol";
+import { console2 } from "forge-std/console2.sol";
+import { StdCheats, StdStorage } from "forge-std/StdCheats.sol";
 import "oz/mocks/ERC721EnumerableMock.sol";
 import "oz/mocks/ERC721ReceiverMock.sol";
 import "oz/interfaces/IERC721Receiver.sol";
 import "oz/interfaces/IERC721.sol";
 
-// OZ mocks above already include something called AccountModule so we rename the contract under test to avoid a clash
-import {AccountModule as VoltzAccountManager} from "../../src/core/modules/AccountModule.sol";
+// OZ mocks above already include something called AccountManager so we rename the contract under test to avoid a clash
+import { AccountManager as VoltzAccountManager } from "../../src/accounts/AccountManager.sol";
 
 /// @dev We must make our test contract signal that it can receive ERC721 tokens if it is to be able to create accounts
 contract AccountManagerTest is

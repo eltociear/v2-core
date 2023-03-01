@@ -6,4 +6,4 @@ import "../../utils/interfaces/INFT.sol";
 /**
  * @title Account Token.
  */
-interface IAccountTokenModule is INFT {}
+interface IAccountTokenModule is INFT { }

@@ -59,7 +59,8 @@ library Account {
         mapping(address => Collateral.Data) collaterals;
         /**
          * @dev Ids of all the products in which the account has active positions
-         * todo: needs logic to mark active products (check out python) and also check out how marking is done in synthetix, how and why they use sets vs. simple arrays
+         * todo: needs logic to mark active products (check out python) and also check out how marking is done in synthetix, how and
+         * why they use sets vs. simple arrays
          */
         SetUtil.UintSet activeProducts;
         /**
@@ -114,7 +115,8 @@ library Account {
     }
 
     /**
-     * @dev Closes all account filled (i.e. attempts to fully unwind) and unfilled orders in all the products in which the account is active
+     * @dev Closes all account filled (i.e. attempts to fully unwind) and unfilled orders in all the products in which the account
+     * is active
      */
     function closeAccount(Data storage self) internal {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
@@ -140,11 +142,7 @@ library Account {
     /**
      * @dev Given a collateral type, returns information about the total balance of the account
      */
-    function getCollateralBalance(Data storage self, address collateralType)
-        internal
-        view
-        returns (uint256 collateralBalanceD18)
-    {
+    function getCollateralBalance(Data storage self, address collateralType) internal view returns (uint256 collateralBalanceD18) {
         collateralBalanceD18 = self.collaterals[collateralType].balanceD18;
         return collateralBalanceD18;
     }
@@ -152,7 +150,10 @@ library Account {
     /**
      * @dev Given a collateral type, returns information about the total balance of the account that's available to withdraw
      */
-    function getCollateralBalanceAvailable(Data storage self, address collateralType)
+    function getCollateralBalanceAvailable(
+        Data storage self,
+        address collateralType
+    )
         internal
         view
         returns (uint256 collateralBalanceAvailableD18)
@@ -175,7 +176,10 @@ library Account {
      * because loading an account and checking for ownership is a very
      * common use case in other parts of the code.
      */
-    function loadAccountAndValidateOwnership(uint128 accountId, address senderAddress)
+    function loadAccountAndValidateOwnership(
+        uint128 accountId,
+        address senderAddress
+    )
         internal
         view
         returns (Data storage account)
@@ -187,11 +191,16 @@ library Account {
     }
 
     /**
-     * @dev Returns the aggregate annualized exposures of the account in all products in which the account is active (annualized exposures are per product)
+     * @dev Returns the aggregate annualized exposures of the account in all products in which the account is active (annualized
+     * exposures are per product)
      * note, the annualized exposures are expected to be in notional terms and in terms of the settlement token of this account
-     * what if we do margin calculations per product for now, that'd help with bringing down the gas costs (since atm we're doing no correlations)
+     * what if we do margin calculations per product for now, that'd help with bringing down the gas costs (since atm we're doing no
+     * correlations)
      */
-    function getAnnualizedProductExposures(Data storage self, uint128 productId)
+    function getAnnualizedProductExposures(
+        Data storage self,
+        uint128 productId
+    )
         internal
         view
         returns (Exposure[] memory productExposures)
@@ -201,7 +210,8 @@ library Account {
     }
 
     /**
-     * @dev Returns the aggregate unrealized pnl of the account in all products in which the account has positions with unrealized pnl
+     * @dev Returns the aggregate unrealized pnl of the account in all products in which the account has positions with unrealized
+     * pnl
      * note, the unrealized pnl is expected to be in terms of the settlement token of this account
      */
     function getUnrealizedPnL(Data storage self) internal view returns (int256 unrealizedPnL) {

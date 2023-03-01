@@ -7,7 +7,7 @@ import "../../src/core/storage/Collateral.sol";
 contract ExposedCollateral {
     using Collateral for Collateral.Data;
 
-    Collateral.Data item;
+    Collateral.Data internal item;
 
     constructor(uint256 balanceD18) {
         item = Collateral.Data({balanceD18: balanceD18});

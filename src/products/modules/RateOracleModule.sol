@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../interfaces/IRateOracleModule.sol";
-import "../storage/VariableRateOracle.sol";
+import "./interfaces/IRateOracleManager.sol";
+import "./storage/VariableRateOracle.sol";
 
 /**
  * @title Module for managing rate oracles connected to the Dated IRS Product
- * @dev See IRateOracleModule
+ * @dev See IRateOracleManager
  *  // todo: register a new rate oracle
  */
-contract RateOracleModule is IRateOracleModule {
+contract RateOracleManager is IRateOracleManager {
     using VariableRateOracle for VariableRateOracle.Data;
     /**
-     * @inheritdoc IRateOracleModule
+     * @inheritdoc IRateOracleManager
      */
 
     function getRateIndexCurrent(uint128 marketId) external view override returns (uint256 rateIndexCurrent) {
@@ -20,7 +20,7 @@ contract RateOracleModule is IRateOracleModule {
     }
 
     /**
-     * @inheritdoc IRateOracleModule
+     * @inheritdoc IRateOracleManager
      */
     function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp)
         external
@@ -31,7 +31,7 @@ contract RateOracleModule is IRateOracleModule {
     }
 
     /**
-     * @inheritdoc IRateOracleModule
+     * @inheritdoc IRateOracleManager
      * @dev this function will likely need the poolAddress as its input since the gwap comes from the vamms
      * todo: needs implementation
      */
@@ -59,7 +59,11 @@ contract RateOracleModule is IRateOracleModule {
         emit VariableRateOracleRegistered(marketId, oracleAddress);
     }
 
-    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) {}
+    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) { 
 
-    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {}
+    }
+
+    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {
+        
+    }
 }
