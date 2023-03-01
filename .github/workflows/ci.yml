@@ -77,21 +77,27 @@ jobs:
       - name: "Run the tests"
         run: "forge test"
 
-      - name: "Get test coverage"
-        run: "forge coverage --report lcov"
-
       - name: "Add test summary"
         run: |
           echo "## Tests result" >> $GITHUB_STEP_SUMMARY
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
 
+      - name: "Get test coverage"
+        run: "forge coverage --report lcov"
+
+      - name: "Generate test"
+        run: "yarn generate:coverage:badge"
+
       - name: "Commit coverage badge"
         - uses: actions/checkout@v3
         - run: |
-            forge coverage --report lcov
-            yarn generate:coverage:badge
             git config user.name github-actions
             git config user.email github-actions@github.com
-            git add .
-            git commit -m "generated"
-            git push
+            git add ./coverage.svg
+            git commit -m "chore: test coverage badge"
+
+      - name: "Push changes"
+          uses: ad-m/github-push-action@master
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            force: true
