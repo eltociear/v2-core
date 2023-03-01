@@ -1,13 +1,11 @@
 # TODOs
 
-[![GitHub Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] [![Coverage][coverage-badge]]
+[![GitHub Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry]
 
 [gha]: https://github.com/Voltz-Protocol/v2-core/actions
 [gha-badge]: https://github.com/Voltz-Protocol/v2-core/actions/workflows/ci.yml/badge.svg
 [foundry]: https://getfoundry.sh/
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
-
-![Alt text](./coverage.svg)
 <img src="./coverage.svg">
 
 Distributions of tasks below
