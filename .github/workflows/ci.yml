@@ -78,10 +78,8 @@ jobs:
         run: "forge test"
 
       - name: "Get test coverage"
+        uses: "actions/upload-artifact@v3"
         run: "forge coverage --report lcov"
-
-      - name: "Generate test coverage badge"
-        run: "yarn generate:coverage:badge"
 
       - name: "Add test summary"
         run: |
