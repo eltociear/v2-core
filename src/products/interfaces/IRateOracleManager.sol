@@ -18,12 +18,12 @@ interface IRateOracleManager {
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC lend)
      * @param marketId Id of the market (e.g. aUSDC lend) for which we're requesting a rate index value
      * @param maturityTimestamp Maturity Timestamp of a given irs market that's requesting the index value for settlement purposes
-     * @return rateIndexAtMaturity Rate index at the requested maturityTimestamp
+     * @return rateIndexMaturity Rate index at the requested maturityTimestamp
      */
-    function getRateIndexAtMaturity(uint128 marketId, uint256 maturityTimestamp)
+    function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp)
         external
         view
-        returns (uint256 rateIndexAtMaturity);
+        returns (uint256 rateIndexMaturity);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC borrow)
