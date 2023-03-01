@@ -60,8 +60,13 @@ contract ExposedAccounts {
         return account.getCollateralBalanceAvailable(collateralType);
     }
 
+<<<<<<< HEAD
     function loadAccountAndValidateOwnership(uint128 id) external view returns (bytes32 s) {
         Account.Data storage account = Account.loadAccountAndValidateOwnership(id, msg.sender);
+=======
+    function loadAccountAndValidateOwnership(uint128 id, address senderAddress) external view returns (bytes32 s) {
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(id, senderAddress);
+>>>>>>> 39cb81817d9f96120eaf383adee359e14a3e1284
         assembly {
             s := account.slot
         }
@@ -86,11 +91,19 @@ contract ExposedAccounts {
         return account.getTotalAccountValue();
     }
 
-    function getRiskParameter(uint128 productId, uint128 marketId) external view returns (int256) {
+    function getRiskParameter(uint128 productId, uint128 marketId)
+        external
+        view
+        returns (int256)
+    {
         return Account.getRiskParameter(productId, marketId);
     }
 
-    function getIMMultiplier() external view returns (uint256) {
+    function getIMMultiplier()
+        external
+        view
+        returns (uint256)
+    {
         return Account.getIMMultiplier();
     }
 
@@ -136,6 +149,8 @@ contract AccountTest is Test {
         accounts.setCollateralBalance(accountId, token, 350e18);
 
         setupProducts();
+        setupRiskConfigurations();
+        setupProtocolRiskConfigurations();
     }
 
     function setupProducts() public {
@@ -197,6 +212,50 @@ contract AccountTest is Test {
         );
     }
 
+    function setupRiskConfigurations() public {
+        // Mock risk parameter for product ID 1 and market ID 10
+        bytes32 slot = keccak256(abi.encode("xyz.voltz.MarketRiskConfiguration", 1, 10));
+        assembly {
+            slot := add(slot, 1)
+        }
+        vm.store(
+            address(accounts),
+            slot,
+            bytes32(abi.encode(1e18))
+        );
+
+        // Mock risk parameter for product ID 1 and market ID 11
+        slot = keccak256(abi.encode("xyz.voltz.MarketRiskConfiguration", 1, 11));
+        assembly {
+            slot := add(slot, 1)
+        }
+        vm.store(
+            address(accounts),
+            slot,
+            bytes32(abi.encode(1e18))
+        );
+
+        // Mock risk parameter for product ID 2 and market ID 20
+        slot = keccak256(abi.encode("xyz.voltz.MarketRiskConfiguration", 2, 20));
+        assembly {
+            slot := add(slot, 1)
+        }
+        vm.store(
+            address(accounts),
+            slot,
+            bytes32(abi.encode(1e18))
+        );
+    }
+
+    function setupProtocolRiskConfigurations() public {
+        bytes32 slot = keccak256(abi.encode("xyz.voltz.ProtocolRiskConfiguration"));
+        vm.store(
+            address(accounts),
+            slot,
+            bytes32(abi.encode(2e18))
+        );
+    }
+
     function test_Exists() public {
         bytes32 slot = accounts.exists(accountId);
         assertEq(slot, accountSlot);
@@ -221,7 +280,7 @@ contract AccountTest is Test {
 
     function test_LoadAccountAndValidateOwnership() public {
         vm.prank(owner);
-        bytes32 slot = accounts.loadAccountAndValidateOwnership(accountId);
+        bytes32 slot = accounts.loadAccountAndValidateOwnership(accountId, owner);
 
         assertEq(slot, accountSlot);
     }
@@ -229,9 +288,8 @@ contract AccountTest is Test {
     function testFuzz_revertWhen_LoadAccountAndValidateOwnership(address randomUser) public {
         vm.assume(randomUser != owner);
 
-        vm.prank(randomUser);
         vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
-        accounts.loadAccountAndValidateOwnership(accountId);
+        accounts.loadAccountAndValidateOwnership(accountId, randomUser);
     }
 
     function test_CloseAccount() public {
