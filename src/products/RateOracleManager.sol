@@ -58,4 +58,12 @@ contract RateOracleManager is IRateOracleManager {
         VariableRateOracle.create(marketId, oracleAddress);
         emit VariableRateOracleRegistered(marketId, oracleAddress);
     }
+
+    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) { 
+
+    }
+
+    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {
+        
+    }
 }
