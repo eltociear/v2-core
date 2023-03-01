@@ -71,6 +71,12 @@ jobs:
       - name: "Run the tests"
         run: "forge test"
 
+      - name: "Get test coverage"
+        run: "forge coverage --report lcov"
+
+      - name: "Generate test coverage badge"
+        run: "yarn generate:coverage:badge"
+
       - name: "Add test summary"
         run: |
           echo "## Tests result" >> $GITHUB_STEP_SUMMARY
