@@ -11,14 +11,15 @@ contract RateOracleManager is IRateOracleManager {
     /**
      * @inheritdoc IRateOracleManager
      */
-    function getRateIndexCurrent(uint128 marketId) external view returns (uint256 rateIndexCurrent) {}
+    function getRateIndexCurrent(uint128 marketId) external view override returns (uint256 rateIndexCurrent) {}
 
     /**
      * @inheritdoc IRateOracleManager
      */
-    function getRateIndexSnapshot(uint128 marketId, uint256 maturityTimestamp)
+    function getRateIndexAtMaturity(uint128 marketId, uint256 maturityTimestamp)
         external
         view
+        override
         returns (uint256 rateIndexSnapshot)
     {}
 
@@ -28,6 +29,7 @@ contract RateOracleManager is IRateOracleManager {
     function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp)
         external
         view
+        override
         returns (uint256 datedIRSGwap)
     {}
 }

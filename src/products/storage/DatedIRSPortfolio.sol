@@ -204,7 +204,7 @@ library DatedIRSPortfolio {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
 
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 liquidityIndexMaturity = IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexSnapshot(
+        int256 liquidityIndexMaturity = IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexAtMaturity(
             marketId, maturityTimestamp
         ).toInt();
 
