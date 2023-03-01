@@ -87,4 +87,3 @@ jobs:
 
       - name: "Generate test"
         run: "yarn generate:coverage:badge"
-
