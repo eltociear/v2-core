@@ -3,7 +3,6 @@
     "@synthetixio/core-contracts": "^1.1.1"
   },
   "scripts": {
-    "build": "forge build",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
     "lint:sol:check": "forge fmt --check && yarn solhint \"{src,test}/**/*.sol\"",
