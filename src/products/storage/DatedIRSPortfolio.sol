@@ -140,8 +140,8 @@ library DatedIRSPortfolio {
                 uint256 maturityTimestamp = self.activeMaturitiesPerMarket[marketId].valueAt(j);
                 int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
 
-                (int256 baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
-
+                (int256 baseBalancePool,) =
+                    IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
                 (int256 unfilledBaseLong, int256 unfilledBaseShort) =
                     IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
 
@@ -151,7 +151,8 @@ library DatedIRSPortfolio {
                     baseAmounts[1] = unfilledBaseLong;
                     baseAmounts[2] = unfilledBaseShort;
 
-                    int256[] memory annualizedExposures = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
+                    int256[] memory annualizedExposures =
+                        baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
 
                     exposures[counter] = Account.Exposure({
                         marketId: marketId,
@@ -211,8 +212,9 @@ library DatedIRSPortfolio {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
 
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 liquidityIndexMaturity =
-            IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexAtMaturity(marketId, maturityTimestamp).toInt();
+        int256 liquidityIndexMaturity = IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexMaturity(
+            marketId, maturityTimestamp
+        ).toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();
