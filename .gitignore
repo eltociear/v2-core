@@ -21,6 +21,5 @@ docs/
 
 # Coverage Files
 /lcov.info
-/badge.svg
 
 bin/
