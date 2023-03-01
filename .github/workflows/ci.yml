@@ -86,14 +86,12 @@ jobs:
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
 
       - name: "Commit coverage badge"
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add . ./coverage.svg
-          git commit -a -m "chore: update coverage badge"
-
-      - name: "Push commit for coverage badge"
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+        - uses: actions/checkout@v3
+        - run: |
+            forge coverage --report lcov
+            yarn generate:coverage:badge
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add .
+            git commit -m "generated"
+            git push
