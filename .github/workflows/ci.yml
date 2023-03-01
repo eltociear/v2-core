@@ -68,12 +68,6 @@ jobs:
       - name: "Install Foundry"
         uses: "foundry-rs/foundry-toolchain@v1"
 
-      - name: "Install Node.js"
-        uses: "actions/setup-node@v3"
-        with:
-          cache: "yarn"
-          node-version: "lts/*"
-
       - name: "Run the tests"
         run: "forge test"
 
@@ -81,6 +75,3 @@ jobs:
         run: |
           echo "## Tests result" >> $GITHUB_STEP_SUMMARY
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
-
-      - name: "Get test coverage"
-        run: "forge coverage --report lcov; yarn generate:coverage:badge"
