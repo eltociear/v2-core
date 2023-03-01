@@ -88,16 +88,3 @@ jobs:
       - name: "Generate test"
         run: "yarn generate:coverage:badge"
 
-      - name: "Commit coverage badge"
-        uses: actions/checkout@v3
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add ./coverage.svg
-          git commit -m "chore: test coverage badge"
-
-      - name: "Push changes"
-        uses: ad-m/github-push-action@master
-        with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        force: true
