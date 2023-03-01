@@ -11,7 +11,9 @@ contract RateOracleManager is IRateOracleManager {
     /**
      * @inheritdoc IRateOracleManager
      */
-    function getRateIndexCurrent(uint128 marketId) external view override returns (uint256 rateIndexCurrent) {}
+    function getRateIndexCurrent(uint128 marketId) external view override returns (uint256 rateIndexCurrent) {
+        
+    }
 
     /**
      * @inheritdoc IRateOracleManager
