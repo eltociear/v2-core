@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./interfaces/IRateOracleModule.sol";
-import "./storage/VariableRateOracle.sol";
+import "../interfaces/IRateOracleModule.sol";
+import "../storage/VariableRateOracle.sol";
 
 /**
  * @title Module for managing rate oracles connected to the Dated IRS Product

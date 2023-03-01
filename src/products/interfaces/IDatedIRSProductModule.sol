@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../../interfaces/IProduct.sol";
 
 /// @title Interface of a dated irs product
-interface IDatedIRSProduct is IProduct {
+interface IDatedIRSProductModule is IProduct {
     // process taker and maker orders & single pool
 
     /**

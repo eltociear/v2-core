@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 /**
  * @title Represents a Rate Oracle Manager
- * note, this is stored in the DatedIRSProduct.sol contract which is outside of the v2 core router proxy
+ * note, this is stored in the DatedIRSProductModule.sol contract which is outside of the v2 core router proxy
  */
 
 library RateOracleManagerStorage {

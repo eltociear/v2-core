@@ -1,21 +1,20 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./interfaces/IDatedIRSProduct.sol";
-import "../accounts/storage/Account.sol";
-import "./storage/DatedIRSPortfolio.sol";
-import "./storage/DatedIRSMarketConfiguration.sol";
-import "../utils/helpers/SafeCast.sol";
-import "../margin-engine/storage/Collateral.sol";
-import "./interfaces/IDatedIRSVAMMPool.sol";
-import "../interfaces/IProductModule.sol";
+import "../interfaces/IDatedIRSProductModule.sol";
+import "../../core/storage/Account.sol";
+import "../storage/DatedIRSPortfolio.sol";
+import "../storage/DatedIRSMarketConfiguration.sol";
+import "../../utils/helpers/SafeCast.sol";
+import "../interfaces/IDatedIRSVAMMPoolModule.sol";
+import "../../core/interfaces/IProductModule.sol";
 
 /**
  * @title Dated Interest Rate Swap Product
- * @dev See IDatedIRSProduct
+ * @dev See IDatedIRSProductModule
  */
 
-contract DatedIRSProduct is IDatedIRSProduct {
+contract DatedIRSProductModule is IDatedIRSProductModule {
     using DatedIRSPortfolio for DatedIRSPortfolio.Data;
     using SafeCastI256 for int256;
 
@@ -30,7 +29,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
     }
 
     /**
-     * @inheritdoc IDatedIRSProduct
+     * @inheritdoc IDatedIRSProductModule
      */
     function initiateTakerOrder(
         address poolAddress,
@@ -48,7 +47,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
     }
 
     /**
-     * @inheritdoc IDatedIRSProduct
+     * @inheritdoc IDatedIRSProductModule
      */
     function initiateMakerOrder(
         address poolAddress,
@@ -66,7 +65,7 @@ contract DatedIRSProduct is IDatedIRSProduct {
         IProductModule(_proxy).propagateMakerOrder(accountId, msg.sender);
     }
     /**
-     * @inheritdoc IDatedIRSProduct
+     * @inheritdoc IDatedIRSProductModule
      */
 
     function settle(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {
