@@ -1,6 +1,4 @@
 # directories
-.yarn/
-**/broadcast
 **/cache
 **/lib
 **/out
@@ -8,7 +6,3 @@
 
 # files
 *.env
-*.log
-.pnp.*
-yarn-debug.log*
-yarn-error.log*
