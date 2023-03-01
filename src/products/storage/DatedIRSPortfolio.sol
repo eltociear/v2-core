@@ -111,16 +111,19 @@ library DatedIRSPortfolio {
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
-    function baseToAnnualizedExposure(int256 baseAmount, uint128 marketId, uint256 maturityTimestamp)
+    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp)
         internal
         view
-        returns (int256 exposure)
+        returns (int256[] memory exposures)
     {
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
         int256 currentLiquidityIndex =
             IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
-        exposure = baseAmount * currentLiquidityIndex * timeDeltaAnnualized;
+
+        for (uint256 i = 0; i < baseAmounts.length; ++i) {
+            exposures[i] = baseAmounts[i] * currentLiquidityIndex * timeDeltaAnnualized;
+        }
     }
 
     /**
@@ -147,12 +150,22 @@ library DatedIRSPortfolio {
                 (int256 unfilledBaseLong, int256 unfilledBaseShort) =
                     pool.getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
 
-                exposures[counter] = Account.Exposure({
-                    marketId: marketId,
-                    filled: baseToAnnualizedExposure((position.baseBalance + baseBalancePool), marketId, maturityTimestamp),
-                    unfilledLong: baseToAnnualizedExposure(unfilledBaseLong, marketId, maturityTimestamp),
-                    unfilledShort: baseToAnnualizedExposure(unfilledBaseShort, marketId, maturityTimestamp)
-                });
+                {
+                    int256[] memory baseAmounts = new int256[](3);
+                    baseAmounts[0] = (position.baseBalance + baseBalancePool);
+                    baseAmounts[1] = unfilledBaseLong;
+                    baseAmounts[2] = unfilledBaseShort;
+
+                    int256[] memory annualizedExposures = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
+
+                    exposures[counter] = Account.Exposure({
+                        marketId: marketId,
+                        filled: annualizedExposures[0],
+                        unfilledLong: annualizedExposures[1],
+                        unfilledShort: annualizedExposures[2]
+                    });
+                }
+
                 counter++;
             }
         }
