@@ -2,32 +2,26 @@
 
 Distributions of tasks below
 
-IRS Product & Pool
-
-- because we still haven't fully figured out pools, consider descoping them from mvp
-- create a diagram of alternatives for how pools could work vs. mvp
-- a product is free to choose what exchange / exchanges to use
-
-- keep products in the core because of the tight dependency with account? -> need to assess pros and cons in more detail
-- consider storing the pool address independently in the product contract as a private var or smth and, do we need a pool manager in that instance or just a simple setter within the product  will do -> worth thinking this through.
-
-
-- create a pool manager (1)
-- create a new repo for vamms (Ioana)
-
 Rate Oracle Manager
-- implement a simple mock rate oracle
+
+- implement aave v3 rate index getters (2)
 
 Account
 
-- Market and risk configuration setting process (3)
-- Add settlement token related logic (setting, checks, etc) (4)
+- check out https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/UtilsModule.sol
+- what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
+
+- Market and risk configuration setting process (1)
+- Add settlement token related logic (setting, checks, etc) (3)
 - Introduce liquidator deposit logic or propose an alternative
 
 Liquidation Engine
 
 - reverts and liquidator deposits (4)
 - introduce LiquidationData (5)
+
+IRS Product & Pool
+- create a new repo for vamms (Ioana)
 
 Fee Logic
 - product implementation needs to include fee distribution logic, must be smth the interface supports
@@ -53,6 +47,7 @@ Math
 Feature Flags
 
 - FeatureFlag.ensureAccessToFeature(_MARKET_FEATURE_FLAG); -> register a new market
+- https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/MarketManagerModule.sol
 
 Notes on Associated System
 
@@ -75,6 +70,11 @@ minor
 - layer in pool logic and think about how it'd impact the gas costs
 - don't think we need cashflow propagation in the collateral engine
 - generalise the signature for pools to also include the productId -> creates the ability to have many to many relationships
+- because we still haven't fully figured out pools, consider descoping them from mvp
+- create a diagram of alternatives for how pools could work vs. mvp
+- a product is free to choose what exchange / exchanges to use
+- keep products in the core because of the tight dependency with account? -> need to assess pros and cons in more detail
+- consider storing the pool address independently in the product contract as a private var or smth and, do we need a pool manager in that instance or just a simple setter within the product  will do -> worth thinking this through.
 
 # Summary
 This project uses foundry. Licensing is not finalised yet, as a placeholder using MIT in a few places to keep the linter happy.
