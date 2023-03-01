@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@synthetixio/core-contracts": "^1.1.1"
+    "@synthetixio/core-contracts": "1.1.1"
   },
   "scripts": {
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
@@ -11,6 +11,7 @@
     "prettier:write": "prettier --write \"**/*.{json,md,yml}\""
   },
   "devDependencies": {
+    "lcov-badge-generator": "1.0.5",
     "prettier": "2.8.4",
     "solhint": "3.4.0"
   }

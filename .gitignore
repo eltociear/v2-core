@@ -19,4 +19,8 @@ docs/
 # VS Code
 /.vscode
 
+# Coverage File
+/lcov.info
+/badge.svg
+
 bin/
