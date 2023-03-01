@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../accounts/storage/Account.sol";
+import "../storage/Account.sol";
 
 /**
  * @title System-wide entry point for the management of products connected to the protocol.

@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../interfaces/IProduct.sol";
+import "../interfaces/external/IProduct.sol";
 import "../interfaces/IProductModule.sol";
-import "./storage/Product.sol";
-import "./storage/ProductCreator.sol";
-import "../utils/storage/AssociatedSystem.sol";
-import "../utils/helpers/ERC165Helper.sol";
-import "../utils/helpers/SafeCast.sol";
+import "../storage/Product.sol";
+import "../storage/ProductCreator.sol";
+import "../../utils/storage/AssociatedSystem.sol";
+import "../../utils/helpers/ERC165Helper.sol";
+import "../../utils/helpers/SafeCast.sol";
 
 /**
  * @title Protocol-wide entry point for the management of products connected to the protocol.

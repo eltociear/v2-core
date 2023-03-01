@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../accounts/storage/Account.sol";
-import "../accounts/storage/ProtocolRiskConfiguration.sol";
-import "../utils/errors/ParameterError.sol";
+import "../storage/Account.sol";
+import "../storage/ProtocolRiskConfiguration.sol";
+import "../../utils/errors/ParameterError.sol";
 import "../interfaces/ILiquidationModule.sol";
-import "../utils/helpers/SafeCast.sol";
-import "./storage/Collateral.sol";
+import "../../utils/helpers/SafeCast.sol";
+import "../storage/Collateral.sol";
 
 /**
  * @title Module for liquidated accounts

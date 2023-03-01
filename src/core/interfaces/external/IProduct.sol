@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../utils/interfaces/IERC165.sol";
-import "../accounts/storage/Account.sol";
+import "../../../utils/interfaces/IERC165.sol";
+import "../../storage/Account.sol";
 
 /// @title Interface a Product needs to adhere.
 interface IProduct is IERC165 {
