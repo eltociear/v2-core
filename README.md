@@ -1,6 +1,6 @@
 # TODOs
 
-[![GitHub Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] [![Coverage][coverage-badge]]
+[![GitHub Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] ![Coverage][coverage-badge]
 
 [gha]: https://github.com/Voltz-Protocol/v2-core/actions
 [gha-badge]: https://github.com/Voltz-Protocol/v2-core/actions/workflows/ci.yml/badge.svg
