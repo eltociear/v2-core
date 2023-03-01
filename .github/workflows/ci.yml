@@ -78,10 +78,21 @@ jobs:
         run: "forge test"
 
       - name: "Get test coverage"
-        uses: "actions/upload-artifact@v3"
         run: "forge coverage --report lcov"
 
       - name: "Add test summary"
         run: |
           echo "## Tests result" >> $GITHUB_STEP_SUMMARY
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+      - name: "Commit coverage badge"
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -a -m "chore: update coverage badge"
+
+      - name: "Push commit for coverage badge"
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
