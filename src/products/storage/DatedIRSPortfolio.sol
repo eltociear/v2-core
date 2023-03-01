@@ -88,9 +88,8 @@ library DatedIRSPortfolio {
                 int256 currentLiquidityIndex =
                     IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
 
-                int256 gwap = IRateOracleModule(oracleManager.oracleManagerAddress).getDatedIRSGwap(
-                    marketId, maturityTimestamp
-                ).toInt();
+                int256 gwap =
+                    IRateOracleModule(oracleManager.oracleManagerAddress).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
 
                 int256 unwindQuote = (baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
                 unrealizedPnL += (unwindQuote + quoteBalance + quoteBalancePool);
@@ -114,8 +113,7 @@ library DatedIRSPortfolio {
         returns (int256[] memory exposures)
     {
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 currentLiquidityIndex =
-            IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
+        int256 currentLiquidityIndex = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -212,9 +210,8 @@ library DatedIRSPortfolio {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
 
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 liquidityIndexMaturity = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexMaturity(
-            marketId, maturityTimestamp
-        ).toInt();
+        int256 liquidityIndexMaturity =
+            IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexMaturity(marketId, maturityTimestamp).toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();
