@@ -22,7 +22,6 @@ interface IRateOracleManager {
      */
     function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp)
         external
-        view
         returns (uint256 rateIndexMaturity);
 
     /**

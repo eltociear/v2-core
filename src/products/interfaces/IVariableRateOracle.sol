@@ -7,5 +7,5 @@ interface IVariableRateOracle {
      * @notice Requests the current rate index value provided by a variable rate oracle
      * @return rateIndexCurrent Current rate index of a given variable rate oracle (e.g. aUSDC lend or cUSDC borrow)
      */
-    function getRateIndexCurrent() external returns (uint256 rateIndexCurrent);
+    function getRateIndexCurrent() external view returns (uint256 rateIndexCurrent);
 }

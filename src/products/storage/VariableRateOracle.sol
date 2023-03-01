@@ -5,23 +5,22 @@ import "../interfaces/IVariableRateOracle.sol";
 
 library VariableRateOracle {
     struct Data {
-        // todo: cache maturity timestamp values in here
-        address oracleAddress;
         uint128 marketId;
+        address oracleAddress;
         mapping(uint256 => uint256) rateIndexPerMaturity;
     }
 
-    function load(address oracleAddress) internal pure returns (Data storage oracle) {
-        bytes32 s = keccak256(abi.encode("xyz.voltz.VariableRateOracle", oracleAddress));
+    function load(uint128 marketId) internal pure returns (Data storage oracle) {
+        bytes32 s = keccak256(abi.encode("xyz.voltz.VariableRateOracle", marketId));
         assembly {
             oracle.slot := s
         }
     }
 
-    function create(address oracleAddress, uint128 marketId) internal returns (Data storage oracle) {
-        oracle = load(oracleAddress);
-        oracle.oracleAddress = oracleAddress;
+    function create(uint128 marketId, address oracleAddress) internal returns (Data storage oracle) {
+        oracle = load(marketId);
         oracle.marketId = marketId;
+        oracle.oracleAddress = oracleAddress;
     }
 
     function getRateIndexCurrent(Data storage self) internal view returns (uint256 rateIndexCurrent) {
