@@ -1,5 +1,16 @@
 {
   "dependencies": {
     "@synthetixio/core-contracts": "^1.1.1"
+  },
+  "scripts": {
+    "build": "forge build",
+    "lint": "yarn lint:sol && yarn prettier:check",
+    "lint:sol": "forge fmt --check && yarn solhint \"{src,test}/**/*.sol\"",
+    "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
+    "prettier:write": "prettier --write \"**/*.{json,md,yml}\""
+  },
+  "devDependencies": {
+    "prettier": "2.8.4",
+    "solhint": "3.4.0"
   }
 }

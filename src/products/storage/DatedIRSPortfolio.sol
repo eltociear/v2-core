@@ -116,7 +116,7 @@ library DatedIRSPortfolio {
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
         int256 currentLiquidityIndex =
             IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
-        int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
+        int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31536000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
             exposures[i] = baseAmounts[i] * currentLiquidityIndex * timeDeltaAnnualized;
