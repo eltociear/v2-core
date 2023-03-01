@@ -25,6 +25,7 @@ contract RateOracleManager is IRateOracleManager {
 
     /**
      * @inheritdoc IRateOracleManager
+     * @dev this function will likely need the poolAddress as its input since the gwap comes from the vamms
      */
     function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp)
         external
