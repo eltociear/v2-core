@@ -6,3 +6,5 @@ test/fixture-projects/*/contracts/Proxy.sol
 
 # Build Output
 dist/
+
+node_modules/
