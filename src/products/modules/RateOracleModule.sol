@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./interfaces/IRateOracleManager.sol";
-import "./storage/VariableRateOracle.sol";
+import "../interfaces/IRateOracleModule.sol";
+import "../storage/VariableRateOracle.sol";
 
 /**
  * @title Module for managing rate oracles connected to the Dated IRS Product
- * @dev See IRateOracleManager
+ * @dev See IRateOracleModule
  *  // todo: register a new rate oracle
  */
-contract RateOracleManager is IRateOracleManager {
+contract RateOracleManager is IRateOracleModule {
     using VariableRateOracle for VariableRateOracle.Data;
     /**
-     * @inheritdoc IRateOracleManager
+     * @inheritdoc IRateOracleModule
      */
 
     function getRateIndexCurrent(uint128 marketId) external view override returns (uint256 rateIndexCurrent) {
@@ -20,9 +20,12 @@ contract RateOracleManager is IRateOracleManager {
     }
 
     /**
-     * @inheritdoc IRateOracleManager
+     * @inheritdoc IRateOracleModule
      */
-    function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp)
+    function getRateIndexMaturity(
+        uint128 marketId,
+        uint256 maturityTimestamp
+    )
         external
         override
         returns (uint256 rateIndexMaturity)
@@ -31,16 +34,11 @@ contract RateOracleManager is IRateOracleManager {
     }
 
     /**
-     * @inheritdoc IRateOracleManager
+     * @inheritdoc IRateOracleModule
      * @dev this function will likely need the poolAddress as its input since the gwap comes from the vamms
      * todo: needs implementation
      */
-    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp)
-        external
-        view
-        override
-        returns (uint256 datedIRSGwap)
-    {}
+    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp) external view override returns (uint256 datedIRSGwap) { }
 
     // todo: do we want this function to return something?
     // todo: needs a feature flag to check for permission to register new variable rate oracles
@@ -59,11 +57,7 @@ contract RateOracleManager is IRateOracleManager {
         emit VariableRateOracleRegistered(marketId, oracleAddress);
     }
 
-    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) { 
+    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) { }
 
-    }
-
-    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {
-        
-    }
+    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) { }
 }
