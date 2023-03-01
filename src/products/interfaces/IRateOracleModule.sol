@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 /// @title Interface for the module for managing rate oracles connected to the Dated IRS Product
-interface IRateOracleManager {
+interface IRateOracleModule {
     /**
      * @notice Emitted when attempting to register a rate oracle with an invalid oracle address
      * @param oracleAddress Invalid oracle address

@@ -2,17 +2,15 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../src/accounts/storage/AccountRBAC.sol";
+import "../../src/core/storage/AccountRBAC.sol";
 
 contract ExposedAccountRBAC {
     using AccountRBAC for AccountRBAC.Data;
-    
+
     AccountRBAC.Data item;
 
     constructor(address owner) {
-        item = AccountRBAC.Data({
-                owner: owner
-            });
+        item = AccountRBAC.Data({owner: owner});
     }
 
     // Mock functions

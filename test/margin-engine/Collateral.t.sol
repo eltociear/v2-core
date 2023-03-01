@@ -2,17 +2,15 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../src/margin-engine/storage/Collateral.sol";
+import "../../src/core/storage/Collateral.sol";
 
 contract ExposedCollateral {
     using Collateral for Collateral.Data;
-    
+
     Collateral.Data item;
 
     constructor(uint256 balanceD18) {
-        item = Collateral.Data({
-                balanceD18: balanceD18
-            });
+        item = Collateral.Data({balanceD18: balanceD18});
     }
 
     // Mock functions
@@ -63,7 +61,7 @@ contract CollateralTest is Test {
         vm.assume(amount <= balance);
         ExposedCollateral collateral = new ExposedCollateral(balance);
         collateral.decreaseCollateralBalance(amount);
-        
+
         assertEq(collateral.get().balanceD18, balance - amount);
     }
 

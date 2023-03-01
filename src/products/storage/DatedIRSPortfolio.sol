@@ -5,10 +5,10 @@ import "../../utils/helpers/SetUtil.sol";
 import "../../utils/helpers/SafeCast.sol";
 import "./DatedIRSPosition.sol";
 import "./RateOracleManagerStorage.sol";
-import "../interfaces/IRateOracleManager.sol";
+import "../interfaces/IRateOracleModule.sol";
 import "../interfaces/IPool.sol";
-// todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface)
-import "../../accounts/storage/Account.sol";
+// todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface) -> think definitely worth doing that
+import "../../core/storage/Account.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
@@ -89,9 +89,9 @@ library DatedIRSPortfolio {
 
                 RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
                 int256 currentLiquidityIndex =
-                    IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
+                    IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
 
-                int256 gwap = IRateOracleManager(oracleManager.oracleManagerAddress).getDatedIRSGwap(
+                int256 gwap = IRateOracleModule(oracleManager.oracleManagerAddress).getDatedIRSGwap(
                     marketId, maturityTimestamp
                 ).toInt();
 
@@ -115,7 +115,7 @@ library DatedIRSPortfolio {
     {
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
         int256 currentLiquidityIndex =
-            IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
+            IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -212,7 +212,7 @@ library DatedIRSPortfolio {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
 
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 liquidityIndexMaturity = IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexMaturity(
+        int256 liquidityIndexMaturity = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexMaturity(
             marketId, maturityTimestamp
         ).toInt();
 

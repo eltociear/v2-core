@@ -6,7 +6,7 @@ pragma solidity >=0.8.13;
  */
 
 library RateOracleManagerStorage {
-    bytes32 private constant _SLOT_ORACLE_MANAGER = keccak256(abi.encode("xyz.voltz.RateOracleManager"));
+    bytes32 private constant _SLOT_ORACLE_MANAGER = keccak256(abi.encode("xyz.voltz.RateOracleModule"));
 
     struct Data {
         /**
