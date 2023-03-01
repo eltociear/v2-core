@@ -83,7 +83,4 @@ jobs:
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
 
       - name: "Get test coverage"
-        run: "forge coverage --report lcov"
-
-      - name: "Generate test"
-        run: "yarn generate:coverage:badge"
+        run: "forge coverage --report lcov; yarn generate:coverage:badge"
