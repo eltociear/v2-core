@@ -7,10 +7,12 @@ import "../externalInterfaces/IAaveV3LendingPool.sol";
 import "../../utils/helpers/Time.sol";
 // import "../rate_oracles/CompoundingRateOracle.sol";
 import { UD60x18, ud } from "@prb/math/UD60x18.sol";
+import {  PRBMathCastingUint256 } from "@prb/math/casting/Uint256.sol";
 
 contract AaveRateOracle is IRateOracle {
     IAaveV3LendingPool public aaveLendingPool;
     address public immutable underlying;
+    using PRBMathCastingUint256 for uint256;
 
     // uint8 public constant override UNDERLYING_YIELD_BEARING_PROTOCOL_ID = 1; // id of aave v2 is 1
 
@@ -59,48 +61,21 @@ contract AaveRateOracle is IRateOracle {
         return ud(liquidityIndexInRay / 1e9);
     }
 
-    /// @dev Given [beforeOrAt, atOrAfter] where the timestamp for which the counterfactual is calculated is within that range (but does not touch any of the bounds)
-    /// @dev We can calculate the apy for [beforeOrAt, atOrAfter] --> refer to this value as apyFromBeforeOrAtToAtOrAfter
-    /// @dev Then we want a counterfactual rate value which results in apy_before_after if the apy is calculated between [beforeOrAt, timestampForCounterfactual]
-    /// @dev Hence (1+rateValueWei/beforeOrAtRateValueWei)^(1/timeInYears) = apyFromBeforeOrAtToAtOrAfter
-    /// @dev Hence rateValueWei = beforeOrAtRateValueWei * (1+apyFromBeforeOrAtToAtOrAfter)^timeInYears - 1)
+    /// @inheritdoc IRateOracle
     function interpolateIndexValue(
-        // uint256 beforeOrAtRateValueRay,
-        // uint256 apyFromBeforeOrAtToAtOrAfterWad,
-        // uint256 timeDeltaBeforeOrAtToQueriedTimeWad
-        uint256 beforeIndexeRay,
-        uint256 beforeTimeStamp,
-        uint256 afterIndexRay,
-        uint256 afterTimestamp,
+        UD60x18 beforeIndex,
+        uint256 beforeTimestamp,
+        UD60x18 atOrAfterIndex,
+        uint256 atOrAfterTimestamp,
         uint40 queryTimestamp
-    ) public pure returns (uint256 indexRay) {
-        // uint256 timeInYearsWad = FixedAndVariableMath.accrualFact(
-        //     timeDeltaBeforeOrAtToQueriedTimeWad
-        // );
-        // uint256 apyPlusOne = apyFromBeforeOrAtToAtOrAfterWad + ONE_IN_WAD;
-        // uint256 factorInWad = PRBMathUD60x18.pow(apyPlusOne, timeInYearsWad);
-        // uint256 factorInRay = WadRayMath.wadToRay(factorInWad);
-        // rateValueRay = WadRayMath.rayMul(beforeOrAtRateValueRay, factorInRay);
-        // TODO: implement with index rather than APY inputs
-        return 0;
-    }
+    ) public pure returns (UD60x18 interpolatedIndex) {
+        if (atOrAfterTimestamp == queryTimestamp) {
+            return atOrAfterIndex;
+        }
 
-    // /// @dev Given [beforeOrAt, atOrAfter] where the timestamp for which the counterfactual is calculated is within that range (but does not touch any of the bounds)
-    // /// @dev We can calculate the apy for [beforeOrAt, atOrAfter] --> refer to this value as apyFromBeforeOrAtToAtOrAfter
-    // /// @dev Then we want a counterfactual rate value which results in apy_before_after if the apy is calculated between [beforeOrAt, timestampForCounterfactual]
-    // /// @dev Hence (1+rateValueWei/beforeOrAtRateValueWei)^(1/timeInYears) = apyFromBeforeOrAtToAtOrAfter
-    // /// @dev Hence rateValueWei = beforeOrAtRateValueWei * (1+apyFromBeforeOrAtToAtOrAfter)^timeInYears - 1)
-    // function interpolateRateValue(
-    //     uint256 beforeOrAtRateValueRay,
-    //     uint256 apyFromBeforeOrAtToAtOrAfterWad,
-    //     uint256 timeDeltaBeforeOrAtToQueriedTimeWad
-    // ) public pure override returns (uint256 rateValueRay) {
-    //     uint256 timeInYearsWad = FixedAndVariableMath.accrualFact(
-    //         timeDeltaBeforeOrAtToQueriedTimeWad
-    //     );
-    //     uint256 apyPlusOne = apyFromBeforeOrAtToAtOrAfterWad + ONE_IN_WAD;
-    //     uint256 factorInWad = PRBMathUD60x18.pow(apyPlusOne, timeInYearsWad);
-    //     uint256 factorInRay = WadRayMath.wadToRay(factorInWad);
-    //     rateValueRay = WadRayMath.rayMul(beforeOrAtRateValueRay, factorInRay);
-    // }
+        // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?)
+        UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex);
+        UD60x18 proportionOfPeriodElapsed = (atOrAfterTimestamp - queryTimestamp).intoUD60x18().div((atOrAfterTimestamp - beforeTimestamp).intoUD60x18());
+        return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
+    }
 }

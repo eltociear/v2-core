@@ -38,4 +38,14 @@ interface IRateOracle {
         external
         view
         returns (UD60x18 liquidityIndex);
+
+    /// @notice Estimate an index for `queryTimestamp`, using known data points either side
+    /// Some implementations may assume that index growth is compounded, others that growth is simple (not compounded)
+    function interpolateIndexValue(
+        UD60x18 beforeIndex,
+        uint256 beforeTimestamp,
+        UD60x18 atOrAfterIndex,
+        uint256 atOrAfterTimestamp,
+        uint40 queryTimestamp
+    ) external pure returns (UD60x18 interpolatedIndex);
 }

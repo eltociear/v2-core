@@ -26,11 +26,11 @@ interface IRateOracleModule {
     function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp) external returns (UD60x18 rateIndexMaturity);
 
     /**
-     * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC borrow)
+     * @notice Requests the current rate index, or the index at maturity if we are past maturity, of a given interest rate market (e.g. aUSDC borrow)
      * @param marketId Id of the market (e.g. aUSDC lend) for which we're requesting the current rate index value
-     * @return rateIndexCurrent Rate index at the current timestamp
+     * @return rateIndexCurrent Rate index at the current timestamp or at maturity time (whichever comes earlier)
      */
-    function getRateIndexCurrent(uint128 marketId) external view returns (UD60x18 rateIndexCurrent);
+    function getRateIndexCurrent(uint128 marketId, uint256 maturityTimestamp) external returns (UD60x18 rateIndexCurrent);
 
     /**
      * @notice Requests the geometric time weighted average fixed rate for a given marketId + maturityTimestamp pai
