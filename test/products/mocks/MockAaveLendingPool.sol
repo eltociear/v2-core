@@ -40,7 +40,7 @@ contract MockAaveLendingPool is IAaveV3LendingPool {
         startTime[address(_underlyingAsset)] = uint40(block.timestamp);
     }
 
-    function setFactorPerSecondInRay(
+    function setFactorPerSecond(
         IERC20 _underlyingAsset,
         UD60x18 _factorPerSecond
     ) public {

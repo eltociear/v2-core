@@ -10,22 +10,19 @@ import { UD60x18, ud } from "@prb/math/UD60x18.sol";
 
 contract AaveRateOracle is IRateOracle {
     IAaveV3LendingPool public aaveLendingPool;
-    address public underlying;
+    address public immutable underlying;
 
     // uint8 public constant override UNDERLYING_YIELD_BEARING_PROTOCOL_ID = 1; // id of aave v2 is 1
 
     constructor(
         IAaveV3LendingPool _aaveLendingPool,
-        address _underlying,
-        uint32[] memory _times,
-        uint256[] memory _results
+        address _underlying
     ) {
         require(
             address(_aaveLendingPool) != address(0),
             "aave pool must exist"
         );
-        // Check that underlying was set in BaseRateOracle
-        require(underlying != address(0), "underlying must exist");
+        
         underlying = _underlying;
         aaveLendingPool = _aaveLendingPool;
     }
