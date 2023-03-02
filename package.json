@@ -11,7 +11,15 @@
     "prettier:write": "prettier --write \"**/*.{json,md,yml}\""
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "4.31.2",
+    "@typescript-eslint/parser": "4.31.2",
+    "eslint": "7.32.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-prettier": "4.0.0",
+    "eslint-plugin-unused-imports": "2.0.0",
     "prettier": "2.8.4",
-    "solhint": "3.4.0"
+    "solhint": "3.4.0",
+    "typescript": "4.9.5",
+    "eslint-config-prettier": "8.5.0"
   }
 }

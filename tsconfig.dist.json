@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "rootDir": "router",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "declarationDir": "./dist/types"
+  },
+  "include": [
+    "./router"
+  ]
+}
