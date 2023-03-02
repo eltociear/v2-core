@@ -33,7 +33,7 @@ contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
     }
 
     function testInitialIndex() public {
-        assertEq(rateOracle.getCurrentLiquidityIndex(), initValue);
+        assertEq(rateOracle.getCurrentIndex(), initValue);
     }
 
     function testInitialIndexWithTime() public {
@@ -56,7 +56,7 @@ contract AaveRateOracle_Test2 is AaveRateOracle_Test_Base {
     }
 
     function testInitialIndex() public {
-        assertEq(rateOracle.getCurrentLiquidityIndex(), initValue);
+        assertEq(rateOracle.getCurrentIndex(), initValue);
     }
 
     function testInitialIndexWithTime() public {

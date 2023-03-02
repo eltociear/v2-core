@@ -85,8 +85,9 @@ library DatedIRSPortfolio {
                 int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
                 RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
+                // TODO: use PRB math
                 int256 currentLiquidityIndex =
-                    IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
+                    IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).intoUint256().toInt();
 
                 int256 gwap =
                     IRateOracleModule(oracleManager.oracleManagerAddress).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
@@ -113,7 +114,8 @@ library DatedIRSPortfolio {
         returns (int256[] memory exposures)
     {
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 currentLiquidityIndex = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
+        // TODO: use PRB math
+        int256 currentLiquidityIndex = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).intoUint256().toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -210,8 +212,9 @@ library DatedIRSPortfolio {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
 
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
+        // TODO: use PRB math
         int256 liquidityIndexMaturity =
-            IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexMaturity(marketId, maturityTimestamp).toInt();
+            IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexMaturity(marketId, maturityTimestamp).intoUint256().toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();

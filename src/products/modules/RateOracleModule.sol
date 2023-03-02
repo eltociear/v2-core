@@ -3,6 +3,8 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IRateOracleModule.sol";
 import "../storage/VariableRateOracle.sol";
+import { UD60x18 } from "@prb/math/UD60x18.sol";
+
 
 /**
  * @title Module for managing rate oracles connected to the Dated IRS Product
@@ -15,7 +17,7 @@ contract RateOracleManager is IRateOracleModule {
      * @inheritdoc IRateOracleModule
      */
 
-    function getRateIndexCurrent(uint128 marketId) external view override returns (uint256 rateIndexCurrent) {
+    function getRateIndexCurrent(uint128 marketId) external view override returns (UD60x18 rateIndexCurrent) {
         return VariableRateOracle.load(marketId).getRateIndexCurrent();
     }
 
@@ -28,7 +30,7 @@ contract RateOracleManager is IRateOracleModule {
     )
         external
         override
-        returns (uint256 rateIndexMaturity)
+        returns (UD60x18 rateIndexMaturity)
     {
         return VariableRateOracle.load(marketId).getRateIndexMaturity(maturityTimestamp);
     }

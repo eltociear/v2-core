@@ -44,7 +44,7 @@ contract AaveRateOracle is IRateOracle {
     }
 
     /// @inheritdoc IRateOracle
-    function getCurrentLiquidityIndex()
+    function getCurrentIndex()
         external
         view
         override

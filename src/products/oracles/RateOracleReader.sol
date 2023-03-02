@@ -27,7 +27,7 @@ contract RateOracleReader {
         settlementTimestamp = _settlementTimestamp;
     }
 
-    function getCurrentLiquidityIndexAndUpdateCache()
+    function getCurrentIndexAndUpdateCache()
         public
         returns (uint40 newTimestamp, UD60x18 newIndex)
     {

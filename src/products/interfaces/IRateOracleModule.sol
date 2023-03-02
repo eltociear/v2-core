@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
+import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 /// @title Interface for the module for managing rate oracles connected to the Dated IRS Product
 interface IRateOracleModule {
@@ -22,14 +23,14 @@ interface IRateOracleModule {
      * @param maturityTimestamp Maturity Timestamp of a given irs market that's requesting the index value for settlement purposes
      * @return rateIndexMaturity Rate index at the requested maturityTimestamp
      */
-    function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp) external returns (uint256 rateIndexMaturity);
+    function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp) external returns (UD60x18 rateIndexMaturity);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC borrow)
      * @param marketId Id of the market (e.g. aUSDC lend) for which we're requesting the current rate index value
      * @return rateIndexCurrent Rate index at the current timestamp
      */
-    function getRateIndexCurrent(uint128 marketId) external view returns (uint256 rateIndexCurrent);
+    function getRateIndexCurrent(uint128 marketId) external view returns (UD60x18 rateIndexCurrent);
 
     /**
      * @notice Requests the geometric time weighted average fixed rate for a given marketId + maturityTimestamp pai

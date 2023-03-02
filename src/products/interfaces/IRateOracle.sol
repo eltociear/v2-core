@@ -34,7 +34,7 @@ interface IRateOracle {
     /// @dev The liquidity index is normalised to a UD60x18 for storage, so that we can perform consistent math across all rates.
     /// @dev This function should revert if a valid rate cannot be discerned
     /// @return liquidityIndex the liquidity index value, as a decimal scaled up by 10^18 for storage in a uint256
-    function getCurrentLiquidityIndex()
+    function getCurrentIndex()
         external
         view
         returns (UD60x18 liquidityIndex);
