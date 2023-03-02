@@ -13,10 +13,7 @@ import "oz/interfaces/IERC721.sol";
 import { AccountModule as VoltzAccountModule } from "../../../src/core/modules/AccountModule.sol";
 
 /// @dev We must make our test contract signal that it can receive ERC721 tokens if it is to be able to create accounts
-contract AccountModuleTest is
-    Test,
-    ERC721ReceiverMock(IERC721Receiver.onERC721Received.selector, ERC721ReceiverMock.Error.None)
-{
+contract AccountModuleTest is Test, ERC721ReceiverMock(IERC721Receiver.onERC721Received.selector, ERC721ReceiverMock.Error.None) {
     /**
      * @dev ERC721 Transfer event. Emitted when `tokenId` token is transferred from `from` to `to`.
      */
