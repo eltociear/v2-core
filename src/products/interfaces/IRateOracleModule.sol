@@ -15,7 +15,7 @@ interface IRateOracleModule {
      * @param marketId The id of the market (e.g. aUSDC lend) associated with the rate oracle
      * @param oracleAddress Address of the variable rate oracle contract
      */
-    event VariableRateOracleRegistered(uint128 marketId, address oracleAddress);
+    event RateOracleRegistered(uint128 marketId, address oracleAddress);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC lend)

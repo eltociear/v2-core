@@ -72,6 +72,7 @@ library DatedIRSPortfolio {
      * todo: this function looks expesive and feels like there's room for optimisations
      */
     function getAccountUnrealizedPnL(Data storage self, address poolAddress) internal view returns (int256 unrealizedPnL) {
+        // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
         for (uint256 i = 1; i <= self.activeMarkets.length(); i++) {
             uint128 marketId = self.activeMarkets.valueAt(i).to128();
             for (uint256 j = 1; j <= self.activeMaturitiesPerMarket[marketId].length(); i++) {

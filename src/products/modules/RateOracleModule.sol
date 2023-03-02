@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "../interfaces/IRateOracleModule.sol";
-import "../storage/VariableRateOracle.sol";
+import "../storage/RateOracleReader.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 
@@ -12,13 +12,13 @@ import { UD60x18 } from "@prb/math/UD60x18.sol";
  *  // todo: register a new rate oracle
  */
 contract RateOracleManager is IRateOracleModule {
-    using VariableRateOracle for VariableRateOracle.Data;
+    using RateOracleReader for RateOracleReader.Data;
     /**
      * @inheritdoc IRateOracleModule
      */
 
     function getRateIndexCurrent(uint128 marketId) external view override returns (UD60x18 rateIndexCurrent) {
-        return VariableRateOracle.load(marketId).getRateIndexCurrent();
+        return RateOracleReader.load(marketId).getRateIndexCurrent();
     }
 
     /**
@@ -32,7 +32,7 @@ contract RateOracleManager is IRateOracleModule {
         override
         returns (UD60x18 rateIndexMaturity)
     {
-        return VariableRateOracle.load(marketId).getRateIndexMaturity(maturityTimestamp);
+        return RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp);
     }
 
     /**
@@ -55,8 +55,8 @@ contract RateOracleManager is IRateOracleModule {
         }
 
         // register the variable rate oracle
-        VariableRateOracle.create(marketId, oracleAddress);
-        emit VariableRateOracleRegistered(marketId, oracleAddress);
+        RateOracleReader.create(marketId, oracleAddress);
+        emit RateOracleRegistered(marketId, oracleAddress);
     }
 
     function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) { }

@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../interfaces/IRateOracle.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
-library VariableRateOracle {
+library RateOracleReader {
     struct Data {
         uint128 marketId;
         address oracleAddress;
