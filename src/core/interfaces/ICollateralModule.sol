@@ -55,7 +55,6 @@ interface ICollateralModule {
         address collateralType
     )
         external
-        view
         returns (uint256 amountD18);
 
     /**
@@ -65,7 +64,7 @@ interface ICollateralModule {
      * @return totalAccountValue The total account value in terms of the quote token of the account, denominated with 18 decimals of
      * precision.
      */
-    function getTotalAccountValue(uint128 accountId) external view returns (int256 totalAccountValue);
+    function getTotalAccountValue(uint128 accountId) external returns (int256 totalAccountValue);
 
     /**
      * @notice Deposits `tokenAmount` of collateral of type `collateralType` into account `accountId`.

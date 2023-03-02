@@ -94,7 +94,7 @@ contract DatedIRSProductModule is IDatedIRSProductModule {
     /**
      * @inheritdoc IProduct
      */
-    function getAccountUnrealizedPnL(uint128 accountId) external view override returns (int256 unrealizedPnL) {
+    function getAccountUnrealizedPnL(uint128 accountId) external override returns (int256 unrealizedPnL) {
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
         return portfolio.getAccountUnrealizedPnL(_poolAddress);
     }
@@ -104,7 +104,6 @@ contract DatedIRSProductModule is IDatedIRSProductModule {
      */
     function getAccountAnnualizedExposures(uint128 accountId)
         external
-        view
         override
         returns (Account.Exposure[] memory exposures)
     {

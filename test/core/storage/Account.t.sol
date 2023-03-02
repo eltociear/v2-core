@@ -55,7 +55,7 @@ contract ExposedAccounts {
         return account.getCollateralBalance(collateralType);
     }
 
-    function getCollateralBalanceAvailable(uint128 id, address collateralType) external view returns (uint256) {
+    function getCollateralBalanceAvailable(uint128 id, address collateralType) external returns (uint256) {
         Account.Data storage account = Account.load(id);
         return account.getCollateralBalanceAvailable(collateralType);
     }
@@ -67,17 +67,17 @@ contract ExposedAccounts {
         }
     }
 
-    function getAnnualizedProductExposures(uint128 id, uint128 productId) external view returns (Account.Exposure[] memory) {
+    function getAnnualizedProductExposures(uint128 id, uint128 productId) external returns (Account.Exposure[] memory) {
         Account.Data storage account = Account.load(id);
         return account.getAnnualizedProductExposures(productId);
     }
 
-    function getUnrealizedPnL(uint128 id) external view returns (int256) {
+    function getUnrealizedPnL(uint128 id) external returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getUnrealizedPnL();
     }
 
-    function getTotalAccountValue(uint128 id) external view returns (int256) {
+    function getTotalAccountValue(uint128 id) external returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getTotalAccountValue();
     }
@@ -86,26 +86,26 @@ contract ExposedAccounts {
         return Account.getRiskParameter(productId, marketId);
     }
 
-    function getIMMultiplier() external view returns (uint256) {
+    function getIMMultiplier() external returns (uint256) {
         return Account.getIMMultiplier();
     }
 
-    function imCheck(uint128 id) external view {
+    function imCheck(uint128 id) external {
         Account.Data storage account = Account.load(id);
         account.imCheck();
     }
 
-    function isIMSatisfied(uint128 id) external view returns (bool, uint256) {
+    function isIMSatisfied(uint128 id) external returns (bool, uint256) {
         Account.Data storage account = Account.load(id);
         return account.isIMSatisfied();
     }
 
-    function isLiquidatable(uint128 id) external view returns (bool, uint256, uint256) {
+    function isLiquidatable(uint128 id) external returns (bool, uint256, uint256) {
         Account.Data storage account = Account.load(id);
         return account.isLiquidatable();
     }
 
-    function getMarginRequirements(uint128 id) external view returns (uint256, uint256) {
+    function getMarginRequirements(uint128 id) external returns (uint256, uint256) {
         Account.Data storage account = Account.load(id);
         return account.getMarginRequirements();
     }

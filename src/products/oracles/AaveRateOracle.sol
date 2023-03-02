@@ -67,7 +67,7 @@ contract AaveRateOracle is IRateOracle {
         uint256 beforeTimestamp,
         UD60x18 atOrAfterIndex,
         uint256 atOrAfterTimestamp,
-        uint40 queryTimestamp
+        uint256 queryTimestamp
     ) public pure returns (UD60x18 interpolatedIndex) {
         if (atOrAfterTimestamp == queryTimestamp) {
             return atOrAfterIndex;

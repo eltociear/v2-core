@@ -36,7 +36,7 @@ library RateOracleReader {
         oracle.oracleAddress = oracleAddress;
     }
 
-    function getRateIndexCurrent(Data storage self, uint256 maturityTimestamp) internal view returns (UD60x18 rateIndexCurrent) {
+    function getRateIndexCurrent(Data storage self, uint256 maturityTimestamp) internal returns (UD60x18 rateIndexCurrent) {
         if (block.timestamp >= maturityTimestamp) {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
@@ -55,11 +55,11 @@ library RateOracleReader {
                 }
 
                 rateIndexMaturity = IRateOracle(self.oracleAddress).interpolateIndexValue({
-                    beforeIndexe: cache.lastKnownIndex,
+                    beforeIndex: cache.lastKnownIndex,
                     beforeTimestamp: cache.lastKnownTimestamp,
                     atOrAfterIndex: currentIndex,
                     atOrAfterTimestamp: block.timestamp,
-                    queryTimestamp:maturityTimestamp
+                    queryTimestamp: maturityTimestamp
                 });
                 self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
             }

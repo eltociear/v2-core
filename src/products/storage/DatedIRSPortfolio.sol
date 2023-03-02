@@ -71,7 +71,7 @@ library DatedIRSPortfolio {
      * consider avoiding pool if account is purely taker to save gas?
      * todo: this function looks expesive and feels like there's room for optimisations
      */
-    function getAccountUnrealizedPnL(Data storage self, address poolAddress) internal view returns (int256 unrealizedPnL) {
+    function getAccountUnrealizedPnL(Data storage self, address poolAddress) internal returns (int256 unrealizedPnL) {
         // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
         for (uint256 i = 1; i <= self.activeMarkets.length(); i++) {
             uint128 marketId = self.activeMarkets.valueAt(i).to128();
@@ -88,7 +88,7 @@ library DatedIRSPortfolio {
                 RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
                 // TODO: use PRB math
                 int256 currentLiquidityIndex =
-                    IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).intoUint256().toInt();
+                    IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId, maturityTimestamp).intoUint256().toInt();
 
                 int256 gwap =
                     IRateOracleModule(oracleManager.oracleManagerAddress).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
@@ -111,12 +111,11 @@ library DatedIRSPortfolio {
         uint256 maturityTimestamp
     )
         internal
-        view
         returns (int256[] memory exposures)
     {
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
         // TODO: use PRB math
-        int256 currentLiquidityIndex = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).intoUint256().toInt();
+        int256 currentLiquidityIndex = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId, maturityTimestamp).intoUint256().toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -133,7 +132,6 @@ library DatedIRSPortfolio {
         address poolAddress
     )
         internal
-        view
         returns (Account.Exposure[] memory exposures)
     {
         uint256 counter = 0;

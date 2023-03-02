@@ -79,7 +79,6 @@ contract CollateralModule is ICollateralModule {
         address collateralType
     )
         external
-        view
         override
         returns (uint256 collateralBalanceAvailable)
     {
@@ -89,7 +88,7 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getTotalAccountValue(uint128 accountId) external view override returns (int256 totalAccountValue) {
+    function getTotalAccountValue(uint128 accountId) external override returns (int256 totalAccountValue) {
         return Account.load(accountId).getTotalAccountValue();
     }
 }
