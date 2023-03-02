@@ -63,13 +63,23 @@ jobs:
       - name: "Check out the repo"
         uses: "actions/checkout@v3"
         with:
+          ref: ${{ github.event.pull_request.head.ref }}
           submodules: "recursive"
 
       - name: "Install Foundry"
         uses: "foundry-rs/foundry-toolchain@v1"
 
       - name: "Run the tests"
-        run: "forge test"
+        run: "forge coverage --report lcov"
+
+      - name: "Generate badge"
+        run: |
+          npx lcov-badge-generator ./lcov.info --output coverage.svg
+          git config user.name voltz-bot
+          git config user.email devcold@voltz.xyz
+          git add .
+          git commit -m "chore: coverage badge updated"
+          git push
 
       - name: "Add test summary"
         run: |
