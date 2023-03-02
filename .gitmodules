@@ -10,3 +10,7 @@
 	path = lib/prb-math
 	url = https://github.com/PaulRBerg/prb-math
 	branch = v3
+[submodule "lib/prb-test"]
+	path = lib/prb-test
+	url = https://github.com/PaulRBerg/prb-test
+	branch = v0
