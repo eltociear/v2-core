@@ -42,25 +42,25 @@ contract MockCore is MockAccount, MockProduct { }
  *          - product IDs: 1, 2
  *          - settlement token: TOKEN_0
  *
- *          - mocked exposures: 
- *            - (productId: 1, marketId: 10): 
+ *          - mocked exposures:
+ *            - (productId: 1, marketId: 10):
  *              - filled: 100
  *              - unfilled long: 200
  *              - unfilled short: -200
  *
- *            - (productId: 1, marketId: 11): 
+ *            - (productId: 1, marketId: 11):
  *              - filled: 200
  *              - unfilled long: 300
  *              - unfilled short: -400
  *
- *            - (productId: 2, marketId: 20): 
+ *            - (productId: 2, marketId: 20):
  *              - filled: -50
  *              - unfilled long: 150
  *              - unfilled short: -150
- * 
+ *
  *          - margin requirements: (im, 1800), (lm, 900)
  *
- *          - mocked uPnLs: 
+ *          - mocked uPnLs:
  *            - (productId: 1) : 100
  *            - (productId: 1) : -200
  * @dev Protocol risk configurations:
@@ -85,15 +85,9 @@ contract MockCoreState is MockCore, Test {
         // Create account (id: 100)
         {
             CollateralBalance[] memory balances = new CollateralBalance[](2);
-            balances[0] = CollateralBalance({ 
-                token: Constants.TOKEN_0, 
-                balanceD18: Constants.DEFAULT_TOKEN_0_BALANCE 
-            });
+            balances[0] = CollateralBalance({ token: Constants.TOKEN_0, balanceD18: Constants.DEFAULT_TOKEN_0_BALANCE });
 
-            balances[1] = CollateralBalance({ 
-                token: Constants.TOKEN_1, 
-                balanceD18: Constants.DEFAULT_TOKEN_1_BALANCE 
-            });
+            balances[1] = CollateralBalance({ token: Constants.TOKEN_1, balanceD18: Constants.DEFAULT_TOKEN_1_BALANCE });
 
             uint128[] memory activeProductIds = new uint128[](2);
             activeProductIds[0] = 1;
@@ -118,18 +112,14 @@ contract MockCoreState is MockCore, Test {
         ProtocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 0 }));
 
         // Mock collateral configuration (token 0)
-        CollateralConfiguration.set(CollateralConfiguration.Data({
-            depositingEnabled: true,
-            liquidationRewardD18: 0,
-            tokenAddress: Constants.TOKEN_0
-        }));
+        CollateralConfiguration.set(
+            CollateralConfiguration.Data({ depositingEnabled: true, liquidationRewardD18: 0, tokenAddress: Constants.TOKEN_0 })
+        );
 
         // Mock collateral configuration (token 1)
-        CollateralConfiguration.set(CollateralConfiguration.Data({
-            depositingEnabled: false,
-            liquidationRewardD18: 0,
-            tokenAddress: Constants.TOKEN_1
-        }));
+        CollateralConfiguration.set(
+            CollateralConfiguration.Data({ depositingEnabled: false, liquidationRewardD18: 0, tokenAddress: Constants.TOKEN_1 })
+        );
     }
 
     function mockAliceCalls() internal {
@@ -137,19 +127,9 @@ contract MockCoreState is MockCore, Test {
         {
             Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
 
-            mockExposures[0] = Account.Exposure({
-                marketId: 10, 
-                filled: 100e18, 
-                unfilledLong: 200e18, 
-                unfilledShort: -200e18 
-            });
+            mockExposures[0] = Account.Exposure({ marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18 });
 
-            mockExposures[1] = Account.Exposure({ 
-                marketId: 11, 
-                filled: 200e18, 
-                unfilledLong: 300e18, 
-                unfilledShort: -400e18 
-            });
+            mockExposures[1] = Account.Exposure({ marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18 });
 
             vm.mockCall(
                 Constants.PRODUCT_ADDRESS_1,
@@ -157,21 +137,17 @@ contract MockCoreState is MockCore, Test {
                 abi.encode(mockExposures)
             );
         }
-        
+
         // Mock account (id: 100) account closure to product (id: 1)
         {
-            vm.mockCall(
-                Constants.PRODUCT_ADDRESS_1, 
-                abi.encodeWithSelector(IProduct.closeAccount.selector, 100), 
-                abi.encode()
-            );
+            vm.mockCall(Constants.PRODUCT_ADDRESS_1, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode());
         }
 
         // Mock account (id: 100) unrealized PnL in product (id: 1)
         {
             vm.mockCall(
-                Constants.PRODUCT_ADDRESS_1, 
-                abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100), 
+                Constants.PRODUCT_ADDRESS_1,
+                abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100),
                 abi.encode(100e18)
             );
         }
@@ -180,12 +156,7 @@ contract MockCoreState is MockCore, Test {
         {
             Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-            mockExposures[0] = Account.Exposure({
-                marketId: 20, 
-                filled: -50e18, 
-                unfilledLong: 150e18, 
-                unfilledShort: -150e18 
-            });
+            mockExposures[0] = Account.Exposure({ marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18 });
 
             vm.mockCall(
                 Constants.PRODUCT_ADDRESS_2,
@@ -193,21 +164,17 @@ contract MockCoreState is MockCore, Test {
                 abi.encode(mockExposures)
             );
         }
-        
+
         // Mock account (id: 100) account closure to product (id: 2)
         {
-            vm.mockCall(
-                Constants.PRODUCT_ADDRESS_2, 
-                abi.encodeWithSelector(IProduct.closeAccount.selector, 100), 
-                abi.encode()
-            );
+            vm.mockCall(Constants.PRODUCT_ADDRESS_2, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode());
         }
 
         // Mock account (id: 100) unrealized PnL in product (id: 2)
         {
             vm.mockCall(
-                Constants.PRODUCT_ADDRESS_2, 
-                abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100), 
+                Constants.PRODUCT_ADDRESS_2,
+                abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100),
                 abi.encode(-200e18)
             );
         }

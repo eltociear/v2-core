@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../../../src/core/modules/CollateralModule.sol";
 import "../test-utils/MockCore.sol";
 
-contract EnhancedCollateralModule is CollateralModule, MockCoreState {}
+contract EnhancedCollateralModule is CollateralModule, MockCoreState { }
 
 contract CollateralModuleTest is Test {
     using SafeCastU256 for uint256;
@@ -21,42 +21,30 @@ contract CollateralModuleTest is Test {
     }
 
     function test_GetAccountCollateralBalance() public {
-        assertEq(
-            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), 
-            Constants.DEFAULT_TOKEN_0_BALANCE
-        );
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE);
     }
 
     function test_GetAccountCollateralBalance_NoSettlementToken() public {
-        assertEq(
-            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_1), 
-            Constants.DEFAULT_TOKEN_1_BALANCE
-        );
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_1), Constants.DEFAULT_TOKEN_1_BALANCE);
     }
 
     function test_GetTotalAccountValue() public {
         int256 uPnL = 100e18;
-        assertEq(
-            collateralModule.getTotalAccountValue(100), 
-            Constants.DEFAULT_TOKEN_0_BALANCE.toInt() - uPnL
-        );
+        assertEq(collateralModule.getTotalAccountValue(100), Constants.DEFAULT_TOKEN_0_BALANCE.toInt() - uPnL);
     }
 
-    function test_GetAccountCollateralBalanceAvailable() public { 
+    function test_GetAccountCollateralBalanceAvailable() public {
         uint256 uPnL = 100e18;
         uint256 im = 1800e18;
 
         assertEq(
-            collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_0), 
+            collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_0),
             Constants.DEFAULT_TOKEN_0_BALANCE - uPnL - im
         );
     }
 
     function test_GetAccountCollateralBalanceAvailable_NoSettlementToken() public {
-        assertEq(
-            collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_1), 
-            Constants.DEFAULT_TOKEN_1_BALANCE
-        );
+        assertEq(collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_1), Constants.DEFAULT_TOKEN_1_BALANCE);
     }
 
     function testFuzz_GetAccountCollateralBalanceAvailable_OtherToken(address otherToken) public {
@@ -70,9 +58,7 @@ contract CollateralModuleTest is Test {
         uint256 amount = 500e18;
 
         vm.mockCall(
-            Constants.TOKEN_0,
-            abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule),
-            abi.encode(amount)
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(amount)
         );
 
         vm.mockCall(
@@ -89,7 +75,7 @@ contract CollateralModuleTest is Test {
         collateralModule.deposit(100, Constants.TOKEN_0, amount);
 
         uint256 collateralBalance = collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0);
-        
+
         assertEq(collateralBalance, Constants.DEFAULT_TOKEN_0_BALANCE + amount);
     }
 
@@ -97,9 +83,7 @@ contract CollateralModuleTest is Test {
         uint256 amount = 500e18;
 
         vm.mockCall(
-            Constants.TOKEN_0,
-            abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule),
-            abi.encode(0)
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(0)
         );
 
         vm.expectRevert(abi.encodeWithSelector(IERC20.InsufficientAllowance.selector, amount, 0));
@@ -118,11 +102,7 @@ contract CollateralModuleTest is Test {
     function test_Withdraw() public {
         uint256 amount = 500e18;
 
-        vm.mockCall(
-            Constants.TOKEN_0,
-            abi.encodeWithSelector(IERC20.transfer.selector, Constants.ALICE, amount),
-            abi.encode()
-        );
+        vm.mockCall(Constants.TOKEN_0, abi.encodeWithSelector(IERC20.transfer.selector, Constants.ALICE, amount), abi.encode());
 
         vm.expectEmit(true, true, true, true, address(collateralModule));
         emit Withdrawn(100, Constants.TOKEN_0, amount, Constants.ALICE);
@@ -132,7 +112,7 @@ contract CollateralModuleTest is Test {
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
 
         uint256 collateralBalance = collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0);
-        
+
         assertEq(collateralBalance, Constants.DEFAULT_TOKEN_0_BALANCE - amount);
     }
 
