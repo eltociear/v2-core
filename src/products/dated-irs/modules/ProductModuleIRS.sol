@@ -95,7 +95,7 @@ contract DatedIRSProductModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-    function getAccountUnrealizedPnL(uint128 accountId) external override returns (int256 unrealizedPnL) {
+    function getAccountUnrealizedPnL(uint128 accountId) external view override returns (int256 unrealizedPnL) {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address _poolAddress = PoolConfiguration.getPoolAddress();
         return portfolio.getAccountUnrealizedPnL(_poolAddress);

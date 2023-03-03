@@ -37,7 +37,7 @@ library RateOracleReader {
         oracle.oracleAddress = oracleAddress;
     }
 
-    function getRateIndexCurrent(Data storage self, uint256 maturityTimestamp) internal returns (UD60x18 rateIndexCurrent) {
+    function getRateIndexCurrent(Data storage self, uint256 maturityTimestamp) internal view returns (UD60x18 rateIndexCurrent) {
         if (block.timestamp >= maturityTimestamp) {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
@@ -45,6 +45,10 @@ library RateOracleReader {
             if (rateIndexMaturity.unwrap() == 0) {
                 // cache not yet populated - populate it now
                 UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
+
+                // todo: write on registration
+                // todo: write for each taker order with some threshold closer towards maturity
+                // todo: bring views back and simplify the logic below
 
                 // TODO: if we can guarantee that a cache value exists (maybe writing to cache on oracle registration?) then code
                 // here and below can simplify

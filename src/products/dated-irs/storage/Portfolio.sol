@@ -74,7 +74,7 @@ library Portfolio {
      * consider avoiding pool if account is purely taker to save gas?
      * todo: this function looks expesive and feels like there's room for optimisations
      */
-    function getAccountUnrealizedPnL(Data storage self, address poolAddress) internal returns (int256 unrealizedPnL) {
+    function getAccountUnrealizedPnL(Data storage self, address poolAddress) internal view returns (int256 unrealizedPnL) {
         // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
         for (uint256 i = 1; i <= self.activeMarkets.length(); i++) {
             uint128 marketId = self.activeMarkets.valueAt(i).to128();

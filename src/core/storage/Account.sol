@@ -212,7 +212,7 @@ library Account {
      * pnl
      * note, the unrealized pnl is expected to be in terms of the settlement token of this account
      */
-    function getUnrealizedPnL(Data storage self) internal returns (int256 unrealizedPnL) {
+    function getUnrealizedPnL(Data storage self) internal view returns (int256 unrealizedPnL) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productIndex = _activeProducts.valueAt(i).to128();
@@ -225,7 +225,7 @@ library Account {
      * @dev Returns the total account value in terms of the quote token of the (single token) account
      */
 
-    function getTotalAccountValue(Data storage self) internal returns (int256 totalAccountValue) {
+    function getTotalAccountValue(Data storage self) internal view returns (int256 totalAccountValue) {
         int256 unrealizedPnL = self.getUnrealizedPnL();
         int256 collateralBalance = self.getCollateralBalance(self.settlementToken).toInt();
         totalAccountValue = unrealizedPnL + collateralBalance;
