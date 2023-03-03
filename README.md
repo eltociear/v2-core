@@ -17,13 +17,13 @@
 - Account -> settlement token checks (Costin)
 - Account -> liquidator deposit logic (Costin)
 - PRB Math & User Defined Types (Costin)
-- Upgrade Module & Initial Module Bundle (AB)
+- Initial Module Bundle (AB)
 
 **P2**
 
 - Fee Module
-- Deployment & Upgradability
 - Feature Flag Module
+- Deployment & Upgradability
 - Associated Systems Module
 - Multicall Module
 
