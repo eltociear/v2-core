@@ -90,7 +90,7 @@ library Portfolio {
 
                 // TODO: use PRB math
                 int256 currentLiquidityIndex =
-                    RateOracleReader.getRateIndexCurrent(marketId, maturityTimestamp).intoUint256().toInt();
+                    RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
 
                 int256 gwap =
                     IVAMMPoolModule(PoolConfiguration.getPoolAddress()).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
@@ -116,7 +116,7 @@ library Portfolio {
         returns (int256[] memory exposures)
     {
         // TODO: use PRB math
-        int256 currentLiquidityIndex = RateOracleReader.getRateIndexCurrent(marketId, maturityTimestamp).intoUint256().toInt();
+        int256 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -212,7 +212,8 @@ library Portfolio {
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
         // TODO: use PRB math
-        int256 liquidityIndexMaturity = RateOracleReader.getRateIndexMaturity(marketId, maturityTimestamp).intoUint256().toInt();
+        int256 liquidityIndexMaturity =
+            RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp).intoUint256().toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();
