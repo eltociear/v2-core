@@ -65,7 +65,7 @@ contract CollateralModule is ICollateralModule {
     {
         return Account.load(accountId).getCollateralBalance(collateralType);
     }
-    
+
     /**
      * @inheritdoc ICollateralModule
      */

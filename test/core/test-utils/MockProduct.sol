@@ -9,11 +9,7 @@ import "../../../src/core/storage/ProductCreator.sol";
 contract MockProduct {
     using Product for Product.Data;
 
-    function mockProduct(
-        address productAddress,
-        string memory name,
-        address owner
-    ) public returns (uint128) {
+    function mockProduct(address productAddress, string memory name, address owner) public returns (uint128) {
         Product.Data storage product = ProductCreator.create(productAddress, name, owner);
         return product.id;
     }

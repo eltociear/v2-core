@@ -6,7 +6,7 @@ import "../../../src/core/modules/CollateralModule.sol";
 import "../test-utils/MockCore.sol";
 
 contract EnhancedCollateralModule is CollateralModule, MockCoreState {
-    constructor() MockCoreState() {}
+    constructor() MockCoreState() { }
 }
 
 contract CollateralModuleTest is Test {
@@ -28,23 +28,17 @@ contract CollateralModuleTest is Test {
         mockExposures[1] = Account.Exposure({ marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18 });
 
         vm.mockCall(
-            Constants.PRODUCT_ADDRESS_1, 
-            abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector, 100), 
+            Constants.PRODUCT_ADDRESS_1,
+            abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector, 100),
             abi.encode(mockExposures)
         );
 
         // Mock account closure to product ID 1
-        vm.mockCall(
-            Constants.PRODUCT_ADDRESS_1, 
-            abi.encodeWithSelector(IProduct.closeAccount.selector, 100), 
-            abi.encode()
-        );
+        vm.mockCall(Constants.PRODUCT_ADDRESS_1, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode());
 
         // Mock account uPnL in product ID 1
         vm.mockCall(
-            Constants.PRODUCT_ADDRESS_1, 
-            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100), 
-            abi.encode(100e18)
+            Constants.PRODUCT_ADDRESS_1, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100), abi.encode(100e18)
         );
 
         // Mock account exposures to product ID 2 and markets IDs 20
@@ -52,23 +46,17 @@ contract CollateralModuleTest is Test {
         mockExposures[0] = Account.Exposure({ marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18 });
 
         vm.mockCall(
-            Constants.PRODUCT_ADDRESS_2, 
-            abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector, 100), 
+            Constants.PRODUCT_ADDRESS_2,
+            abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector, 100),
             abi.encode(mockExposures)
         );
 
         // Mock account closure to product ID 2
-        vm.mockCall(
-            Constants.PRODUCT_ADDRESS_2, 
-            abi.encodeWithSelector(IProduct.closeAccount.selector, 100), 
-            abi.encode()
-        );
+        vm.mockCall(Constants.PRODUCT_ADDRESS_2, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode());
 
         // Mock account uPnL in product ID 2
         vm.mockCall(
-            Constants.PRODUCT_ADDRESS_2, 
-            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100), 
-            abi.encode(-200e18)
+            Constants.PRODUCT_ADDRESS_2, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100), abi.encode(-200e18)
         );
     }
 
@@ -101,30 +89,18 @@ contract CollateralModuleTest is Test {
     }
 
     function test_GetAccountCollateralBalance() public {
-        assertEq(
-            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), 
-            350e18
-        );
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), 350e18);
 
-        assertEq(
-            collateralModule.getAccountCollateralBalance(101, Constants.TOKEN_1), 
-            300e18
-        );
+        assertEq(collateralModule.getAccountCollateralBalance(101, Constants.TOKEN_1), 300e18);
     }
 
     function test_GetTotalAccountValue() public {
-        assertEq(
-            collateralModule.getTotalAccountValue(100), 
-            250e18
-        );
+        assertEq(collateralModule.getTotalAccountValue(100), 250e18);
     }
 
-    function test_GetAccountCollateralBalanceAvailable() public {}
+    function test_GetAccountCollateralBalanceAvailable() public { }
 
     function test_GetAccountCollateralBalanceAvailable_OtherToken() public {
-        assertEq(
-            collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_1), 
-            100e18
-        );
+        assertEq(collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_1), 100e18);
     }
 }

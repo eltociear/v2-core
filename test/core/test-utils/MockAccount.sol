@@ -20,21 +20,38 @@ contract MockAccount {
         CollateralBalance[] memory balances,
         uint128[] memory activeProductIds,
         address settlementToken
-    ) public {
+    )
+        public
+    {
         // Mock account
         Account.Data storage account = Account.create(accountId, owner);
         account.settlementToken = settlementToken;
 
         for (uint256 i = 0; i < balances.length; i++) {
-            address token = balances[i].token;
-            uint256 balanceD18 = balances[i].balanceD18;
-
-            account.collaterals[token].balanceD18 = balanceD18;
+            changeAccountBalance(accountId, balances[i]);
         }
 
         for (uint256 i = 0; i < activeProductIds.length; i++) {
-            uint128 productId = activeProductIds[i];
-            account.activeProducts.add(productId);
+            addActiveProduct(accountId, activeProductIds[i]);
         }
+    }
+
+    function changeAccountBalance(uint128 accountId, CollateralBalance memory balance) public {
+        Account.Data storage account = Account.exists(accountId);
+
+        address token = balance.token;
+        uint256 balanceD18 = balance.balanceD18;
+
+        account.collaterals[token].balanceD18 = balanceD18;
+    }
+
+    function addActiveProduct(uint128 accountId, uint128 productId) public {
+        Account.Data storage account = Account.exists(accountId);
+        account.activeProducts.add(productId);
+    }
+
+    function removeActiveProduct(uint128 accountId, uint128 productId) public {
+        Account.Data storage account = Account.exists(accountId);
+        account.activeProducts.remove(productId);
     }
 }
