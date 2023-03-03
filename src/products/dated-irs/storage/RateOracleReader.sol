@@ -25,7 +25,7 @@ library RateOracleReader {
     }
 
     function load(uint128 marketId) internal pure returns (Data storage oracle) {
-        bytes32 s = keccak256(abi.encode("xyz.voltz.VariableRateOracle", marketId));
+        bytes32 s = keccak256(abi.encode("xyz.voltz.RateOracleReader", marketId));
         assembly {
             oracle.slot := s
         }
