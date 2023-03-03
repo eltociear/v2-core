@@ -14,11 +14,10 @@
 - G-TWAP Integration with Rate Oracle Module (Cyclops Rex)
 - Variable Rate Oracles (Cyclops Rex)
 - Dated IRS Market Configuration Module (AB)
-- Pool Configuration Module (AB)
 - Account -> settlement token checks (Costin)
 - Account -> liquidator deposit logic (Costin)
 - PRB Math & User Defined Types (Costin)
-- Owner Module & Upgrade Module (Initial Module Bundle) (AB)
+- Upgrade Module & Initial Module Bundle (AB)
 
 **P2**
 
