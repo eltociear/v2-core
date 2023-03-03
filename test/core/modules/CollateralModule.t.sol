@@ -5,102 +5,160 @@ import "forge-std/Test.sol";
 import "../../../src/core/modules/CollateralModule.sol";
 import "../test-utils/MockCore.sol";
 
-contract EnhancedCollateralModule is CollateralModule, MockCoreState {
-    constructor() MockCoreState() { }
-}
+contract EnhancedCollateralModule is CollateralModule, MockCoreState {}
 
 contract CollateralModuleTest is Test {
+    using SafeCastU256 for uint256;
+    using SafeCastI256 for int256;
+
+    event Deposited(uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender);
+    event Withdrawn(uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender);
+
     EnhancedCollateralModule internal collateralModule;
 
     function setUp() public {
         collateralModule = new EnhancedCollateralModule();
-
-        setupProducts();
-        setupRiskConfigurations();
-        setupProtocolRiskConfigurations();
-    }
-
-    function setupProducts() public {
-        // Mock Alice's account exposures to product ID 1 and markets IDs 10, 11
-        Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
-        mockExposures[0] = Account.Exposure({ marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18 });
-
-        mockExposures[1] = Account.Exposure({ marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18 });
-
-        vm.mockCall(
-            Constants.PRODUCT_ADDRESS_1,
-            abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector, 100),
-            abi.encode(mockExposures)
-        );
-
-        // Mock account closure to product ID 1
-        vm.mockCall(Constants.PRODUCT_ADDRESS_1, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode());
-
-        // Mock account uPnL in product ID 1
-        vm.mockCall(
-            Constants.PRODUCT_ADDRESS_1, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100), abi.encode(100e18)
-        );
-
-        // Mock account exposures to product ID 2 and markets IDs 20
-        mockExposures = new Account.Exposure[](1);
-        mockExposures[0] = Account.Exposure({ marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18 });
-
-        vm.mockCall(
-            Constants.PRODUCT_ADDRESS_2,
-            abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector, 100),
-            abi.encode(mockExposures)
-        );
-
-        // Mock account closure to product ID 2
-        vm.mockCall(Constants.PRODUCT_ADDRESS_2, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode());
-
-        // Mock account uPnL in product ID 2
-        vm.mockCall(
-            Constants.PRODUCT_ADDRESS_2, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100), abi.encode(-200e18)
-        );
-    }
-
-    function setupRiskConfigurations() public {
-        // Mock risk parameter for product ID 1 and market ID 10
-        bytes32 slot = keccak256(abi.encode("xyz.voltz.MarketRiskConfiguration", 1, 10));
-        assembly {
-            slot := add(slot, 1)
-        }
-        vm.store(address(collateralModule), slot, bytes32(abi.encode(1e18)));
-
-        // Mock risk parameter for product ID 1 and market ID 11
-        slot = keccak256(abi.encode("xyz.voltz.MarketRiskConfiguration", 1, 11));
-        assembly {
-            slot := add(slot, 1)
-        }
-        vm.store(address(collateralModule), slot, bytes32(abi.encode(1e18)));
-
-        // Mock risk parameter for product ID 2 and market ID 20
-        slot = keccak256(abi.encode("xyz.voltz.MarketRiskConfiguration", 2, 20));
-        assembly {
-            slot := add(slot, 1)
-        }
-        vm.store(address(collateralModule), slot, bytes32(abi.encode(1e18)));
-    }
-
-    function setupProtocolRiskConfigurations() public {
-        bytes32 slot = keccak256(abi.encode("xyz.voltz.ProtocolRiskConfiguration"));
-        vm.store(address(collateralModule), slot, bytes32(abi.encode(2e18)));
     }
 
     function test_GetAccountCollateralBalance() public {
-        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), 350e18);
+        assertEq(
+            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), 
+            Constants.DEFAULT_TOKEN_0_BALANCE
+        );
+    }
 
-        assertEq(collateralModule.getAccountCollateralBalance(101, Constants.TOKEN_1), 300e18);
+    function test_GetAccountCollateralBalance_NoSettlementToken() public {
+        assertEq(
+            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_1), 
+            Constants.DEFAULT_TOKEN_1_BALANCE
+        );
     }
 
     function test_GetTotalAccountValue() public {
-        assertEq(collateralModule.getTotalAccountValue(100), 250e18);
+        int256 uPnL = 100e18;
+        assertEq(
+            collateralModule.getTotalAccountValue(100), 
+            Constants.DEFAULT_TOKEN_0_BALANCE.toInt() - uPnL
+        );
     }
 
-    function test_GetAccountCollateralBalanceAvailable() public { }
+    function test_GetAccountCollateralBalanceAvailable() public { 
+        uint256 uPnL = 100e18;
+        uint256 im = 1800e18;
 
-    function test_GetAccountCollateralBalanceAvailable_OtherToken() public {
-        assertEq(collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_1), 100e18);
+        assertEq(
+            collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_0), 
+            Constants.DEFAULT_TOKEN_0_BALANCE - uPnL - im
+        );
+    }
+
+    function test_GetAccountCollateralBalanceAvailable_NoSettlementToken() public {
+        assertEq(
+            collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_1), 
+            Constants.DEFAULT_TOKEN_1_BALANCE
+        );
+    }
+
+    function testFuzz_GetAccountCollateralBalanceAvailable_OtherToken(address otherToken) public {
+        vm.assume(otherToken != Constants.TOKEN_0);
+        vm.assume(otherToken != Constants.TOKEN_1);
+
+        assertEq(collateralModule.getAccountCollateralBalanceAvailable(100, otherToken), 0);
+    }
+
+    function testFuzz_Deposit(address depositor) public {
+        uint256 amount = 500e18;
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule),
+            abi.encode(amount)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, amount),
+            abi.encode()
+        );
+
+        vm.prank(depositor);
+
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Deposited(100, Constants.TOKEN_0, amount, depositor);
+
+        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+
+        uint256 collateralBalance = collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0);
+        
+        assertEq(collateralBalance, Constants.DEFAULT_TOKEN_0_BALANCE + amount);
+    }
+
+    function testFuzz_revertWhen_Deposit_WithNotEnoughAllowance(address depositor) public {
+        uint256 amount = 500e18;
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule),
+            abi.encode(0)
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(IERC20.InsufficientAllowance.selector, amount, 0));
+        vm.prank(depositor);
+        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+    }
+
+    function testFuzz_revertWhen_Deposit_WithCollateralTypeNotEnabled(address depositor) public {
+        uint256 amount = 500e18;
+
+        vm.expectRevert(abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_1));
+        vm.prank(depositor);
+        collateralModule.deposit(100, Constants.TOKEN_1, amount);
+    }
+
+    function test_Withdraw() public {
+        uint256 amount = 500e18;
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transfer.selector, Constants.ALICE, amount),
+            abi.encode()
+        );
+
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Withdrawn(100, Constants.TOKEN_0, amount, Constants.ALICE);
+
+        vm.prank(Constants.ALICE);
+
+        collateralModule.withdraw(100, Constants.TOKEN_0, amount);
+
+        uint256 collateralBalance = collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0);
+        
+        assertEq(collateralBalance, Constants.DEFAULT_TOKEN_0_BALANCE - amount);
+    }
+
+    function test_revertWhen_Withdraw_UnautohorizedAccount(address otherAddress) public {
+        vm.assume(otherAddress != Constants.ALICE);
+
+        uint256 amount = 500e18;
+
+        vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, 100, otherAddress));
+        vm.prank(otherAddress);
+        collateralModule.withdraw(100, Constants.TOKEN_0, amount);
+    }
+
+    function test_revertWhen_Withdraw_MoreThanBalance() public {
+        uint256 amount = 10500e18;
+
+        vm.prank(Constants.ALICE);
+        vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientCollateral.selector, amount));
+        collateralModule.withdraw(100, Constants.TOKEN_0, amount);
+    }
+
+    function test_revertWhen_Withdraw_WhenIMNoLongerSatisfied() public {
+        uint256 amount = 9500e18;
+
+        vm.prank(Constants.ALICE);
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100));
+        collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 }

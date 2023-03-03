@@ -5,6 +5,7 @@ import "./MockAccount.sol";
 import "./MockProduct.sol";
 import "./Constants.sol";
 import "../../../src/core/storage/MarketRiskConfiguration.sol";
+import "../../../src/core/storage/CollateralConfiguration.sol";
 import "forge-std/Test.sol";
 
 contract MockCore is MockAccount, MockProduct { }
@@ -37,7 +38,7 @@ contract MockCore is MockAccount, MockProduct { }
  *        - Alice:
  *          - id: 100
  *          - owner: ALICE
- *          - default balances: (TOKEN_0, 1000), (TOKEN_1, 1000)
+ *          - default balances: (TOKEN_0, 10000), (TOKEN_1, 10)
  *          - product IDs: 1, 2
  *          - settlement token: TOKEN_0
  *
@@ -84,9 +85,15 @@ contract MockCoreState is MockCore, Test {
         // Create account (id: 100)
         {
             CollateralBalance[] memory balances = new CollateralBalance[](2);
-            balances[0] = CollateralBalance({ token: Constants.TOKEN_0, balanceD18: 1000e18 });
+            balances[0] = CollateralBalance({ 
+                token: Constants.TOKEN_0, 
+                balanceD18: Constants.DEFAULT_TOKEN_0_BALANCE 
+            });
 
-            balances[1] = CollateralBalance({ token: Constants.TOKEN_1, balanceD18: 1000e18 });
+            balances[1] = CollateralBalance({ 
+                token: Constants.TOKEN_1, 
+                balanceD18: Constants.DEFAULT_TOKEN_1_BALANCE 
+            });
 
             uint128[] memory activeProductIds = new uint128[](2);
             activeProductIds[0] = 1;
@@ -109,6 +116,20 @@ contract MockCoreState is MockCore, Test {
 
         // Set protocol risk configuration
         ProtocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 0 }));
+
+        // Mock collateral configuration (token 0)
+        CollateralConfiguration.set(CollateralConfiguration.Data({
+            depositingEnabled: true,
+            liquidationRewardD18: 0,
+            tokenAddress: Constants.TOKEN_0
+        }));
+
+        // Mock collateral configuration (token 1)
+        CollateralConfiguration.set(CollateralConfiguration.Data({
+            depositingEnabled: false,
+            liquidationRewardD18: 0,
+            tokenAddress: Constants.TOKEN_1
+        }));
     }
 
     function mockAliceCalls() internal {

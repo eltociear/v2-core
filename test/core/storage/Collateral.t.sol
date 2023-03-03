@@ -68,7 +68,7 @@ contract CollateralTest is Test {
     function testFuzz_revertWhen_NotEnoughBalanceToDecrease(uint256 balance, uint256 amount) public {
         vm.assume(amount > balance);
         ExposedCollateral collateral = new ExposedCollateral(balance);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientCollateral.selector, amount));
         collateral.decreaseCollateralBalance(amount);
     }
 }

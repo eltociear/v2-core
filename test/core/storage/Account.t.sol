@@ -146,6 +146,11 @@ contract AccountTest is Test {
         assertEq(collateralBalanceD18, LOW_COLLATERAL);
     }
 
+    function test_GetCollateralBalance_NonSettlementToken() public {
+        uint256 collateralBalanceD18 = accounts.getCollateralBalance(accountId, Constants.TOKEN_1);
+        assertEq(collateralBalanceD18, Constants.DEFAULT_TOKEN_1_BALANCE);
+    }
+
     function testFuzz_GetCollateralBalance_NoCollateral(address otherToken) public {
         vm.assume(otherToken != Constants.TOKEN_0);
         vm.assume(otherToken != Constants.TOKEN_1);
@@ -276,6 +281,14 @@ contract AccountTest is Test {
         uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_0);
 
         assertEq(collateralBalanceAvailableD18, 3100e18);
+    }
+
+    function test_GetCollateralBalanceAvailable_NonSettlementToken() public {
+        setCollateralProfile("high");
+
+        uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_1);
+
+        assertEq(collateralBalanceAvailableD18, Constants.DEFAULT_TOKEN_1_BALANCE);
     }
 
     function test_GetCollateralBalanceAvailable_Zero() public {
