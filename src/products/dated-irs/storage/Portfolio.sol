@@ -88,11 +88,9 @@ library Portfolio {
 
                 int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
-                RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
                 // TODO: use PRB math
-                int256 currentLiquidityIndex = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(
-                    marketId, maturityTimestamp
-                ).intoUint256().toInt();
+                int256 currentLiquidityIndex =
+                    RateOracleReader.getRateIndexCurrent(marketId, maturityTimestamp).intoUint256().toInt();
 
                 int256 gwap =
                     IVAMMPoolModule(PoolConfiguration.getPoolAddress()).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
@@ -117,11 +115,8 @@ library Portfolio {
         internal
         returns (int256[] memory exposures)
     {
-        RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
         // TODO: use PRB math
-        int256 currentLiquidityIndex = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(
-            marketId, maturityTimestamp
-        ).intoUint256().toInt();
+        int256 currentLiquidityIndex = RateOracleReader.getRateIndexCurrent(marketId, maturityTimestamp).intoUint256().toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -216,11 +211,8 @@ library Portfolio {
     function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp) internal returns (int256 settlementCashflow) {
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
-        RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
         // TODO: use PRB math
-        int256 liquidityIndexMaturity = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexMaturity(
-            marketId, maturityTimestamp
-        ).intoUint256().toInt();
+        int256 liquidityIndexMaturity = RateOracleReader.getRateIndexMaturity(marketId, maturityTimestamp).intoUint256().toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();
