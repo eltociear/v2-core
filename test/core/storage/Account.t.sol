@@ -133,21 +133,25 @@ contract AccountTest is Test {
 
     function test_Exists() public {
         bytes32 slot = accounts.exists(accountId);
+
         assertEq(slot, accountSlot);
     }
 
     function test_revertWhen_AccountDoesNotExist() public {
         vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 0));
+
         accounts.exists(0);
     }
 
     function test_GetCollateralBalance() public {
         uint256 collateralBalanceD18 = accounts.getCollateralBalance(accountId, Constants.TOKEN_0);
+
         assertEq(collateralBalanceD18, LOW_COLLATERAL);
     }
 
     function test_GetCollateralBalance_NonSettlementToken() public {
         uint256 collateralBalanceD18 = accounts.getCollateralBalance(accountId, Constants.TOKEN_1);
+
         assertEq(collateralBalanceD18, Constants.DEFAULT_TOKEN_1_BALANCE);
     }
 
@@ -156,6 +160,7 @@ contract AccountTest is Test {
         vm.assume(otherToken != Constants.TOKEN_1);
 
         uint256 collateralBalanceD18 = accounts.getCollateralBalance(accountId, otherToken);
+
         assertEq(collateralBalanceD18, 0);
     }
 
@@ -179,6 +184,7 @@ contract AccountTest is Test {
 
     function test_GetAnnualizedProductExposures() public {
         Account.Exposure[] memory exposures = accounts.getAnnualizedProductExposures(accountId, 1);
+
         assertEq(exposures.length, 2);
 
         assertEq(exposures[0].marketId, 10);
@@ -265,7 +271,6 @@ contract AccountTest is Test {
         setCollateralProfile("medium");
 
         vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, accountId));
-
         accounts.imCheck(accountId);
     }
 
