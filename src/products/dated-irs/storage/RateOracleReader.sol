@@ -6,7 +6,6 @@ import "src/utils/helpers/Time.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 library RateOracleReader {
-
     /**
      * @dev Thrown if the index-at-maturity is requested before maturity.
      */
@@ -14,8 +13,10 @@ library RateOracleReader {
 
     struct PreMaturityData {
         uint40 lastKnownTimestamp;
-        UD60x18 lastKnownIndex; // TODO - truncate indices to UD40x18 (nned to define this and faciliate checked casting) to save a storage slot here and elsewhere
+        UD60x18 lastKnownIndex; // TODO - truncate indices to UD40x18 (nned to define this and faciliate checked casting) to save a
+            // storage slot here and elsewhere
     }
+
     struct Data {
         uint128 marketId;
         address oracleAddress;
@@ -45,7 +46,8 @@ library RateOracleReader {
                 // cache not yet populated - populate it now
                 UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
 
-                // TODO: if we can guarantee that a cache value exists (maybe writing to cache on oracle registration?) then code here and below can simplify
+                // TODO: if we can guarantee that a cache value exists (maybe writing to cache on oracle registration?) then code
+                // here and below can simplify
                 PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];
 
                 if (cache.lastKnownTimestamp == 0) {

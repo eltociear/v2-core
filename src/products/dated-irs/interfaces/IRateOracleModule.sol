@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
+
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 /// @title Interface for the module for managing rate oracles connected to the Dated IRS Product
@@ -26,7 +27,8 @@ interface IRateOracleModule {
     function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp) external returns (UD60x18 rateIndexMaturity);
 
     /**
-     * @notice Requests the current rate index, or the index at maturity if we are past maturity, of a given interest rate market (e.g. aUSDC borrow)
+     * @notice Requests the current rate index, or the index at maturity if we are past maturity, of a given interest rate market
+     * (e.g. aUSDC borrow)
      * @param marketId Id of the market (e.g. aUSDC lend) for which we're requesting the current rate index value
      * @return rateIndexCurrent Rate index at the current timestamp or at maturity time (whichever comes earlier)
      */

@@ -7,35 +7,25 @@ import "../externalInterfaces/IAaveV3LendingPool.sol";
 import "../../utils/helpers/Time.sol";
 // import "../rate_oracles/CompoundingRateOracle.sol";
 import { UD60x18, ud } from "@prb/math/UD60x18.sol";
-import {  PRBMathCastingUint256 } from "@prb/math/casting/Uint256.sol";
+import { PRBMathCastingUint256 } from "@prb/math/casting/Uint256.sol";
 
 contract AaveRateOracle is IRateOracle {
     IAaveV3LendingPool public aaveLendingPool;
     address public immutable underlying;
+
     using PRBMathCastingUint256 for uint256;
 
     // uint8 public constant override UNDERLYING_YIELD_BEARING_PROTOCOL_ID = 1; // id of aave v2 is 1
 
-    constructor(
-        IAaveV3LendingPool _aaveLendingPool,
-        address _underlying
-    ) {
-        require(
-            address(_aaveLendingPool) != address(0),
-            "aave pool must exist"
-        );
-        
+    constructor(IAaveV3LendingPool _aaveLendingPool, address _underlying) {
+        require(address(_aaveLendingPool) != address(0), "aave pool must exist");
+
         underlying = _underlying;
         aaveLendingPool = _aaveLendingPool;
     }
 
     /// @inheritdoc IRateOracle
-    function getLastUpdatedIndex()
-        public
-        view
-        override
-        returns (uint40 timestamp, UD60x18 liquidityIndex)
-    {
+    function getLastUpdatedIndex() public view override returns (uint40 timestamp, UD60x18 liquidityIndex) {
         uint256 liquidityIndexInRay = aaveLendingPool.getReserveNormalizedIncome(underlying);
         // if (liquidityIndex == 0) {
         //     revert CustomErrors.AavePoolGetReserveNormalizedIncomeReturnedZero();
@@ -46,12 +36,7 @@ contract AaveRateOracle is IRateOracle {
     }
 
     /// @inheritdoc IRateOracle
-    function getCurrentIndex()
-        external
-        view
-        override
-        returns (UD60x18 liquidityIndex)
-    {
+    function getCurrentIndex() external view override returns (UD60x18 liquidityIndex) {
         uint256 liquidityIndexInRay = aaveLendingPool.getReserveNormalizedIncome(underlying);
         // if (liquidityIndex == 0) {
         //     revert CustomErrors.AavePoolGetReserveNormalizedIncomeReturnedZero();
@@ -68,14 +53,19 @@ contract AaveRateOracle is IRateOracle {
         UD60x18 atOrAfterIndex,
         uint256 atOrAfterTimestamp,
         uint256 queryTimestamp
-    ) public pure returns (UD60x18 interpolatedIndex) {
+    )
+        public
+        pure
+        returns (UD60x18 interpolatedIndex)
+    {
         if (atOrAfterTimestamp == queryTimestamp) {
             return atOrAfterIndex;
         }
 
         // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?)
         UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex);
-        UD60x18 proportionOfPeriodElapsed = (atOrAfterTimestamp - queryTimestamp).intoUD60x18().div((atOrAfterTimestamp - beforeTimestamp).intoUD60x18());
+        UD60x18 proportionOfPeriodElapsed =
+            (atOrAfterTimestamp - queryTimestamp).intoUD60x18().div((atOrAfterTimestamp - beforeTimestamp).intoUD60x18());
         return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
     }
 }

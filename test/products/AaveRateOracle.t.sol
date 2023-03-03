@@ -7,8 +7,6 @@ import { UD60x18, convert, ud } from "@prb/math/UD60x18.sol";
 import { PRBMathAssertions } from "@prb/math/test/Assertions.sol";
 import { console2 } from "forge-std/console2.sol";
 
-
-
 contract AaveRateOracle_Test_Base is PRBMathAssertions {
     address constant TEST_UNDERLYING_ADDRESS = 0x1122334455667788990011223344556677889900;
     IERC20 constant TEST_UNDERLYING = IERC20(TEST_UNDERLYING_ADDRESS);
@@ -16,7 +14,7 @@ contract AaveRateOracle_Test_Base is PRBMathAssertions {
     MockAaveLendingPool mockLendingPool;
     AaveRateOracle rateOracle;
 
-    function setUp() virtual public {
+    function setUp() public virtual {
         mockLendingPool = new MockAaveLendingPool();
         mockLendingPool.setReserveNormalizedIncome(TEST_UNDERLYING, initValue);
         rateOracle = new AaveRateOracle(mockLendingPool, TEST_UNDERLYING_ADDRESS);
@@ -24,7 +22,7 @@ contract AaveRateOracle_Test_Base is PRBMathAssertions {
 }
 
 contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
-    function setUp() override public {
+    function setUp() public override {
         super.setUp();
     }
 
@@ -44,7 +42,7 @@ contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
 }
 
 contract AaveRateOracle_Test2 is AaveRateOracle_Test_Base {
-    function setUp() override public {
+    function setUp() public override {
         super.setUp();
         // 1000000001000000000 for 0.0000001% per second = ~3.2% APY
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(1000000001000000000));

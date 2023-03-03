@@ -17,11 +17,7 @@ library Time {
         return timestampAsUint40(block.timestamp);
     }
 
-    function timestampAsUint40(uint256 _timestamp)
-        internal
-        pure
-        returns (uint40 timestamp)
-    {
+    function timestampAsUint40(uint256 _timestamp) internal pure returns (uint40 timestamp) {
         require((timestamp = uint40(_timestamp)) == _timestamp, "TSOFLOW");
     }
 

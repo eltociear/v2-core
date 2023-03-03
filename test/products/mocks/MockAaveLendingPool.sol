@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity =0.8.17;
+
 import "src/products/externalInterfaces/IAaveV3LendingPool.sol";
 import "oz/interfaces/IERC20.sol";
 import { UD60x18, ud } from "@prb/math/UD60x18.sol";
@@ -14,17 +15,11 @@ contract MockAaveLendingPool is IAaveV3LendingPool {
     mapping(address => uint40) internal startTime;
     mapping(address => UD60x18) internal factorPerSecond; // E.g. 1000000001000000000 for 0.0000001% per second = ~3.2% APY
 
-    function getReserveNormalizedIncome(address _underlyingAsset)
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function getReserveNormalizedIncome(address _underlyingAsset) public view override returns (uint256) {
         UD60x18 factor = factorPerSecond[_underlyingAsset];
         UD60x18 currentIndex = reserveNormalizedIncome[_underlyingAsset];
         if (factor.unwrap() > 0) {
-            uint256 secondsSinceNormalizedIncomeSet = block.timestamp -
-                startTime[_underlyingAsset];
+            uint256 secondsSinceNormalizedIncomeSet = block.timestamp - startTime[_underlyingAsset];
             currentIndex = reserveNormalizedIncome[_underlyingAsset].mul(factor.powu(secondsSinceNormalizedIncomeSet));
         }
 
@@ -32,18 +27,12 @@ contract MockAaveLendingPool is IAaveV3LendingPool {
         return currentIndex.intoUint256() * 1e9;
     }
 
-    function setReserveNormalizedIncome(
-        IERC20 _underlyingAsset,
-        UD60x18 _reserveNormalizedIncomeInWeiNotRay
-    ) public {
+    function setReserveNormalizedIncome(IERC20 _underlyingAsset, UD60x18 _reserveNormalizedIncomeInWeiNotRay) public {
         reserveNormalizedIncome[address(_underlyingAsset)] = _reserveNormalizedIncomeInWeiNotRay;
         startTime[address(_underlyingAsset)] = uint40(block.timestamp);
     }
 
-    function setFactorPerSecond(
-        IERC20 _underlyingAsset,
-        UD60x18 _factorPerSecond
-    ) public {
+    function setFactorPerSecond(IERC20 _underlyingAsset, UD60x18 _factorPerSecond) public {
         factorPerSecond[address(_underlyingAsset)] = _factorPerSecond;
     }
 }
