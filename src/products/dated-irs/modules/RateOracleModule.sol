@@ -5,7 +5,6 @@ import "../interfaces/IRateOracleModule.sol";
 import "../storage/RateOracleReader.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
-
 /**
  * @title Module for managing rate oracles connected to the Dated IRS Product
  * @dev See IRateOracleModule
@@ -20,9 +19,11 @@ contract RateOracleManager is IRateOracleModule {
     function getRateIndexCurrent(
         uint128 marketId,
         uint256 maturityTimestamp
-    ) external
-      override
-      returns (UD60x18 rateIndexCurrent) {
+    )
+        external
+        override
+        returns (UD60x18 rateIndexCurrent)
+    {
         return RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp);
     }
 
@@ -39,13 +40,6 @@ contract RateOracleManager is IRateOracleModule {
     {
         return RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp);
     }
-
-    /**
-     * @inheritdoc IRateOracleModule
-     * @dev this function will likely need the poolAddress as its input since the gwap comes from the vamms
-     * todo: needs implementation
-     */
-    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp) external view override returns (uint256 datedIRSGwap) { }
 
     // todo: do we want this function to return something?
     // todo: needs a feature flag to check for permission to register new variable rate oracles
