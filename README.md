@@ -24,17 +24,18 @@
 - Periphery & Multicall Module
 
 **P2**
+
 - Deployment & Upgradability
-- Subgraph 
+- Subgraph
 - SDK
-- Fuzzing 
+- Fuzzing
 - E2E Testing
 - Gas Cost Reduction
 - Community Deployer
 
 **P3**
-- Differential fuzzing against python repo
 
+- Differential fuzzing against python repo
 
 Notes on Associated System
 
