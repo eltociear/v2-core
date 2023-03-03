@@ -57,7 +57,7 @@ jobs:
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
 
   test:
-    needs: [ "lint", "build" ]
+    needs: ["lint", "build"]
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
@@ -77,7 +77,7 @@ jobs:
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
 
   coverage:
-    needs: [ "lint", "build" ]
+    needs: ["lint", "build"]
     runs-on: ubuntu-latest
     env:
       CI_COMMIT_MESSAGE: Code Coverage Artifacts
