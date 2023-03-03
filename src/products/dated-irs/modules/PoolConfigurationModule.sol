@@ -15,10 +15,19 @@ contract PoolConfigurationModule is IPoolConfigurationModule {
     /**
      * @inheritdoc IPoolConfigurationModule
      */
-    function configurePool(PoolConfiguration.Data memory config) external { }
+    function configurePool(PoolConfiguration.Data memory config) external {
+        OwnableStorage.onlyOwner();
+
+        PoolConfiguration.set(config);
+
+        emit PoolConfigured(config);
+    }
 
     /**
      * @inheritdoc IPoolConfigurationModule
      */
-    function getPoolConfiguration() external view returns (PoolConfiguration.Data memory config) { }
+    // solc-ignore-next-line func-mutability
+    function getPoolConfiguration() external view returns (PoolConfiguration.Data memory config) {
+        return PoolConfiguration.load();
+    }
 }
