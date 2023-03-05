@@ -54,27 +54,6 @@ contract DatedIRSProductModule is IProductIRSModule {
     /**
      * @inheritdoc IProductIRSModule
      */
-    function initiateMakerOrder(
-        uint128 accountId,
-        uint128 marketId,
-        uint256 maturityTimestamp,
-        uint256 priceLower,
-        uint256 priceUpper,
-        int256 requestedBaseAmount
-    )
-        external
-        override
-        returns (int256 executedBaseAmount)
-    {
-        address _poolAddress = PoolConfiguration.getPoolAddress();
-        IVAMMPoolModule pool = IVAMMPoolModule(_poolAddress);
-        executedBaseAmount = pool.executeDatedMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, requestedBaseAmount);
-
-        IProductModule(_proxy).propagateMakerOrder(accountId, msg.sender);
-    }
-    /**
-     * @inheritdoc IProductIRSModule
-     */
 
     function settle(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
