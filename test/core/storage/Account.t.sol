@@ -56,12 +56,12 @@ contract ExposedAccounts is MockCoreState {
         return account.getAnnualizedProductExposures(productId);
     }
 
-    function getUnrealizedPnL(uint128 id) external returns (int256) {
+    function getUnrealizedPnL(uint128 id) external view returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getUnrealizedPnL();
     }
 
-    function getTotalAccountValue(uint128 id) external returns (int256) {
+    function getTotalAccountValue(uint128 id) external view returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getTotalAccountValue();
     }
@@ -70,7 +70,7 @@ contract ExposedAccounts is MockCoreState {
         return Account.getRiskParameter(productId, marketId);
     }
 
-    function getIMMultiplier() external returns (uint256) {
+    function getIMMultiplier() external view returns (uint256) {
         return Account.getIMMultiplier();
     }
 

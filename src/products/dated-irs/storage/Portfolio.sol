@@ -113,6 +113,7 @@ library Portfolio {
         uint256 maturityTimestamp
     )
         internal
+        view
         returns (int256[] memory exposures)
     {
         // TODO: use PRB math
@@ -133,6 +134,7 @@ library Portfolio {
         address poolAddress
     )
         internal
+        view
         returns (Account.Exposure[] memory exposures)
     {
         uint256 counter = 0;
