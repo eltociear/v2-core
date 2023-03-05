@@ -7,7 +7,6 @@ import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
 import "../storage/PoolConfiguration.sol";
 import "../../../utils/helpers/SafeCast.sol";
-import "../interfaces/IVAMMPoolModule.sol";
 import "../../../core/interfaces/IProductModule.sol";
 
 /**
@@ -15,7 +14,7 @@ import "../../../core/interfaces/IProductModule.sol";
  * @dev See IProductIRSModule
  */
 
-contract DatedIRSProductModule is IProductIRSModule {
+contract ProductIRSModule is IProductIRSModule {
     using Portfolio for Portfolio.Data;
     using SafeCastI256 for int256;
 
