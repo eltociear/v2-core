@@ -44,7 +44,7 @@ contract ProductIRSModule is IProductIRSModule {
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         address _poolAddress = PoolConfiguration.getPoolAddress();
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        IVAMMPoolModule pool = IVAMMPoolModule(_poolAddress);
+        IPool pool = IPool(_poolAddress);
         (executedBaseAmount, executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
         IProductModule(_proxy).propagateTakerOrder(accountId, msg.sender);
