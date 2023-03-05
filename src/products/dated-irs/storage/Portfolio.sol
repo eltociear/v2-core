@@ -9,7 +9,6 @@ import "./PoolConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface) -> think definitely worth doing that
 import "../../../core/storage/Account.sol";
-import "../interfaces/IVAMMPoolModule.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
@@ -92,8 +91,7 @@ library Portfolio {
                 int256 currentLiquidityIndex =
                     RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
 
-                int256 gwap =
-                    IVAMMPoolModule(PoolConfiguration.getPoolAddress()).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
+                int256 gwap = IPool(PoolConfiguration.getPoolAddress()).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
 
                 int256 unwindQuote = (baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
                 unrealizedPnL += (unwindQuote + quoteBalance + quoteBalancePool);
