@@ -16,6 +16,7 @@ import "../../../core/interfaces/IProductModule.sol";
  */
 
 contract ProductIRSModule is IProductIRSModule {
+    using RateOracleReader for RateOracleReader.Data;
     using Portfolio for Portfolio.Data;
     using SafeCastI256 for int256;
 
