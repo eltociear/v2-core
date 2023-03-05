@@ -54,11 +54,11 @@ library RateOracleReader {
                 // here and below can simplify
                 PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];
 
-                if (cache.lastKnownTimestamp == 0) {
-                    self.rateIndexAtMaturity[maturityTimestamp] = currentIndex;
-                } else {
-                    // We know a rate before settlment and now at/after settlement => interpolate between them
-                }
+                // if (cache.lastKnownTimestamp == 0) {
+                //     self.rateIndexAtMaturity[maturityTimestamp] = currentIndex;
+                // } else {
+                //     // We know a rate before settlment and now at/after settlement => interpolate between them
+                // }
 
                 rateIndexMaturity = IRateOracle(self.oracleAddress).interpolateIndexValue({
                     beforeIndex: cache.lastKnownIndex,
@@ -67,7 +67,7 @@ library RateOracleReader {
                     atOrAfterTimestamp: block.timestamp,
                     queryTimestamp: maturityTimestamp
                 });
-                self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
+                // self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
             }
             return rateIndexMaturity;
         } else {
@@ -88,10 +88,10 @@ library RateOracleReader {
                 }
             }
 
-            if (updateCache) {
-                cache.lastKnownTimestamp = Time.blockTimestampTruncated();
-                cache.lastKnownIndex = currentIndex;
-            }
+            // if (updateCache) {
+            //     cache.lastKnownTimestamp = Time.blockTimestampTruncated();
+            //     cache.lastKnownIndex = currentIndex;
+            // }
 
             return currentIndex;
         }
