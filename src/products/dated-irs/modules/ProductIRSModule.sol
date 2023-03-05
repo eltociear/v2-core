@@ -6,6 +6,7 @@ import "../../../core/storage/Account.sol";
 import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
 import "../storage/PoolConfiguration.sol";
+import "../storage/RateOracleReader.sol";
 import "../../../utils/helpers/SafeCast.sol";
 import "../../../core/interfaces/IProductModule.sol";
 
@@ -41,6 +42,9 @@ contract ProductIRSModule is IProductIRSModule {
         override
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)
     {
+        // update rate oracle cache if empty or hasn't been updated in a while
+        RateOracleReader.load(marketId).updateCache(maturityTimestamp);
+
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         address _poolAddress = PoolConfiguration.getPoolAddress();
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
