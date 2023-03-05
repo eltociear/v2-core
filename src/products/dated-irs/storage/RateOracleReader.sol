@@ -66,7 +66,7 @@ library RateOracleReader {
             // timestamp has not yet passed
 
             UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
-            bool updateCache = true;
+            bool shouldUpdateCache = true;
             PreMaturityData storage cache = self.rateIndexPreMaturity[maturityTimestamp];
             if (cache.lastKnownTimestamp > 0) {
                 // We have saved a pre-maturity value already; check whether we need to update it
@@ -76,11 +76,11 @@ library RateOracleReader {
                     // We only update the cache if we are at least halfway to maturity since the last cache update
                     // This heuristic should give us a timestamp very close to the maturity timestamp, but should save unnecessary
                     // writes early in the life of a given IRS
-                    updateCache = false;
+                    shouldUpdateCache = false;
                 }
             }
 
-            if (updateCache) {
+            if (shouldUpdateCache) {
                 cache.lastKnownTimestamp = Time.blockTimestampTruncated();
                 cache.lastKnownIndex = currentIndex;
             }
