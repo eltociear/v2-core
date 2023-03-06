@@ -117,20 +117,6 @@ cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --n
 
 
 
-
-
-
-
-
-
-
-## Finalizing the release
-
-[...]
-
-
-
-
 # Draft Notes
 
 Notes on Associated System
