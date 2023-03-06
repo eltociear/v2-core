@@ -4,7 +4,7 @@ defaultValue = "voltz:1.0.0"
 [setting.owner]
 
 [setting.salt]
-defaultValue = "snax"
+defaultValue = "vltz"
 
 [provision.system]
 source = "<%= settings.voltz_package %>"

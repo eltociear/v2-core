@@ -11,6 +11,7 @@
 
 **P1**
 
+- Community Deployer (separate module), hmm can we have that for all deployments?
 - Deployment Cannon (AB)
 - Dated IRS VAMM Pool Implementation in v2-periphery (Cyclops Rex)
 - G-TWAP Integration with Rate Oracle Module (Cyclops Rex)
