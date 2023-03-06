@@ -10,29 +10,28 @@
 
 **P1**
 
-- Rate Oracle View
-- initiate maker order goes into the pool (Ioana)
-- Dated IRS VAMM Pool Implementation in v2-periphery (Ioana)
+- Deployment Cannon (AB)
+- Dated IRS VAMM Pool Implementation in v2-periphery (Cyclops Rex)
 - G-TWAP Integration with Rate Oracle Module (Cyclops Rex)
-- Variable Rate Oracles (Cyclops Rex)
 - Dated IRS Market Configuration Module (AB)
-- Account -> settlement token checks (Costin)
-- Account -> liquidator deposit logic (Costin)
-- PRB Math & User Defined Types (Costin)
 - Fee Module and associated maker/taker fee logic (AB)
-- Feature Flag Module
-- Associated Systems Module
-- Periphery & Multicall Module
+- Account -> settlement token checks (AB)
+- Account -> liquidator deposit logic (AB)
+- PRB Math & User Defined Types (Costin)
+
+
 
 **P2**
 
-- Deployment & Upgradability
-- Subgraph
-- SDK
+- Subgraph Setup (AB)
+- SDK Setup (AB)
+- Community Deployer (AB)
+- Feature Flag Module
+- Associated Systems Module
+- Periphery & Multicall Module
 - Fuzzing
 - E2E Testing
 - Gas Cost Reduction
-- Community Deployer
 
 **P3**
 
@@ -88,3 +87,29 @@ Any markdown in your comments will carry over properly when generating docs with
 
 Good: /// @notice Returns the sum of `x` and `y`.
 Bad: /// @notice Returns the sum of x and y.
+
+
+# Deployment Guide
+
+To prepare for system upgrades, this repository is used to release new versions of the voltz protocol (core) and products.
+
+## Preparing a release
+
+- Ensure you have the latest version of [Cannon](https://usecannon.com) installed: `npm i -g @usecannon/cli` and `hardhat-cannon` is upgraded to the latest through the repository.
+- After installing for the first time, run `cannon setup` to configure IPFS and a reliable RPC endpoint to communicate with the Cannon package registry.
+- Run `npm i` and `npm run build` in the root directory of the repository.
+- From the directory of the package you're releasing, run `npx hardhat cannon:build`.
+  - If you're upgrading the voltz package, also run `npm run build && npx hardhat cannon:build cannonfile.test.toml` to generate the testable package.
+  - Confirm the private key that owns the corresponding namespace in the package registry is set in the `.env` file as `DEPLOYER_PRIVATE_KEY`.
+  - Publish the release to Cannon package registry with `npx hardhat cannon:publish --network mainnet`.
+- Increment the version in the relevant `package.json` files. _The repositories should always contain the version number of the next release.
+- If you've upgraded voltz, also increment the version of the `package.json` file in the root directory. Also upgrade the version in [...]
+- Run `npm i` in the root directory.
+- Commit and push the change to this repository.
+- Then follow the instructions below:
+
+
+
+
+## Finalizing the release
+
