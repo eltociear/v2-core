@@ -83,6 +83,44 @@ To prepare for system upgrades, this repository is used to release new versions 
 - Commit and push the change to this repository.
 - Then follow the instructions below:
 
+## Specify Upgrade
+
+- After publishing any new versions of the provisioned packages (core, dated irs product), bump the versions throughout the cannonfiles to match.
+- Add new settings and invoke actions as necessary
+- Update the default values in the network-specific omnibus cannonfiles as desired
+- asdf
+
+## Execute Upgrade
+
+Conduct the following process for each network:
+
+- Perform a dry-run and confirm that the actions that would be executed by Cannon are expected:
+
+```
+cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --network <RPC_URL_FOR_NETWORK_NAME>  --private-key <DEPLOYER_PRIVATE_KEY> --dry-run
+```
+
+- Remove the dry-run option to execute the upgrade:
+```
+cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --network <RPC_URL_FOR_NETWORK_NAME> --private-key <DEPLOYER_PRIVATE_KEY>
+```
+
+### Finalize Release
+
+- Publish your new packages on the Cannon registry:
+  - If you upgraded voltz core, `cannon publish voltz:<VERSION_NUMBER> --private-key <KEY_THAT_HAS_ETH_ON_MAINNET> --tags latest,3`
+  - `cannon publish synthetix-omnibus:<VERSION_NUMBER> --private-key <KEY_THAT_HAS_ETH_ON_MAINNET> --tags latest,3`
+- Increment the version number in each of the omnibus toml files in the root of the repository. (The version in the repository should always be the next version.)
+- Commit and merge the change.
+- After the new version of the voltz-omnibus package has been published, the previously published packages can be verified on Etherscan.
+- From the relevant package's directory, run the following command for each network it was deployed on:  `npx hardhat cannon:verify <PACKAGE_NAME>:<VERSION> --network <NETWORK_NAME>`
+
+
+
+
+
+
+
 
 
 
