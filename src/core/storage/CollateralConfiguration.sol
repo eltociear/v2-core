@@ -14,11 +14,6 @@ library CollateralConfiguration {
         keccak256(abi.encode("xyz.voltz.CollateralConfiguration_availableCollaterals"));
 
     /**
-     * @dev Thrown when the token address of a collateral cannot be found.
-     */
-    error CollateralNotFound();
-
-    /**
      * @dev Thrown when deposits are disabled for the given collateral type.
      * @param collateralType The address of the collateral type for which depositing was disabled.
      */
