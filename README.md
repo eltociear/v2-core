@@ -7,6 +7,24 @@
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 [coverage-badge]: ./coverage.svg
 
+# Package Structure
+
+This is a monorepo with the following folder structure and packages:
+
+```
+.
+├── products                     // Standalone products that extend the core Voltz protocol with new instruments
+│   ├── dated-irs                // Dated Interest Rate Swap Product
+│
+├── core                         // Core Voltz Protocol (to be extended by products)
+│
+└── utils                        // Utilities, plugins, tooling
+    ├── contracts                // Standard contract implementations like ERC20, adapted for custom router storage. 
+    ├── modules                  // Modules that are reused between multiple router based projects
+    └── router                   // Cannon plugin that merges multiple modules into a router contract.
+```
+
+
 # Priorities
 
 **P1**
