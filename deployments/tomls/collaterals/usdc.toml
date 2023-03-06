@@ -1,7 +1,7 @@
 [setting.usdc_address]
 
 
-[invoke.configureSnxCollateral]
+[invoke.configureUsdcCollateral]
 target = ["system.CoreProxy"]
 fromCall.func = "owner"
 func = "configureCollateral"
