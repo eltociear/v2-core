@@ -29,6 +29,7 @@ This is a monorepo with the following folder structure and packages:
 
 **P1**
 
+
 - Community Deployer (separate module), hmm can we have that for all deployments?
 - Deployment Cannon (AB)
 - Dated IRS VAMM Pool Implementation in v2-periphery (Cyclops Rex)
@@ -43,6 +44,7 @@ This is a monorepo with the following folder structure and packages:
 
 **P2**
 
+- Consider bringing the .ts tests from https://github.com/Synthetixio/synthetix-v3/tree/main/utils/core-contracts/test/contracts
 - Subgraph Setup (AB)
 - SDK Setup (AB)
 - Community Deployer (AB)
