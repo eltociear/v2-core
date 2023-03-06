@@ -24,13 +24,6 @@ library CollateralConfiguration {
      */
     error CollateralDepositDisabled(address collateralType);
 
-    /**
-     * @dev Thrown when attempting to convert a token to the protocol amount and the conversion results in a loss of precision.
-     * @param tokenAmount The amount of tokens that were attempted to be converted.
-     * @param decimals The number of decimals of the token that was attempted to be converted.
-     */
-    error PrecisionLost(uint256 tokenAmount, uint8 decimals);
-
     struct Data {
         /**
          * @dev Allows the owner to control deposits and delegation of collateral types.
