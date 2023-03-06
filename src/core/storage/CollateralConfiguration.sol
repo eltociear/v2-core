@@ -42,7 +42,7 @@ library CollateralConfiguration {
          * protocol.
          * @dev could be -> if zero, set it to be equal to the liquidationRewardD18
          */
-        uint256 liquidationRewardD18;
+        uint256 liquidationReward;
         /**
          * @dev The oracle manager node id which reports the current price for this collateral type.
          */
