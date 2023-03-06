@@ -3,7 +3,7 @@ pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
 import "../../../src/core/storage/CollateralConfiguration.sol";
-import "../test-utils/MockCoreStorage.sol";
+import "../test-utils/Constants.sol";
 
 contract ExposedCollateralConfiguration {
     using SetUtil for SetUtil.AddressSet;
@@ -66,7 +66,8 @@ contract CollateralConfigurationTest is Test {
         );
 
         {
-            CollateralConfiguration.Data memory configuration = collateralConfiguration.getCollateralConfiguration(Constants.TOKEN_0);
+            CollateralConfiguration.Data memory configuration =
+                collateralConfiguration.getCollateralConfiguration(Constants.TOKEN_0);
 
             assertEq(configuration.depositingEnabled, true);
             assertEq(configuration.liquidationReward, 5e16);
@@ -91,7 +92,8 @@ contract CollateralConfigurationTest is Test {
         );
 
         {
-            CollateralConfiguration.Data memory configuration = collateralConfiguration.getCollateralConfiguration(Constants.TOKEN_0);
+            CollateralConfiguration.Data memory configuration =
+                collateralConfiguration.getCollateralConfiguration(Constants.TOKEN_0);
 
             assertEq(configuration.depositingEnabled, true);
             assertEq(configuration.liquidationReward, 1e16);
@@ -116,7 +118,8 @@ contract CollateralConfigurationTest is Test {
         );
 
         {
-            CollateralConfiguration.Data memory configuration = collateralConfiguration.getCollateralConfiguration(Constants.TOKEN_0);
+            CollateralConfiguration.Data memory configuration =
+                collateralConfiguration.getCollateralConfiguration(Constants.TOKEN_0);
 
             assertEq(configuration.depositingEnabled, true);
             assertEq(configuration.liquidationReward, 5e16);
@@ -124,7 +127,8 @@ contract CollateralConfigurationTest is Test {
         }
 
         {
-            CollateralConfiguration.Data memory configuration = collateralConfiguration.getCollateralConfiguration(Constants.TOKEN_1);
+            CollateralConfiguration.Data memory configuration =
+                collateralConfiguration.getCollateralConfiguration(Constants.TOKEN_1);
 
             assertEq(configuration.depositingEnabled, false);
             assertEq(configuration.liquidationReward, 1e16);
