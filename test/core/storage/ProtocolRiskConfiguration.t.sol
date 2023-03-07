@@ -4,13 +4,9 @@ pragma solidity >=0.8.13;
 import "forge-std/Test.sol";
 import "../../../src/core/storage/ProtocolRiskConfiguration.sol";
 
-contract ExposedProtocolRiskConfiguration { 
+contract ExposedProtocolRiskConfiguration {
     // Mock support
-    function getProtocolRiskConfiguration()
-        external
-        pure
-        returns (ProtocolRiskConfiguration.Data memory)
-    {
+    function getProtocolRiskConfiguration() external pure returns (ProtocolRiskConfiguration.Data memory) {
         return ProtocolRiskConfiguration.load();
     }
 
@@ -37,17 +33,11 @@ contract ProtocolRiskConfigurationTest is Test {
     function test_Load() public {
         bytes32 slot = protocolRiskConfiguration.load();
 
-        assertEq(
-            slot,
-            keccak256(abi.encode("xyz.voltz.ProtocolRiskConfiguration"))
-        );
+        assertEq(slot, keccak256(abi.encode("xyz.voltz.ProtocolRiskConfiguration")));
     }
 
     function test_Set() public {
-        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({
-            imMultiplier: 2e18,
-            liquidatorRewardParameter: 5e16
-        }));
+        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 5e16 }));
 
         ProtocolRiskConfiguration.Data memory config = protocolRiskConfiguration.getProtocolRiskConfiguration();
 
@@ -56,15 +46,9 @@ contract ProtocolRiskConfigurationTest is Test {
     }
 
     function test_Set_Twice() public {
-        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({
-            imMultiplier: 2e18,
-            liquidatorRewardParameter: 5e16
-        }));
+        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 5e16 }));
 
-        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({
-            imMultiplier: 4e18,
-            liquidatorRewardParameter: 10e16
-        }));
+        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({ imMultiplier: 4e18, liquidatorRewardParameter: 10e16 }));
 
         ProtocolRiskConfiguration.Data memory config = protocolRiskConfiguration.getProtocolRiskConfiguration();
 
