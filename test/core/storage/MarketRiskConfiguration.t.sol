@@ -31,7 +31,7 @@ contract ExposedMarketRiskConfiguration {
 }
 
 contract MarketRiskConfigurationTest is Test {
-    ExposedMarketRiskConfiguration marketRiskConfiguration;
+    ExposedMarketRiskConfiguration internal marketRiskConfiguration;
 
     function setUp() public {
         marketRiskConfiguration = new ExposedMarketRiskConfiguration();

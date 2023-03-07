@@ -42,7 +42,7 @@ contract ExposedCollateralConfiguration {
 }
 
 contract CollateralConfigurationTest is Test {
-    ExposedCollateralConfiguration collateralConfiguration;
+    ExposedCollateralConfiguration internal collateralConfiguration;
 
     function setUp() public {
         collateralConfiguration = new ExposedCollateralConfiguration();
