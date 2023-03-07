@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../interfaces/ICollateralModule.sol";
 import "../storage/Account.sol";
 import "../storage/CollateralConfiguration.sol";
-import "../../utils/contracts/token/ERC20Helper.sol";
+import "../../../utils/contracts/src/token/ERC20Helper.sol";
 import "../storage/Collateral.sol";
 /**
  * @title Module for managing user collateral.
@@ -54,10 +54,7 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getAccountCollateralBalance(
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountCollateralBalance(uint128 accountId, address collateralType)
         external
         view
         override
@@ -69,10 +66,7 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getAccountCollateralBalanceAvailable(
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
         external
         override
         returns (uint256 collateralBalanceAvailable)

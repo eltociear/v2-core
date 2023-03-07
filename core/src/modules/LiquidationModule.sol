@@ -3,9 +3,9 @@ pragma solidity >=0.8.13;
 
 import "../storage/Account.sol";
 import "../storage/ProtocolRiskConfiguration.sol";
-import "../../utils/errors/ParameterError.sol";
+import "../../../utils/contracts/src/errors/ParameterError.sol";
 import "../interfaces/ILiquidationModule.sol";
-import "../../utils/contracts/src/helpers/SafeCast.sol";
+import "../../../utils/contracts/src/helpers/SafeCast.sol";
 import "../storage/Collateral.sol";
 
 /**
@@ -23,10 +23,7 @@ contract LiquidationModule is ILiquidationModule {
     /**
      * @inheritdoc ILiquidationModule
      */
-    function liquidate(
-        uint128 liquidatedAccountId,
-        uint128 liquidatorAccountId
-    )
+    function liquidate(uint128 liquidatedAccountId, uint128 liquidatorAccountId)
         external
         returns (uint256 liquidatorRewardAmount)
     {
