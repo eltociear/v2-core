@@ -24,9 +24,6 @@ artifact = "src/modules/AccountModule.sol:AccountModule"
 [contract.AccountTokenModule]
 artifact = "src/modules/AccountTokenModule.sol:AccountTokenModule"
 
-[contract.AccountTokenModule]
-artifact = "src/modules/AccountTokenModule.sol:AccountTokenModule"
-
 [contract.AssociatedSystemsModule]
 artifact = "src/modules/AssociatedSystemsModule.sol:AssociatedSystemsModule"
 
@@ -48,3 +45,65 @@ artifact = "src/modules/ProductModule.sol:ProductModule"
 [contract.RiskConfigurationModule]
 artifact = "src/modules/RiskConfigurationModule.sol:RiskConfigurationModule"
 
+# Core
+[router.CoreRouter]
+contracts = [
+    "InitialModuleBundle",
+    "AccountModule",
+    "AssociatedSystemsModule",
+    "CollateralModule",
+    "CollateralConfigurationModule",
+    "LiquidationModule",
+    "MulticallModule",
+    "RiskConfigurationModule",
+    "ProductModule"
+]
+
+depends = [
+  "contract.InitialModuleBundle",
+  "contract.AccountModule",
+  "contract.AssociatedSystemsModule",
+  "contract.CollateralModule",
+  "contract.CollateralConfigurationModule",
+  "contract.LiquidationModule",
+  "contract.MulticallModule",
+  "contract.RiskConfigurationModule",
+  "contract.ProductModule",
+]
+
+[contract.InitialCoreProxy]
+artifact = "contracts/CoreProxy.sol:CoreProxy"
+args = ["<%= contracts.InitialModuleBundle.address %>", "<%= settings.owner %>"]
+abiOf = ["InitialModuleBundle"]
+salt = "<%= settings.salt %>"
+create2 = true
+depends = ["contract.InitialModuleBundle"]
+
+[invoke.upgrade_core_proxy]
+target = ["InitialCoreProxy"]
+abi = "UpgradeModule"
+from = "<%= settings.owner %>"
+func = "upgradeTo"
+args = ["<%= contracts.CoreRouter.address %>"]
+
+factory.CoreProxy.abiOf = ["CoreRouter"]
+factory.CoreProxy.event = "Upgraded"
+factory.CoreProxy.arg = 0
+
+depends = [
+  "contract.InitialCoreProxy",
+  "router.CoreRouter"
+]
+
+# Account
+[router.AccountRouter]
+contracts = [
+    "InitialModuleBundle",
+    "AccountTokenModule",
+]
+depends = [
+  "contract.InitialModuleBundle",
+  "contract.AccountTokenModule"
+]
+
+# Post actions
