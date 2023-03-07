@@ -30,20 +30,19 @@ This is a monorepo with the following folder structure and packages:
 **P1**
 
 
-- Community Deployer (separate module), hmm can we have that for all deployments?
-- Deployment Cannon (AB)
+- Core Deployment (AB)
+- Dated IRS Deployment (AB)
+- Community Deployer (separate module), hmm can we have that for all deployments? (AB)
+- Dated IRS Market Configuration Module (AB)
 - Dated IRS VAMM Pool Implementation in v2-periphery (Cyclops Rex)
 - G-TWAP Integration with Rate Oracle Module (Cyclops Rex)
-- Dated IRS Market Configuration Module (AB)
-- Fee Module and associated maker/taker fee logic (AB)
-- Account -> settlement token checks (AB)
-- Account -> liquidator deposit logic (AB)
 - PRB Math & User Defined Types (Costin)
-
-
 
 **P2**
 
+- Fee Module and associated maker/taker fee logic (AB)
+- Account -> settlement token checks (AB)
+- Account -> liquidator deposit logic (AB)
 - Consider bringing the .ts tests from https://github.com/Synthetixio/synthetix-v3/tree/main/utils/core-contracts/test/contracts
 - Subgraph Setup (AB)
 - SDK Setup (AB)
