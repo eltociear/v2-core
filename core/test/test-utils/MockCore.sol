@@ -8,7 +8,7 @@ import "../../src/storage/MarketRiskConfiguration.sol";
 import "../../src/storage/CollateralConfiguration.sol";
 import "forge-std/Test.sol";
 
-contract MockCore is MockAccount, MockProduct { }
+contract MockCore is MockAccount, MockProduct {}
 
 /**
  * @dev Core storage mocks for accounts and products
@@ -109,16 +109,26 @@ contract MockCoreState is MockCore, Test {
         MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: 1e18}));
 
         // Set protocol risk configuration
-        ProtocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({imMultiplier: 2e18, liquidatorRewardParameter: 0}));
+        ProtocolRiskConfiguration.set(
+            ProtocolRiskConfiguration.Data({imMultiplier: 2e18, liquidatorRewardParameter: 0})
+        );
 
         // Mock collateral configuration (token 0)
         CollateralConfiguration.set(
-            CollateralConfiguration.Data({depositingEnabled: true, liquidationRewardD18: 0, tokenAddress: Constants.TOKEN_0})
+            CollateralConfiguration.Data({
+                depositingEnabled: true,
+                liquidationReward: 0,
+                tokenAddress: Constants.TOKEN_0
+            })
         );
 
         // Mock collateral configuration (token 1)
         CollateralConfiguration.set(
-            CollateralConfiguration.Data({depositingEnabled: false, liquidationRewardD18: 0, tokenAddress: Constants.TOKEN_1})
+            CollateralConfiguration.Data({
+                depositingEnabled: false,
+                liquidationReward: 0,
+                tokenAddress: Constants.TOKEN_1
+            })
         );
     }
 
@@ -127,9 +137,11 @@ contract MockCoreState is MockCore, Test {
         {
             Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
 
-            mockExposures[0] = Account.Exposure({marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18});
+            mockExposures[0] =
+                Account.Exposure({marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18});
 
-            mockExposures[1] = Account.Exposure({marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18});
+            mockExposures[1] =
+                Account.Exposure({marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18});
 
             vm.mockCall(
                 Constants.PRODUCT_ADDRESS_1,
@@ -140,7 +152,9 @@ contract MockCoreState is MockCore, Test {
 
         // Mock account (id: 100) account closure to product (id: 1)
         {
-            vm.mockCall(Constants.PRODUCT_ADDRESS_1, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode());
+            vm.mockCall(
+                Constants.PRODUCT_ADDRESS_1, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode()
+            );
         }
 
         // Mock account (id: 100) unrealized PnL in product (id: 1)
@@ -156,7 +170,8 @@ contract MockCoreState is MockCore, Test {
         {
             Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-            mockExposures[0] = Account.Exposure({marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18});
+            mockExposures[0] =
+                Account.Exposure({marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18});
 
             vm.mockCall(
                 Constants.PRODUCT_ADDRESS_2,
@@ -167,7 +182,9 @@ contract MockCoreState is MockCore, Test {
 
         // Mock account (id: 100) account closure to product (id: 2)
         {
-            vm.mockCall(Constants.PRODUCT_ADDRESS_2, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode());
+            vm.mockCall(
+                Constants.PRODUCT_ADDRESS_2, abi.encodeWithSelector(IProduct.closeAccount.selector, 100), abi.encode()
+            );
         }
 
         // Mock account (id: 100) unrealized PnL in product (id: 2)

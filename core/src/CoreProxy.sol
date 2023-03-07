@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../utils/contracts/proxy/UUPSProxyWithOwner.sol";
+import "./utils/contracts/proxy/UUPSProxyWithOwner.sol";
 
 /**
  * Voltz V2 Core Proxy Contract
@@ -10,5 +10,7 @@ import "../utils/contracts/proxy/UUPSProxyWithOwner.sol";
  */
 contract CoreProxy is UUPSProxyWithOwner {
     // solhint-disable-next-line no-empty-blocks
-    constructor(address firstImplementation, address initialOwner) UUPSProxyWithOwner(firstImplementation, initialOwner) { }
+    constructor(address firstImplementation, address initialOwner)
+        UUPSProxyWithOwner(firstImplementation, initialOwner)
+    {}
 }
