@@ -1,30 +1,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./initializable/InitializableMixin.sol";
-import "../errors/AddressError.sol";
-import "../helpers/AddressUtil.sol";
-import "../storage/OwnableStorage.sol";
+import "../../contracts/initializable/InitializableMixin.sol";
+import "../../contracts/errors/AddressError.sol";
+import "../../contracts/helpers/AddressUtil.sol";
+import "../../contracts/storage/OwnableStorage.sol";
 import "../storage/Initialized.sol";
-import "./token/ERC721Enumerable.sol";
-import "../interfaces/INFT.sol";
+import "../../contracts/token/ERC721Enumerable.sol";
+import "../interfaces/INftModule.sol";
 
 /**
  * @title Module wrapping an ERC721 token implementation.
- * See INFT.
+ * See INftModule.
  */
-contract NFT is INFT, ERC721Enumerable, InitializableMixin {
+contract NFT is INftModule, ERC721Enumerable, InitializableMixin {
     bytes32 internal constant _INITIALIZED_NAME = "NFT";
 
     /**
-     * @inheritdoc INFT
+     * @inheritdoc INftModule
      */
     function isInitialized() external view returns (bool) {
         return _isInitialized();
     }
 
     /**
-     * @inheritdoc INFT
+     * @inheritdoc INftModule
      */
     function initialize(string memory tokenName, string memory tokenSymbol, string memory uri) public {
         OwnableStorage.onlyOwner();
@@ -34,7 +34,7 @@ contract NFT is INFT, ERC721Enumerable, InitializableMixin {
     }
 
     /**
-     * @inheritdoc INFT
+     * @inheritdoc INftModule
      */
     function burn(uint256 tokenId) external override {
         OwnableStorage.onlyOwner();
@@ -42,7 +42,7 @@ contract NFT is INFT, ERC721Enumerable, InitializableMixin {
     }
 
     /**
-     * @inheritdoc INFT
+     * @inheritdoc INftModule
      */
     function mint(address to, uint256 tokenId) external override {
         OwnableStorage.onlyOwner();
@@ -50,7 +50,7 @@ contract NFT is INFT, ERC721Enumerable, InitializableMixin {
     }
 
     /**
-     * @inheritdoc INFT
+     * @inheritdoc INftModule
      */
     function safeMint(address to, uint256 tokenId, bytes memory data) external override {
         OwnableStorage.onlyOwner();
@@ -62,7 +62,7 @@ contract NFT is INFT, ERC721Enumerable, InitializableMixin {
     }
 
     /**
-     * @inheritdoc INFT
+     * @inheritdoc INftModule
      */
     function setAllowance(uint256 tokenId, address spender) external override {
         OwnableStorage.onlyOwner();

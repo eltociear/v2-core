@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../interfaces/IToken.sol";
-import "../interfaces/INFT.sol";
+import "../interfaces/ITokenModule.sol";
+import "../interfaces/INftModule.sol";
 
 library AssociatedSystem {
     struct Data {
@@ -33,9 +33,9 @@ library AssociatedSystem {
         return ITokenModule(self.proxy);
     }
 
-    function asNft(Data storage self) internal view returns (INFT) {
+    function asNft(Data storage self) internal view returns (INftModule) {
         expectKind(self, KIND_ERC721);
-        return INFT(self.proxy);
+        return INftModule(self.proxy);
     }
 
     function set(Data storage self, address proxy, address impl, bytes32 kind) internal {

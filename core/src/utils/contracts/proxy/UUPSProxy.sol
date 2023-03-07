@@ -2,9 +2,9 @@
 pragma solidity >=0.8.13;
 
 import "./AbstractProxy.sol";
-import "../../storage/ProxyStorage.sol";
-import "../../errors/AddressError.sol";
-import "../../helpers/AddressUtil.sol";
+import "../../contracts/storage/ProxyStorage.sol";
+import "../../contracts/errors/AddressError.sol";
+import "../../contracts/helpers/AddressUtil.sol";
 
 contract UUPSProxy is AbstractProxy, ProxyStorage {
     constructor(address firstImplementation) {

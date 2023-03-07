@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../interfaces/IBaseOwnerModule.sol";
-import "../ownership/Ownable.sol";
+import "../../modules/interfaces/IBaseOwnerModule.sol";
+import "../../contracts/ownership/Ownable.sol";
 
 /**
  * @title Module for giving a system owner based access control.
