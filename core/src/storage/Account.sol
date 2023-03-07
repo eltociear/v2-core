@@ -142,7 +142,7 @@ library Account {
         view
         returns (uint256 collateralBalanceD18)
     {
-        collateralBalanceD18 = self.collaterals[collateralType].balanceD18;
+        collateralBalanceD18 = self.collaterals[collateralType].balance;
         return collateralBalanceD18;
     }
 

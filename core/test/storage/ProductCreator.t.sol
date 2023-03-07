@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../../src/core/storage/ProductCreator.sol";
+import "../../src/storage/ProductCreator.sol";
 
 contract ExposedProductCreator {
     // Mock support

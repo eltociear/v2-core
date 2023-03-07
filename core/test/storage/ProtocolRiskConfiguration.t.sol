@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../../src/core/storage/ProtocolRiskConfiguration.sol";
+import "../../src/storage/ProtocolRiskConfiguration.sol";
 
 contract ExposedProtocolRiskConfiguration {
     // Mock support

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../../src/core/storage/Product.sol";
+import "../../src/storage/Product.sol";
 import "../test-utils/MockCoreStorage.sol";
 
 contract ExposedProduct is CoreState {
@@ -20,15 +20,16 @@ contract ExposedProduct is CoreState {
         Product.onlyProductOwner(productId, caller);
     }
 
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId) external view returns (int256 accountUnrealizedPnL) {
+    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId)
+        external
+        view
+        returns (int256 accountUnrealizedPnL)
+    {
         Product.Data storage product = Product.load(productId);
         return product.getAccountUnrealizedPnL(accountId);
     }
 
-    function getAccountAnnualizedExposures(
-        uint128 productId,
-        uint128 accountId
-    )
+    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId)
         external
         returns (Account.Exposure[] memory exposures)
     {
