@@ -4,8 +4,8 @@ pragma solidity >=0.8.13;
 import "./MarketRiskConfiguration.sol";
 import "./ProtocolRiskConfiguration.sol";
 import "./AccountRBAC.sol";
-import "../../utils/helpers/SafeCast.sol";
-import "../../utils/helpers/SetUtil.sol";
+import "../../../utils/contracts/src/helpers/SafeCast.sol";
+import "../../../utils/contracts/src/helpers/SetUtil.sol";
 import "./Collateral.sol";
 import "./Product.sol";
 

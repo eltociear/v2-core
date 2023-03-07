@@ -3,7 +3,7 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IAccountTokenModule.sol";
 import "../interfaces/IAccountModule.sol";
-import "../../utils/storage/AssociatedSystem.sol";
+import "../../utils/contracts/src/storage/AssociatedSystem.sol";
 import "../storage/Account.sol";
 import "../storage/AccountRBAC.sol";
 

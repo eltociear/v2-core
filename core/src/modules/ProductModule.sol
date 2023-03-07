@@ -5,9 +5,9 @@ import "../interfaces/external/IProduct.sol";
 import "../interfaces/IProductModule.sol";
 import "../storage/Product.sol";
 import "../storage/ProductCreator.sol";
-import "../../utils/storage/AssociatedSystem.sol";
-import "../../utils/helpers/ERC165Helper.sol";
-import "../../utils/helpers/SafeCast.sol";
+import "../../utils/contracts/src/storage/AssociatedSystem.sol";
+import "../../utils/contracts/src/helpers/ERC165Helper.sol";
+import "../../utils/contracts/src/helpers/SafeCast.sol";
 
 /**
  * @title Protocol-wide entry point for the management of products connected to the protocol.

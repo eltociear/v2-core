@@ -5,7 +5,7 @@ import "../storage/Account.sol";
 import "../storage/ProtocolRiskConfiguration.sol";
 import "../../utils/errors/ParameterError.sol";
 import "../interfaces/ILiquidationModule.sol";
-import "../../utils/helpers/SafeCast.sol";
+import "../../utils/contracts/src/helpers/SafeCast.sol";
 import "../storage/Collateral.sol";
 
 /**

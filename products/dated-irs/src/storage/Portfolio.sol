@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../../utils/helpers/SetUtil.sol";
-import "../../../utils/helpers/SafeCast.sol";
+import "../../../utils/contracts/src/helpers/SetUtil.sol";
+import "../../../utils/contracts/src/helpers/SafeCast.sol";
 import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./PoolConfiguration.sol";

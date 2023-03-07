@@ -7,7 +7,7 @@ import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
 import "../storage/PoolConfiguration.sol";
 import "../storage/RateOracleReader.sol";
-import "../../../utils/helpers/SafeCast.sol";
+import "../../../utils/contracts/src/helpers/SafeCast.sol";
 import "../../../core/interfaces/IProductModule.sol";
 
 /**

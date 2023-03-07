@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../utils/errors/AccessError.sol";
+// todo: import utils via an npm package
+import "../../../utils/contracts/src/errors/AccessError.sol";
 import "../interfaces/external/IProduct.sol";
 import "./Account.sol";
 
