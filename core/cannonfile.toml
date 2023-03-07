@@ -1,3 +1,50 @@
 name = "voltz-core"
-version = "2.0.0"
+version = "<%= package.version %>"
 description = "Voltz V2 Core"
+
+# `salt` here only affects proxy contract
+[setting.salt]
+description = "Change this to a unique string when deploying multiple instances of the protocol. Note that only the proxy contract will be unique."
+defaultValue = "main"
+
+
+[setting.owner]
+description = "Admin user for the protocol"
+defaultValue = "0xb527E950fC7c4F581160768f48b3bfA66a7dE1f0"
+
+
+[contract.InitialModuleBundle]
+artifact = "src/modules/InitialModuleBundle.sol:InitialModuleBundle"
+salt = "<%= settings.salt %>"
+create2 = true
+
+[contract.AccountModule]
+artifact = "src/modules/AccountModule.sol:AccountModule"
+
+[contract.AccountTokenModule]
+artifact = "src/modules/AccountTokenModule.sol:AccountTokenModule"
+
+[contract.AccountTokenModule]
+artifact = "src/modules/AccountTokenModule.sol:AccountTokenModule"
+
+[contract.AssociatedSystemsModule]
+artifact = "src/modules/AssociatedSystemsModule.sol:AssociatedSystemsModule"
+
+[contract.CollateralConfigurationModule]
+artifact = "src/modules/CollateralConfigurationModule.sol:CollateralConfigurationModule"
+
+[contract.CollateralModule]
+artifact = "src/modules/CollateralModule.sol:CollateralModule"
+
+[contract.LiquidationModule]
+artifact = "src/modules/LiquidationModule.sol:LiquidationModule"
+
+[contract.MulticallModule]
+artifact = "src/modules/MulticallModule.sol:MulticallModule"
+
+[contract.ProductModule]
+artifact = "src/modules/ProductModule.sol:ProductModule"
+
+[contract.RiskConfigurationModule]
+artifact = "src/modules/RiskConfigurationModule.sol:RiskConfigurationModule"
+

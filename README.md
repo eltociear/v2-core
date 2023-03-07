@@ -136,36 +136,6 @@ cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --n
 - After the new version of the voltz-omnibus package has been published, the previously published packages can be verified on Etherscan.
 - From the relevant package's directory, run the following command for each network it was deployed on:  `npx hardhat cannon:verify <PACKAGE_NAME>:<VERSION> --network <NETWORK_NAME>`
 
-
-
-# Draft Notes
-
-Notes on Associated System
-
-- Associated systems become available to all system modules for communication and interaction, but as opposed to inter-modular communications, interactions with associated systems will require the use of `CALL`.
-- Managed systems are connected via a proxy, which means that their implementation can be updated, and the system controls the execution context of the associated system. Example, an snxUSD token connected to the system, and controlled by the system.
-- Unmanaged systems are just addresses tracked by the system, for which it has no control whatsoever. Example, Uniswap v3, Curve, etc.
-
-minor
-
-- glp as a service = composability = lp token wars
-- permissonless product creation with isolated pool of collateral
-- can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
-- consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
-- note, pool ids are no a much broader concept, this needs to be elaborated in the architecture diagram and docs
-- layer in pool logic and think about how it'd impact the gas costs
-- don't think we need cashflow propagation in the collateral engine
-- generalise the signature for pools to also include the productId -> creates the ability to have many to many relationships
-- because we still haven't fully figured out pools, consider descoping them from mvp
-- create a diagram of alternatives for how pools could work vs. mvp
-- a product is free to choose what exchange / exchanges to use
-- keep products in the core because of the tight dependency with account? -> need to assess pros and cons in more detail
-- consider storing the pool address independently in the product contract as a private var or smth and, do we need a pool manager in that instance or just a simple setter within the product will do -> worth thinking this through.
-- check out https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/UtilsModule.sol
-- what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
-- FeatureFlag.ensureAccessToFeature(\_MARKET_FEATURE_FLAG); -> register a new market
-- https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/MarketManagerModule.sol
-
 # Cannon
 
 From cannon gh (https://github.com/usecannon/cannon): "cannon is under active development. While the interface and functionality are generally stable, use the tool with caution when conducting high-risk deployments".
@@ -197,3 +167,33 @@ Verify your project’s contracts on Etherscan:
 `cannon verify voltz-core --api-key REPLACE_WITH_ETHERSCAN_API_KEY --chain-id REPLACE_WITH_CHAIN_ID`
 
 Finally publish the project to a registry. [...]
+
+
+
+# Draft Notes
+
+Notes on Associated System
+
+- Associated systems become available to all system modules for communication and interaction, but as opposed to inter-modular communications, interactions with associated systems will require the use of `CALL`.
+- Managed systems are connected via a proxy, which means that their implementation can be updated, and the system controls the execution context of the associated system. Example, an snxUSD token connected to the system, and controlled by the system.
+- Unmanaged systems are just addresses tracked by the system, for which it has no control whatsoever. Example, Uniswap v3, Curve, etc.
+
+minor
+
+- glp as a service = composability = lp token wars
+- permissonless product creation with isolated pool of collateral
+- can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
+- consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
+- note, pool ids are no a much broader concept, this needs to be elaborated in the architecture diagram and docs
+- layer in pool logic and think about how it'd impact the gas costs
+- don't think we need cashflow propagation in the collateral engine
+- generalise the signature for pools to also include the productId -> creates the ability to have many to many relationships
+- because we still haven't fully figured out pools, consider descoping them from mvp
+- create a diagram of alternatives for how pools could work vs. mvp
+- a product is free to choose what exchange / exchanges to use
+- keep products in the core because of the tight dependency with account? -> need to assess pros and cons in more detail
+- consider storing the pool address independently in the product contract as a private var or smth and, do we need a pool manager in that instance or just a simple setter within the product will do -> worth thinking this through.
+- check out https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/UtilsModule.sol
+- what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
+- FeatureFlag.ensureAccessToFeature(\_MARKET_FEATURE_FLAG); -> register a new market
+- https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/MarketManagerModule.sol
