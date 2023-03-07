@@ -2,10 +2,10 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../src/storage/Account.sol";
+import "../../src/contracts/storage/Account.sol";
 import "../test-utils/MockCore.sol";
 
-contract ExposedAccounts is MockCoreState {
+contract ExposedAccounts is CoreState {
     using Account for Account.Data;
 
     // Exposed functions
@@ -32,11 +32,6 @@ contract ExposedAccounts is MockCoreState {
 
     function closeAccount(uint128 id) external {
         Account.load(id).closeAccount();
-    }
-
-    function getCollateralBalance(uint128 id, address collateralType) external view returns (uint256) {
-        Account.Data storage account = Account.load(id);
-        return account.getCollateralBalance(collateralType);
     }
 
     function getCollateralBalanceAvailable(uint128 id, address collateralType) external returns (uint256) {
@@ -120,13 +115,15 @@ contract AccountTest is Test {
 
         require(low || medium || high, "Unkwown collateral profile type");
 
-        uint256 balanceD18 = 0;
-        if (low) balanceD18 = LOW_COLLATERAL;
-        if (medium) balanceD18 = MEDIUM_COLLATERAL;
-        if (high) balanceD18 = HIGH_COLLATERAL;
+        uint256 balance = 0;
+        if (low) balance = LOW_COLLATERAL;
+        if (medium) balance = MEDIUM_COLLATERAL;
+        if (high) balance = HIGH_COLLATERAL;
 
         // Set up the balance of token 0
-        accounts.changeAccountBalance(accountId, MockAccount.CollateralBalance({token: Constants.TOKEN_0, balanceD18: balanceD18}));
+        accounts.changeAccountBalance(
+            accountId, MockAccountStorage.CollateralBalance({ token: Constants.TOKEN_0, balance: balance })
+        );
     }
 
     function test_Exists() public {
@@ -142,24 +139,24 @@ contract AccountTest is Test {
     }
 
     function test_GetCollateralBalance() public {
-        uint256 collateralBalanceD18 = accounts.getCollateralBalance(accountId, Constants.TOKEN_0);
+        uint256 collateralBalance = accounts.getCollateralBalance(accountId, Constants.TOKEN_0);
 
-        assertEq(collateralBalanceD18, LOW_COLLATERAL);
+        assertEq(collateralBalance, LOW_COLLATERAL);
     }
 
     function test_GetCollateralBalance_NonSettlementToken() public {
-        uint256 collateralBalanceD18 = accounts.getCollateralBalance(accountId, Constants.TOKEN_1);
+        uint256 collateralBalance = accounts.getCollateralBalance(accountId, Constants.TOKEN_1);
 
-        assertEq(collateralBalanceD18, Constants.DEFAULT_TOKEN_1_BALANCE);
+        assertEq(collateralBalance, Constants.DEFAULT_TOKEN_1_BALANCE);
     }
 
     function testFuzz_GetCollateralBalance_NoCollateral(address otherToken) public {
         vm.assume(otherToken != Constants.TOKEN_0);
         vm.assume(otherToken != Constants.TOKEN_1);
 
-        uint256 collateralBalanceD18 = accounts.getCollateralBalance(accountId, otherToken);
+        uint256 collateralBalance = accounts.getCollateralBalance(accountId, otherToken);
 
-        assertEq(collateralBalanceD18, 0);
+        assertEq(collateralBalance, 0);
     }
 
     function test_LoadAccountAndValidateOwnership() public {
@@ -281,35 +278,35 @@ contract AccountTest is Test {
     function test_GetCollateralBalanceAvailable_Positive() public {
         setCollateralProfile("high");
 
-        uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_0);
+        uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_0);
 
-        assertEq(collateralBalanceAvailableD18, 3100e18);
+        assertEq(collateralBalanceAvailable, 3100e18);
     }
 
     function test_GetCollateralBalanceAvailable_NonSettlementToken() public {
         setCollateralProfile("high");
 
-        uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_1);
+        uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_1);
 
-        assertEq(collateralBalanceAvailableD18, Constants.DEFAULT_TOKEN_1_BALANCE);
+        assertEq(collateralBalanceAvailable, Constants.DEFAULT_TOKEN_1_BALANCE);
     }
 
     function test_GetCollateralBalanceAvailable_Zero() public {
         setCollateralProfile("medium");
 
-        uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_0);
+        uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_0);
 
-        assertEq(collateralBalanceAvailableD18, 0);
+        assertEq(collateralBalanceAvailable, 0);
     }
 
     function testFuzz_GetCollateralBalanceAvailable_NoSettlementToken(address otherToken) public {
         vm.assume(otherToken != Constants.TOKEN_0);
         vm.assume(otherToken != Constants.TOKEN_1);
 
-        accounts.changeAccountBalance(accountId, MockAccount.CollateralBalance({token: otherToken, balanceD18: 1e18}));
+        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({ token: otherToken, balance: 1e18 }));
 
-        uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, otherToken);
+        uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, otherToken);
 
-        assertEq(collateralBalanceAvailableD18, 1e18);
+        assertEq(collateralBalanceAvailable, 1e18);
     }
 }

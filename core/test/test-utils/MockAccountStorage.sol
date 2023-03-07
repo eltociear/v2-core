@@ -21,7 +21,9 @@ contract MockAccountStorage {
         CollateralBalance[] memory balances,
         uint128[] memory activeProductIds,
         address settlementToken
-    ) public {
+    )
+        public
+    {
         // Mock account
         Account.Data storage account = Account.create(accountId, owner);
         account.settlementToken = settlementToken;
