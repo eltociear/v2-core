@@ -11,6 +11,7 @@
   src = "src"
   test = "test"
   auto_detect_remappings = false
+  fs_permissions = [{ access = "read", path = "./"}]
 
 [profile.ci]
   fuzz = { runs = 1_000 }

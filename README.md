@@ -37,6 +37,7 @@ This is a monorepo with the following folder structure and packages:
 - Dated IRS VAMM Pool Implementation in v2-periphery (Cyclops Rex)
 - G-TWAP Integration with Rate Oracle Module (Cyclops Rex)
 - PRB Math & User Defined Types (Costin)
+- Cannon Tests (AB)
 
 **P2**
 
@@ -164,3 +165,35 @@ minor
 - what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
 - FeatureFlag.ensureAccessToFeature(\_MARKET_FEATURE_FLAG); -> register a new market
 - https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/MarketManagerModule.sol
+
+# Cannon
+
+From cannon gh (https://github.com/usecannon/cannon): "cannon is under active development. While the interface and functionality are generally stable, use the tool with caution when conducting high-risk deployments".
+
+In order to setup cannon run the following command:
+
+➜ `npx cannon setup `
+
+# Cannon Build
+
+Make sure cannonfile.toml is in the root directory of the project. In order to build the cannon-file for local development and testing run the following command:
+
+➜ `npx cannon build `
+example output: `package voltz-core:1.0.0 (ipfs://QmcEaDzQsPdDVrfDi1HaSGTJ9ZXNQexEAbfkecUrT59Xoi)`
+
+The above command creates a local deployment of the core. At this point you should be able to run this package locally using the command-line tool:
+
+➜ `npx cannon voltz-core `
+example output: `package voltz-core:latest (ipfs://QmNSntXpk9aueviEVqQDgZ4TNSaYodSMpkQY4uaLQLVViS) voltz-core:latest has been deployed to a local node running at localhost:8545`
+
+# Cannon Deploy
+
+Deploying is effectively just building on a remote network.
+
+`npx cannon build --network REPLACE_WITH_RPC_ENDPOINT --private-key REPLACE_WITH_KEY_THAT_HAS_GAS_TOKENS`
+
+Verify your project’s contracts on Etherscan:
+
+`cannon verify voltz-core --api-key REPLACE_WITH_ETHERSCAN_API_KEY --chain-id REPLACE_WITH_CHAIN_ID`
+
+Finally publish the project to a registry. [...]
