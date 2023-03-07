@@ -4,10 +4,10 @@ pragma solidity =0.8.17;
 
 import "../interfaces/IRateOracle.sol";
 import "../externalInterfaces/IAaveV3LendingPool.sol";
-import "../../../utils/contracts/src/helpers/Time.sol";
+import "../utils/contracts//helpers/Time.sol";
 // import "../rate_oracles/CompoundingRateOracle.sol";
-import { UD60x18, ud } from "@prb/math/UD60x18.sol";
-import { PRBMathCastingUint256 } from "@prb/math/casting/Uint256.sol";
+import {UD60x18, ud} from "@prb/math/UD60x18.sol";
+import {PRBMathCastingUint256} from "@prb/math/casting/Uint256.sol";
 
 contract AaveRateOracle is IRateOracle {
     IAaveV3LendingPool public aaveLendingPool;
@@ -51,19 +51,16 @@ contract AaveRateOracle is IRateOracle {
         UD60x18 atOrAfterIndex,
         uint256 atOrAfterTimestamp,
         uint256 queryTimestamp
-    )
-        public
-        pure
-        returns (UD60x18 interpolatedIndex)
-    {
+    ) public pure returns (UD60x18 interpolatedIndex) {
         if (atOrAfterTimestamp == queryTimestamp) {
             return atOrAfterIndex;
         }
 
         // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?)
         UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex);
-        UD60x18 proportionOfPeriodElapsed =
-            (atOrAfterTimestamp - queryTimestamp).intoUD60x18().div((atOrAfterTimestamp - beforeTimestamp).intoUD60x18());
+        UD60x18 proportionOfPeriodElapsed = (atOrAfterTimestamp - queryTimestamp).intoUD60x18().div(
+            (atOrAfterTimestamp - beforeTimestamp).intoUD60x18()
+        );
         return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
     }
 }

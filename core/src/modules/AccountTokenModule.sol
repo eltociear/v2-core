@@ -3,8 +3,8 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IAccountTokenModule.sol";
 import "../interfaces/IAccountModule.sol";
-import "../../utils/contracts/src/helpers/SafeCast.sol";
-import "../../utils/contracts/NFT.sol";
+import "../utils/contracts/helpers/SafeCast.sol";
+import "../utils/modules/modules/NftModule.sol";
 
 /**
  * @title Account Token
@@ -20,11 +20,7 @@ contract AccountTokenModule is IAccountTokenModule, NFT {
         address, // from (unused)
         address to,
         uint256 tokenId
-    )
-        internal
-        virtual
-        override
-    {
+    ) internal virtual override {
         IAccountModule(OwnableStorage.getOwner()).notifyAccountTransfer(to, tokenId.to128());
     }
 }

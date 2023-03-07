@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../interfaces/ICollateralModule.sol";
 import "../storage/Account.sol";
 import "../storage/CollateralConfiguration.sol";
-import "../../../utils/contracts/src/token/ERC20Helper.sol";
+import "../utils/contracts//token/ERC20Helper.sol";
 import "../storage/Collateral.sol";
 /**
  * @title Module for managing user collateral.

@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../../utils/contracts/src/helpers/SetUtil.sol";
+import "../utils/contracts/helpers/SetUtil.sol";
 
 /**
  * @title Tracks protocol-wide settings for each collateral type, as well as helper functions for it, such as retrieving its current

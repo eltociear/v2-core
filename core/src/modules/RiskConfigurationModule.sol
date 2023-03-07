@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../interfaces/IRiskConfigurationModule.sol";
 import "../storage/MarketRiskConfiguration.sol";
 import "../storage/ProtocolRiskConfiguration.sol";
-import "../../../utils/contracts/src/storage/OwnableStorage.sol";
+import "../utils/contracts//storage/OwnableStorage.sol";
 
 /**
  * @title Module for configuring protocol-wide and product+market level risk parameters
@@ -33,10 +33,7 @@ contract RiskConfigurationModule is IRiskConfigurationModule {
      */
     // solc-ignore-next-line func-mutability
 
-    function getMarketRiskConfiguration(
-        uint128 productId,
-        uint128 marketId
-    )
+    function getMarketRiskConfiguration(uint128 productId, uint128 marketId)
         external
         view
         override

@@ -7,7 +7,7 @@ import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
 import "../storage/PoolConfiguration.sol";
 import "../storage/RateOracleReader.sol";
-import "../../../utils/contracts/src/helpers/SafeCast.sol";
+import "../utils/contracts//helpers/SafeCast.sol";
 import "../../../core/interfaces/IProductModule.sol";
 
 /**
@@ -33,12 +33,7 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProductIRSModule
      */
-    function initiateTakerOrder(
-        uint128 accountId,
-        uint128 marketId,
-        uint256 maturityTimestamp,
-        int256 baseAmount
-    )
+    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint256 maturityTimestamp, int256 baseAmount)
         external
         override
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)

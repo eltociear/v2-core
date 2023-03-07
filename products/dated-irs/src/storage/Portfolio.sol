@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../../utils/contracts/src/helpers/SetUtil.sol";
-import "../../../utils/contracts/src/helpers/SafeCast.sol";
+import "../utils/contracts//helpers/SetUtil.sol";
+import "../utils/contracts//helpers/SafeCast.sol";
 import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./PoolConfiguration.sol";
@@ -73,7 +73,11 @@ library Portfolio {
      * consider avoiding pool if account is purely taker to save gas?
      * todo: this function looks expesive and feels like there's room for optimisations
      */
-    function getAccountUnrealizedPnL(Data storage self, address poolAddress) internal view returns (int256 unrealizedPnL) {
+    function getAccountUnrealizedPnL(Data storage self, address poolAddress)
+        internal
+        view
+        returns (int256 unrealizedPnL)
+    {
         // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
         for (uint256 i = 1; i <= self.activeMarkets.length(); i++) {
             uint128 marketId = self.activeMarkets.valueAt(i).to128();
@@ -91,9 +95,11 @@ library Portfolio {
                 int256 currentLiquidityIndex =
                     RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
 
-                int256 gwap = IPool(PoolConfiguration.getPoolAddress()).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
+                int256 gwap =
+                    IPool(PoolConfiguration.getPoolAddress()).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
 
-                int256 unwindQuote = (baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
+                int256 unwindQuote =
+                    (baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
                 unrealizedPnL += (unwindQuote + quoteBalance + quoteBalancePool);
             }
         }
@@ -105,17 +111,14 @@ library Portfolio {
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
-    function baseToAnnualizedExposure(
-        int256[] memory baseAmounts,
-        uint128 marketId,
-        uint256 maturityTimestamp
-    )
+    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp)
         internal
         view
         returns (int256[] memory exposures)
     {
         // TODO: use PRB math
-        int256 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
+        int256 currentLiquidityIndex =
+            RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -127,10 +130,7 @@ library Portfolio {
      * @dev note: given that all the accounts are single-token, annualized exposures for a given account are in terms
      * of the settlement token of that account
      */
-    function getAccountAnnualizedExposures(
-        Data storage self,
-        address poolAddress
-    )
+    function getAccountAnnualizedExposures(Data storage self, address poolAddress)
         internal
         view
         returns (Account.Exposure[] memory exposures)
@@ -142,7 +142,8 @@ library Portfolio {
                 uint256 maturityTimestamp = self.activeMaturitiesPerMarket[marketId].valueAt(j);
                 int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
 
-                (int256 baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+                (int256 baseBalancePool,) =
+                    IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
                 (int256 unfilledBaseLong, int256 unfilledBaseShort) =
                     IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
 
@@ -152,7 +153,8 @@ library Portfolio {
                     baseAmounts[1] = unfilledBaseLong;
                     baseAmounts[2] = unfilledBaseShort;
 
-                    int256[] memory annualizedExposures = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
+                    int256[] memory annualizedExposures =
+                        baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
 
                     exposures[counter] = Account.Exposure({
                         marketId: marketId,
@@ -198,9 +200,7 @@ library Portfolio {
         uint256 maturityTimestamp,
         int256 baseDelta,
         int256 quoteDelta
-    )
-        internal
-    {
+    ) internal {
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
         position.update(baseDelta, quoteDelta);
     }
@@ -208,7 +208,10 @@ library Portfolio {
     /**
      * @dev create, edit or close an irs position for a given marketId (e.g. aUSDC lend) and maturityTimestamp (e.g. 31st Dec 2023)
      */
-    function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp) internal returns (int256 settlementCashflow) {
+    function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp)
+        internal
+        returns (int256 settlementCashflow)
+    {
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
         // TODO: use PRB math
