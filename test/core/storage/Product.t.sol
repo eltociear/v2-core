@@ -8,11 +8,6 @@ import "../test-utils/MockCoreStorage.sol";
 contract ExposedProduct is CoreState {
     using Product for Product.Data;
 
-    // Mock support
-    function getProduct(uint128 id) external pure returns (Product.Data memory product) {
-        product = Product.load(id);
-    }
-
     // Exposed functions
     function load(uint128 id) external pure returns (bytes32 s) {
         Product.Data storage product = Product.load(id);
