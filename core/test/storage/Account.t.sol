@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../../src/core/storage/Account.sol";
+import "../../src/storage/Account.sol";
 import "../test-utils/MockCore.sol";
 
 contract ExposedAccounts is MockCoreState {

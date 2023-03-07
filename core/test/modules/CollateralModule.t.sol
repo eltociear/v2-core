@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../../src/core/modules/CollateralModule.sol";
+import "../../src/modules/CollateralModule.sol";
 import "../test-utils/MockCore.sol";
 
 contract EnhancedCollateralModule is CollateralModule, MockCoreState { }

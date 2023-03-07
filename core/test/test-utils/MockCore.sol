@@ -4,8 +4,8 @@ pragma solidity >=0.8.13;
 import "./MockAccount.sol";
 import "./MockProduct.sol";
 import "./Constants.sol";
-import "../../../src/core/storage/MarketRiskConfiguration.sol";
-import "../../../src/core/storage/CollateralConfiguration.sol";
+import "../../src/storage/MarketRiskConfiguration.sol";
+import "../../src/storage/CollateralConfiguration.sol";
 import "forge-std/Test.sol";
 
 contract MockCore is MockAccount, MockProduct { }

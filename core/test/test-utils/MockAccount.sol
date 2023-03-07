@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../../src/core/storage/Account.sol";
+import "../../src/storage/Account.sol";
 
 /**
  * @title Object for mocking account storage

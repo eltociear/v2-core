@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../../src/core/storage/ProductCreator.sol";
+import "../../src/storage/ProductCreator.sol";
 
 /**
  * @title Object for mocking product storage
