@@ -1,5 +1,5 @@
 {
-    "name": "@voltz-protocol/core-utils",
+    "name": "@voltz-protocol-core-utils",
     "version": "1.0.0",
     "private": true,
     "description": "Common JS utils for Voltz",
@@ -17,10 +17,6 @@
       "test:watch": "npm run test -- --watch",
       "prepublishOnly": "npm run build"
     },
-    "peerDependencies": {
-      "ethers": "^5.0.0",
-      "solidity-ast": "^0.4.0"
-    },
     "devDependencies": {
       "@istanbuljs/nyc-config-typescript": "1.0.2",
       "@types/prompts": "2.0.14",
@@ -35,6 +31,8 @@
       "chalk": "4.1.2",
       "fast-glob": "3.2.12",
       "prompts": "2.4.2",
-      "rfdc": "1.3.0"
+      "rfdc": "1.3.0",
+      "ethers": "^5.0.0",
+      "solidity-ast": "^0.4.0"
     }
   }
