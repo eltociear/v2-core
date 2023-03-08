@@ -8,7 +8,11 @@
     "lint:sol:check": "forge fmt --check && yarn solhint \"{src,test}/**/*.sol\"",
     "lint:sol:write": "forge fmt && yarn solhint --fix \"{src,test}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
-    "prettier:write": "prettier --write \"**/*.{json,md,yml}\""
+    "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
+
+    "build": "forge build --sizes",
+    "test": "forge test",
+    "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
   },
   "devDependencies": {
     "lcov-badge-generator": "1.0.5",

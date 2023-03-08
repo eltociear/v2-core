@@ -2,8 +2,11 @@
   "private": true,
   "dependencies": {},
   "scripts": {
-    "lint:check": "yarn workspaces run lint:check -all",
-    "lint:write": "yarn workspaces run lint:write -all"
+    "lint:check": "yarn workspaces run lint:check",
+    "lint:write": "yarn workspaces run lint:write",
+    "build": "yarn workspaces run build",
+    "test": "yarn workspaces run test",
+    "coverage": "yarn workspaces run coverage"
   },
   "devDependencies": {},
   "workspaces": [
