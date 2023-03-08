@@ -5,11 +5,7 @@
     "lint:check": "yarn workspaces run lint:check -all",
     "lint:write": "yarn workspaces run lint:write -all"
   },
-  "devDependencies": {
-    "lcov-badge-generator": "1.0.5",
-    "prettier": "2.8.4",
-    "solhint": "3.4.0"
-  },
+  "devDependencies": {},
   "workspaces": [
     "core"
   ]
