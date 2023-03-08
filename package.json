@@ -2,7 +2,7 @@
     "name": "voltz-v2",
     "version": "2.0.0",
     "private": true,
-    "description": "Mono Repo with Voltz V2 Contracts",
+    "description": "Mono Repo with Voltz V2 Contracts and js tooling",
     "repository": {
       "type": "git",
       "url": "git+https://github.com/Voltz-Protocol/v2-core.git"
@@ -15,6 +15,7 @@
     "homepage": "https://github.com/Voltz-Protocol/v2-core#readme",
     "scripts": {
       "clean": "npm run --workspaces --if-present clean",
+      "build": "npm run @voltz-protocol-w /core-utils -w @voltz-protocol/hardhat-storage -w @voltz-protocol/router -w @synthetixio/main build",
       "test": "npm run --workspaces --if-present test",
       "coverage": "npm run --workspaces --if-present coverage",
       "lint:js": "prettier --check '**/*.{t,j}s' && eslint --max-warnings=0 '**/*.{t,j}s'",
@@ -23,9 +24,11 @@
       "lint:sol:fix": "prettier --write '(protocol|utils|products)/**/*.sol' && solhint --fix utils/contracts/src/**/*.sol core/src/**/*.sol",
       "lint:quick": "pretty-quick --check --staged --pattern '**/*.(js|ts|sol)'",
       "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
-      "lint": "npm run lint:js && npm run lint:sol"
+      "lint": "npm run lint:js && npm run lint:sol",
+      "check-packages": "node .github/check-packages.js"    
     },
     "devDependencies": {
+      "@types/mocha": "10.0.1",
       "@types/node": "18.11.10",
       "@typescript-eslint/eslint-plugin": "5.45.0",
       "@typescript-eslint/parser": "5.45.0",

@@ -12,7 +12,7 @@ import 'hardhat-ignore-warnings';
 // Router generation cannon plugin
 // todo: turn router into a private package on npm
 import '../router/utils/cannon';
-import '@synthetixio/hardhat-storage';
+// import '@synthetixio/hardhat-storage';
 
 // Load common .env file from root
 dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') });
@@ -89,8 +89,8 @@ const config = {
     },
   },
   tenderly: {
-    project: 'synthetix',
-    username: 'synthetix-services',
+    project: 'voltz',
+    username: 'voltz-protocol',
   },
   cannon: {
     publicSourceCode: true,

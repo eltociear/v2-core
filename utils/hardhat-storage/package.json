@@ -27,7 +27,6 @@
       "prepublishOnly": "npm run build"
     },
     "dependencies": {
-      "@synthetixio/core-utils": "*",
       "mustache": "4.2.0"
     },
     "devDependencies": {
