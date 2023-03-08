@@ -1,22 +1,26 @@
 {
-  "extends": "solhint:recommended",
+  "extends": ["solhint:recommended"],
+  "plugins": ["numcast"],
   "rules": {
-    "code-complexity": "off",
-    "compiler-version": ["error", ">=0.8.13"],
-    "const-name-snakecase": "off",
+    "not-rely-on-time": "off",
+    "avoid-low-level-calls": "off",
+    "compiler-version": ["error", "^0.8.0"],
     "contract-name-camelcase": "off",
-    "func-name-mixedcase": "off",
     "func-visibility": [
       "error",
       {
         "ignoreConstructors": true
       }
     ],
-    "max-line-length": ["error", 164],
-    "no-console": "off",
-    "no-global-import": "off",
+    "no-complex-fallback": "off",
     "no-inline-assembly": "off",
-    "not-rely-on-time": "off",
-    "var-name-mixedcase": "off"
+    "private-vars-leading-underscore": "off",
+    "reason-string": [
+      "error",
+      {
+        "maxLength": 32
+      }
+    ],
+    "numcast/safe-cast": "error"
   }
 }
