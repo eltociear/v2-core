@@ -38,7 +38,7 @@ contract CollateralConfigurationModuleTest is Test {
         assertEq(existingConfig.tokenAddress, config.tokenAddress);
     }
 
-    function test_ConfigureCollateral(address otherAddress) public {
+    function testFuzz_revertWhen_ConfigureCollateral_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
         CollateralConfiguration.Data memory config =
@@ -88,8 +88,7 @@ contract CollateralConfigurationModuleTest is Test {
             CollateralConfiguration.Data({ depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1 })
         );
 
-        CollateralConfiguration.Data[] memory configs =
-            collateralConfigurationModule.getCollateralConfigurations(false);
+        CollateralConfiguration.Data[] memory configs = collateralConfigurationModule.getCollateralConfigurations(false);
 
         assertEq(configs.length, 2);
 
@@ -113,8 +112,7 @@ contract CollateralConfigurationModuleTest is Test {
             CollateralConfiguration.Data({ depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1 })
         );
 
-        CollateralConfiguration.Data[] memory configs =
-            collateralConfigurationModule.getCollateralConfigurations(true);
+        CollateralConfiguration.Data[] memory configs = collateralConfigurationModule.getCollateralConfigurations(true);
 
         assertEq(configs.length, 1);
 
