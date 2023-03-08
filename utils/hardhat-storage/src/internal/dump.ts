@@ -1,4 +1,5 @@
-import { findAll } from '@synthetixio/core-utils/utils/ast/finders';
+// todo: use a private npm package
+import { findAll } from '../../../core-utils/src/utils/ast/finders';
 import { clone } from '@synthetixio/core-utils/utils/misc/clone';
 import { SourceUnit } from 'solidity-ast/types';
 import { iterateContracts, iterateSlotAssignments } from './iterators';
