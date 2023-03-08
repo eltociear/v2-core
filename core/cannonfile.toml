@@ -1,5 +1,5 @@
 name = "voltz-core"
-version = "<%= package.version %>"
+version = "2.0.0"
 description = "Voltz V2 Core"
 
 # `salt` here only affects proxy contract
@@ -14,36 +14,36 @@ defaultValue = "0xb527E950fC7c4F581160768f48b3bfA66a7dE1f0"
 
 
 [contract.InitialModuleBundle]
-artifact = "src/modules/InitialModuleBundle.sol:InitialModuleBundle"
+artifact = "out/InitialModuleBundle.sol:InitialModuleBundle"
 salt = "<%= settings.salt %>"
 create2 = true
 
 [contract.AccountModule]
-artifact = "src/modules/AccountModule.sol:AccountModule"
+artifact = "AccountModule"
 
 [contract.AccountTokenModule]
-artifact = "src/modules/AccountTokenModule.sol:AccountTokenModule"
+artifact = "AccountTokenModule"
 
 [contract.AssociatedSystemsModule]
-artifact = "src/modules/AssociatedSystemsModule.sol:AssociatedSystemsModule"
+artifact = "AssociatedSystemsModule"
 
 [contract.CollateralConfigurationModule]
-artifact = "src/modules/CollateralConfigurationModule.sol:CollateralConfigurationModule"
+artifact = "CollateralConfigurationModule"
 
 [contract.CollateralModule]
-artifact = "src/modules/CollateralModule.sol:CollateralModule"
+artifact = "CollateralModule"
 
 [contract.LiquidationModule]
-artifact = "src/modules/LiquidationModule.sol:LiquidationModule"
+artifact = "LiquidationModule"
 
 [contract.MulticallModule]
-artifact = "src/modules/MulticallModule.sol:MulticallModule"
+artifact = "MulticallModule"
 
 [contract.ProductModule]
-artifact = "src/modules/ProductModule.sol:ProductModule"
+artifact = "ProductModule"
 
 [contract.RiskConfigurationModule]
-artifact = "src/modules/RiskConfigurationModule.sol:RiskConfigurationModule"
+artifact = "RiskConfigurationModule"
 
 # Core
 [router.CoreRouter]

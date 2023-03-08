@@ -29,7 +29,7 @@ This is a monorepo with the following folder structure and packages:
 
 **P1**
 
-
+- Associated Systems Module (AB)
 - Core Deployment (AB)
 - Dated IRS Deployment (AB)
 - Community Deployer (separate module), hmm can we have that for all deployments? (AB)
@@ -49,7 +49,6 @@ This is a monorepo with the following folder structure and packages:
 - SDK Setup (AB)
 - Community Deployer (AB)
 - Feature Flag Module
-- Associated Systems Module
 - Periphery & Multicall Module
 - Fuzzing
 - E2E Testing
