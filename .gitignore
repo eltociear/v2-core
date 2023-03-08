@@ -24,3 +24,4 @@ docs/
 
 bin/
 /yarn-error.log
+.DS_Store
