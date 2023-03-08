@@ -5,14 +5,18 @@ import "forge-std/Test.sol";
 import "../../src/modules/CollateralModule.sol";
 import "../test-utils/MockCoreStorage.sol";
 
-contract EnhancedCollateralModule is CollateralModule, CoreState { }
+contract EnhancedCollateralModule is CollateralModule, CoreState {}
 
 contract CollateralModuleTest is Test {
     using SafeCastU256 for uint256;
     using SafeCastI256 for int256;
 
-    event Deposited(uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender);
-    event Withdrawn(uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender);
+    event Deposited(
+        uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender
+    );
+    event Withdrawn(
+        uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender
+    );
 
     EnhancedCollateralModule internal collateralModule;
 
@@ -21,11 +25,15 @@ contract CollateralModuleTest is Test {
     }
 
     function test_GetAccountCollateralBalance() public {
-        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE);
+        assertEq(
+            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE
+        );
     }
 
     function test_GetAccountCollateralBalance_NoSettlementToken() public {
-        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_1), Constants.DEFAULT_TOKEN_1_BALANCE);
+        assertEq(
+            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_1), Constants.DEFAULT_TOKEN_1_BALANCE
+        );
     }
 
     function test_GetTotalAccountValue() public {
@@ -44,7 +52,10 @@ contract CollateralModuleTest is Test {
     }
 
     function test_GetAccountCollateralBalanceAvailable_NoSettlementToken() public {
-        assertEq(collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_1), Constants.DEFAULT_TOKEN_1_BALANCE);
+        assertEq(
+            collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_1),
+            Constants.DEFAULT_TOKEN_1_BALANCE
+        );
     }
 
     function testFuzz_GetAccountCollateralBalanceAvailable_OtherToken(address otherToken) public {
@@ -60,7 +71,9 @@ contract CollateralModuleTest is Test {
 
         // Mock ERC20 external calls
         vm.mockCall(
-            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(amount)
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule),
+            abi.encode(amount)
         );
 
         vm.mockCall(
@@ -80,7 +93,10 @@ contract CollateralModuleTest is Test {
         collateralModule.deposit(100, Constants.TOKEN_0, amount);
 
         // Check the collateral balance post deposit
-        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE + amount);
+        assertEq(
+            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0),
+            Constants.DEFAULT_TOKEN_0_BALANCE + amount
+        );
     }
 
     function testFuzz_revertWhen_Deposit_WithNotEnoughAllowance(address depositor) public {
@@ -89,7 +105,9 @@ contract CollateralModuleTest is Test {
 
         // Mock ERC20 external calls
         vm.mockCall(
-            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(0)
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule),
+            abi.encode(0)
         );
 
         // Route the deposit from depositor
@@ -108,7 +126,9 @@ contract CollateralModuleTest is Test {
         vm.prank(depositor);
 
         // Expect revert due to unsupported collateral type
-        vm.expectRevert(abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_1));
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_1)
+        );
         collateralModule.deposit(100, Constants.TOKEN_1, amount);
     }
 
@@ -117,7 +137,9 @@ contract CollateralModuleTest is Test {
         uint256 amount = 500e18;
 
         // Mock ERC20 external calls
-        vm.mockCall(Constants.TOKEN_0, abi.encodeWithSelector(IERC20.transfer.selector, Constants.ALICE, amount), abi.encode());
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.transfer.selector, Constants.ALICE, amount), abi.encode()
+        );
 
         // Route the deposit from Alice
         vm.prank(Constants.ALICE);
@@ -130,7 +152,10 @@ contract CollateralModuleTest is Test {
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
 
         // Check the collateral balance post withdraw
-        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE - amount);
+        assertEq(
+            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0),
+            Constants.DEFAULT_TOKEN_0_BALANCE - amount
+        );
     }
 
     function test_revertWhen_Withdraw_UnautohorizedAccount(address otherAddress) public {

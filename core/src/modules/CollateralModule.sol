@@ -54,10 +54,7 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getAccountCollateralBalance(
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountCollateralBalance(uint128 accountId, address collateralType)
         external
         view
         override
@@ -69,10 +66,7 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getAccountCollateralBalanceAvailable(
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
         external
         override
         returns (uint256 collateralBalanceAvailable)

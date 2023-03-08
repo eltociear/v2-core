@@ -131,11 +131,7 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
         ERC721EnumerableStorage.load().allTokens.pop();
     }
 
-    function _initialize(
-        string memory tokenName,
-        string memory tokenSymbol,
-        string memory baseTokenURI
-    )
+    function _initialize(string memory tokenName, string memory tokenSymbol, string memory baseTokenURI)
         internal
         virtual
         override
