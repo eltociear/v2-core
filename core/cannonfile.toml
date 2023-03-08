@@ -14,7 +14,7 @@ defaultValue = "0xb527E950fC7c4F581160768f48b3bfA66a7dE1f0"
 
 
 [contract.InitialModuleBundle]
-artifact = "out/InitialModuleBundle.sol:InitialModuleBundle"
+artifact = "InitialModuleBundle"
 salt = "<%= settings.salt %>"
 create2 = true
 
@@ -36,9 +36,6 @@ artifact = "CollateralModule"
 [contract.LiquidationModule]
 artifact = "LiquidationModule"
 
-[contract.MulticallModule]
-artifact = "MulticallModule"
-
 [contract.ProductModule]
 artifact = "ProductModule"
 
@@ -54,7 +51,6 @@ contracts = [
     "CollateralModule",
     "CollateralConfigurationModule",
     "LiquidationModule",
-    "MulticallModule",
     "RiskConfigurationModule",
     "ProductModule"
 ]
@@ -66,13 +62,12 @@ depends = [
   "contract.CollateralModule",
   "contract.CollateralConfigurationModule",
   "contract.LiquidationModule",
-  "contract.MulticallModule",
   "contract.RiskConfigurationModule",
   "contract.ProductModule",
 ]
 
 [contract.InitialCoreProxy]
-artifact = "contracts/CoreProxy.sol:CoreProxy"
+artifact = "CoreProxy"
 args = ["<%= contracts.InitialModuleBundle.address %>", "<%= settings.owner %>"]
 abiOf = ["InitialModuleBundle"]
 salt = "<%= settings.salt %>"
@@ -84,7 +79,7 @@ target = ["InitialCoreProxy"]
 abi = "UpgradeModule"
 from = "<%= settings.owner %>"
 func = "upgradeTo"
-args = ["<%= contracts.CoreRouter.address %>"]
+args = ["<%= contracts.CoreRouter.address %>"] // stopped here, need to figure out how to retrieve contracts.CoreRouter.address 
 
 factory.CoreProxy.abiOf = ["CoreRouter"]
 factory.CoreProxy.event = "Upgraded"
@@ -94,16 +89,3 @@ depends = [
   "contract.InitialCoreProxy",
   "router.CoreRouter"
 ]
-
-# Account
-[router.AccountRouter]
-contracts = [
-    "InitialModuleBundle",
-    "AccountTokenModule",
-]
-depends = [
-  "contract.InitialModuleBundle",
-  "contract.AccountTokenModule"
-]
-
-# Post actions
