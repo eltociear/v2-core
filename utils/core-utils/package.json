@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "publishConfig":{
       "access": "restricted",
-      "registry":"https://registry.npmjs.org/"
+      "registry":"https://npm.pkg.github.com/@voltz-protocol"
     }, 
     "description": "Common JS utils for Voltz",
     "files": [
