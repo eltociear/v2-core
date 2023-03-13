@@ -13,6 +13,7 @@
       "utils/**/*.d.ts.map"
     ],
     "scripts": {
+      "publish:all": "yarn publish",
       "build": "tsc --project src/tsconfig.json",
       "watch": "npm run build -- --watch",
       "test": "mocha --require ts-node/register",
