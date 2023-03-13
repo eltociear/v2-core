@@ -1,7 +1,10 @@
 {
-    "name": "@voltz-protocol-core-utils",
+    "name": "@voltz-protocol/core-utils",
     "version": "1.0.0",
-    "private": true,
+    "publishConfig":{
+      "access": "restricted",
+      "registry":"https://registry.npmjs.org/"
+    }, 
     "description": "Common JS utils for Voltz",
     "files": [
       "utils/**/*.js",
