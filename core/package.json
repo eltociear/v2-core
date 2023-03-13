@@ -3,7 +3,7 @@
   "version": "2.0.2",
   "publishConfig": {
     "access": "restricted",
-    "registry": "https://npm.pkg.github.com/@voltz-protocol"
+    "@voltz-protocol:registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
     "@usecannon/cli": "^2.1.7"

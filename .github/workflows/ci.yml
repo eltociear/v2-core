@@ -2,6 +2,7 @@ name: "CI"
 
 env:
   FOUNDRY_PROFILE: "ci"
+  REGISTRY: ghcr.io
 
 on:
   workflow_dispatch:
