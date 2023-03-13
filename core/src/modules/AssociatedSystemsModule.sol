@@ -7,4 +7,4 @@ import "../utils/modules/modules/BaseAssociatedSystemsModule.sol";
  * @title Module for connecting to other systems.
  */
 // solhint-disable-next-line no-empty-blocks
-contract AssociatedSystemsModule is BaseAssociatedSystemsModule {}
+contract AssociatedSystemsModule is BaseAssociatedSystemsModule { }

@@ -19,7 +19,13 @@ contract BaseAssociatedSystemsModule is IBaseAssociatedSystemsModule {
     /**
      * @inheritdoc IBaseAssociatedSystemsModule
      */
-    function initOrUpgradeNft(bytes32 id, string memory name, string memory symbol, string memory uri, address impl)
+    function initOrUpgradeNft(
+        bytes32 id,
+        string memory name,
+        string memory symbol,
+        string memory uri,
+        address impl
+    )
         external
         override
     {
@@ -62,9 +68,7 @@ contract BaseAssociatedSystemsModule is IBaseAssociatedSystemsModule {
         _setAssociatedSystem(id, AssociatedSystem.KIND_ERC721, proxy, impl);
     }
 
-    function _initOrUpgradeNft(bytes32 id, string memory name, string memory symbol, string memory uri, address impl)
-        internal
-    {
+    function _initOrUpgradeNft(bytes32 id, string memory name, string memory symbol, string memory uri, address impl) internal {
         OwnableStorage.onlyOwner();
         AssociatedSystem.Data storage store = AssociatedSystem.load(id);
 
