@@ -15,9 +15,8 @@
     "homepage": "https://github.com/Voltz-Protocol/v2-core#readme",
     "scripts": {
       "clean": "npm run --workspaces --if-present clean",
-      "build": "npm run @voltz-protocol-w /core-utils -w @voltz-protocol/hardhat-storage -w @voltz-protocol/router -w @synthetixio/main build",
-      "test": "npm run --workspaces --if-present test",
-      "coverage": "npm run --workspaces --if-present coverage",
+      "test": "yarn workspaces run test",
+      "coverage": "yarn workspaces run coverage",
       "lint:js": "prettier --check '**/*.{t,j}s' && eslint --max-warnings=0 '**/*.{t,j}s'",
       "lint:js:fix": "prettier --write '**/*.{t,j}s' && eslint --max-warnings=0 --fix '**/*.{t,j}s'",
       "lint:sol": "prettier --check '(core|utils|products)/**/*.sol' && solhint utils/contracts/src/**/*.sol core/src/**/*.sol",
@@ -25,7 +24,10 @@
       "lint:quick": "pretty-quick --check --staged --pattern '**/*.(js|ts|sol)'",
       "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
       "lint": "npm run lint:js && npm run lint:sol",
-      "check-packages": "node .github/check-packages.js"    
+      "check-packages": "node .github/check-packages.js",
+      "lint:check": "yarn workspaces run lint:check",
+      "lint:write": "yarn workspaces run lint:write",
+      "build": "yarn workspaces run build"
     },
     "devDependencies": {
       "@types/mocha": "10.0.1",
@@ -47,9 +49,7 @@
       "check-packages"
     ],
     "workspaces": [
-      "utils/*",
-      "core/*",
-      "products/*"
+      "core"
     ],
     "engines": {
       "node": "^16.16.0",

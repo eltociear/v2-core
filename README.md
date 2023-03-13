@@ -1,11 +1,10 @@
-
-[![GitHub Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] ![Coverage][coverage-badge]
+[![GitHub Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] ![Coverage:Core][coverage-badge]
 
 [gha]: https://github.com/Voltz-Protocol/v2-core/actions
 [gha-badge]: https://github.com/Voltz-Protocol/v2-core/actions/workflows/ci.yml/badge.svg
 [foundry]: https://getfoundry.sh/
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
-[coverage-badge]: ./coverage.svg
+[coverage-badge]: ./core/coverage.svg
 
 # Package Structure
 
@@ -19,11 +18,10 @@ This is a monorepo with the following folder structure and packages:
 ├── core                         // Core Voltz Protocol (to be extended by products)
 │
 └── utils                        // Utilities, plugins, tooling
-    ├── contracts                // Standard contract implementations like ERC20, adapted for custom router storage. 
+    ├── contracts                // Standard contract implementations like ERC20, adapted for custom router storage.
     ├── modules                  // Modules that are reused between multiple router based projects
     └── router                   // Cannon plugin that merges multiple modules into a router contract.
 ```
-
 
 # Priorities
 
@@ -84,7 +82,6 @@ Any markdown in your comments will carry over properly when generating docs with
 Good: /// @notice Returns the sum of `x` and `y`.
 Bad: /// @notice Returns the sum of x and y.
 
-
 # Deployment Guide
 
 To prepare for system upgrades, this repository is used to release new versions of the voltz protocol (core) and products.
@@ -98,7 +95,7 @@ To prepare for system upgrades, this repository is used to release new versions 
   - If you're upgrading the voltz package, also run `npm run build && npx hardhat cannon:build cannonfile.test.toml` to generate the testable package.
   - Confirm the private key that owns the corresponding namespace in the package registry is set in the `.env` file as `DEPLOYER_PRIVATE_KEY`.
   - Publish the release to Cannon package registry with `npx hardhat cannon:publish --network mainnet`.
-- Increment the version in the relevant `package.json` files. _The repositories should always contain the version number of the next release.
+- Increment the version in the relevant `package.json` files. \_The repositories should always contain the version number of the next release.
 - If you've upgraded voltz, also increment the version of the `package.json` file in the root directory. Also upgrade the version in [...]
 - Run `npm i` in the root directory.
 - Commit and push the change to this repository.
@@ -122,6 +119,7 @@ cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --n
 ```
 
 - Remove the dry-run option to execute the upgrade:
+
 ```
 cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --network <RPC_URL_FOR_NETWORK_NAME> --private-key <DEPLOYER_PRIVATE_KEY>
 ```
@@ -134,6 +132,7 @@ cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --n
 - Increment the version number in each of the omnibus toml files in the root of the repository. (The version in the repository should always be the next version.)
 - Commit and merge the change.
 - After the new version of the voltz-omnibus package has been published, the previously published packages can be verified on Etherscan.
+<<<<<<< HEAD
 - From the relevant package's directory, run the following command for each network it was deployed on:  `npx hardhat cannon:verify <PACKAGE_NAME>:<VERSION> --network <NETWORK_NAME>`
 
 # Cannon
@@ -169,6 +168,9 @@ Verify your project’s contracts on Etherscan:
 Finally publish the project to a registry. [...]
 
 
+=======
+- From the relevant package's directory, run the following command for each network it was deployed on: `npx hardhat cannon:verify <PACKAGE_NAME>:<VERSION> --network <NETWORK_NAME>`
+>>>>>>> 0c873ca7d6453be5626dd093f4b6a53f46433c40
 
 # Draft Notes
 
