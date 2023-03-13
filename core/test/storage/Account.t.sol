@@ -46,7 +46,10 @@ contract ExposedAccounts is CoreState {
         }
     }
 
-    function getAnnualizedProductExposures(uint128 id, uint128 productId) external returns (Account.Exposure[] memory) {
+    function getAnnualizedProductExposures(uint128 id, uint128 productId)
+        external
+        returns (Account.Exposure[] memory)
+    {
         Account.Data storage account = Account.load(id);
         return account.getAnnualizedProductExposures(productId);
     }
@@ -121,7 +124,9 @@ contract AccountTest is Test {
         if (high) balance = HIGH_COLLATERAL;
 
         // Set up the balance of token 0
-        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({token: Constants.TOKEN_0, balance: balance}));
+        accounts.changeAccountBalance(
+            accountId, MockAccountStorage.CollateralBalance({token: Constants.TOKEN_0, balance: balance})
+        );
     }
 
     function test_Exists() public {
@@ -301,7 +306,9 @@ contract AccountTest is Test {
         vm.assume(otherToken != Constants.TOKEN_0);
         vm.assume(otherToken != Constants.TOKEN_1);
 
-        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({token: otherToken, balance: 1e18}));
+        accounts.changeAccountBalance(
+            accountId, MockAccountStorage.CollateralBalance({token: otherToken, balance: 1e18})
+        );
 
         uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, otherToken);
 

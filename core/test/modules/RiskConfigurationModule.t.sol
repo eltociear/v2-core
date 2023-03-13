@@ -15,11 +15,16 @@ contract RiskConfigurationModuleTest is Test {
     function setUp() public {
         riskConfigurationModule = new RiskConfigurationModule();
 
-        vm.store(address(riskConfigurationModule), keccak256(abi.encode("xyz.voltz.OwnableStorage")), bytes32(abi.encode(owner)));
+        vm.store(
+            address(riskConfigurationModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
+        );
     }
 
     function test_ConfigureMarketRisk() public {
-        MarketRiskConfiguration.Data memory config = MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e16});
+        MarketRiskConfiguration.Data memory config =
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e16});
 
         // Expect MarketRiskConfigured event
         vm.expectEmit(true, true, true, true, address(riskConfigurationModule));
@@ -38,7 +43,8 @@ contract RiskConfigurationModuleTest is Test {
     function testFuzz_revertWhen_ConfigureMarketRisk_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
-        MarketRiskConfiguration.Data memory config = MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e16});
+        MarketRiskConfiguration.Data memory config =
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e16});
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -47,10 +53,14 @@ contract RiskConfigurationModuleTest is Test {
 
     function test_GetMarketRiskConfiguration() public {
         vm.prank(owner);
-        riskConfigurationModule.configureMarketRisk(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e16}));
+        riskConfigurationModule.configureMarketRisk(
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e16})
+        );
 
         vm.prank(owner);
-        riskConfigurationModule.configureMarketRisk(MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: 2e16}));
+        riskConfigurationModule.configureMarketRisk(
+            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: 2e16})
+        );
 
         MarketRiskConfiguration.Data memory existingConfig = riskConfigurationModule.getMarketRiskConfiguration(2, 20);
 
