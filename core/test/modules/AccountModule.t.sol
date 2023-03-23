@@ -94,6 +94,20 @@ contract AccountModuleTest is Test {
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, unauthorizedAddress);
     }
 
+    function test_revertWhen_GrantPermissionFromAdmin() public {
+        address adminAddress = address(1);
+
+        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        accountModule.createAccount(100);
+        accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress);
+        assertEq(accountModule.hasPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress), true);
+
+        vm.prank(adminAddress);
+        address randomAddress = address(2);
+        vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, 100, adminAddress));
+        accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, randomAddress);
+    }
+
     function test_RevokePermission() public {
         address revokedAddress = address(1);
 
@@ -154,6 +168,22 @@ contract AccountModuleTest is Test {
         accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
     }
 
+    function test_revertWhen_RevokePermissionFromAdmin() public {
+        address adminAddress = address(1);
+        address otherAdminAddress = address(2);
+
+        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        accountModule.createAccount(100);
+        accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress);
+        accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, otherAdminAddress);
+        assertEq(accountModule.hasPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress), true);
+        assertEq(accountModule.hasPermission(100, AccountRBAC._ADMIN_PERMISSION, otherAdminAddress), true);
+
+        vm.prank(adminAddress);
+        vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, 100, adminAddress));
+        accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, otherAdminAddress);
+    }
+
     function test_RenouncePermission() public {
         address renouncedAddress = address(1);
 
@@ -186,7 +216,9 @@ contract AccountModuleTest is Test {
         assertEq(accountPerms.length, 0);
 
         vm.prank(renouncedAddress);
-        vm.expectRevert(abi.encodeWithSelector(IAccountModule.PermissionNotGranted.selector, 100, AccountRBAC._ADMIN_PERMISSION, renouncedAddress));
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccountModule.PermissionNotGranted.selector, 100, AccountRBAC._ADMIN_PERMISSION, renouncedAddress)
+        );
         accountModule.renouncePermission(100, AccountRBAC._ADMIN_PERMISSION);
     }
 

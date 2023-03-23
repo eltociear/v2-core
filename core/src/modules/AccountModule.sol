@@ -98,9 +98,8 @@ contract AccountModule is IAccountModule {
         bytes32 permission,
         address user
     ) external override {
-        Account.Data storage account = Account.loadAccountAndValidatePermission(
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(
             accountId,
-            AccountRBAC._ADMIN_PERMISSION,
             msg.sender
         );
 
@@ -117,9 +116,8 @@ contract AccountModule is IAccountModule {
         bytes32 permission,
         address user
     ) external override {
-        Account.Data storage account = Account.loadAccountAndValidatePermission(
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(
             accountId,
-            AccountRBAC._ADMIN_PERMISSION,
             msg.sender
         );
 

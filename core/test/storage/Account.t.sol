@@ -39,7 +39,20 @@ contract ExposedAccounts is CoreState {
         return account.getCollateralBalanceAvailable(collateralType);
     }
 
-    function loadAccountAndValidatePermission(uint128 id, bytes32 permission, address senderAddress) external view returns (bytes32 s) {
+    function loadAccountAndValidateOwnership(uint128 id, address senderAddress) 
+        external view 
+        returns (bytes32 s) 
+    {
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(id, senderAddress);
+        assembly {
+            s := account.slot
+        }
+    }
+
+    function loadAccountAndValidatePermission(uint128 id, bytes32 permission, address senderAddress) 
+        external view 
+        returns (bytes32 s) 
+    {
         Account.Data storage account = Account.loadAccountAndValidatePermission(id, permission, senderAddress);
         assembly {
             s := account.slot
@@ -155,6 +168,20 @@ contract AccountTest is Test {
         uint256 collateralBalance = accounts.getCollateralBalance(accountId, otherToken);
 
         assertEq(collateralBalance, 0);
+    }
+
+    function test_LoadAccountAndValidateOwnership() public {
+        vm.prank(Constants.ALICE);
+        bytes32 slot = accounts.loadAccountAndValidateOwnership(accountId, Constants.ALICE);
+
+        assertEq(slot, accountSlot);
+    }
+
+    function testFuzz_revertWhen_LoadAccountAndValidateOwnership(address randomUser) public {
+        vm.assume(randomUser != Constants.ALICE);
+
+        vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
+        accounts.loadAccountAndValidateOwnership(accountId, randomUser);
     }
 
     function test_LoadAccountAndValidatePermission() public {

@@ -170,6 +170,27 @@ library Account {
      * in a single function because loading an account and checking for a 
      * permission is a very common use case in other parts of the code.
      */
+    function loadAccountAndValidateOwnership(
+        uint128 accountId,
+        address senderAddress
+    )
+        internal
+        view
+        returns (Data storage account)
+    {
+        account = Account.load(accountId);
+        if (account.rbac.owner != senderAddress) {
+            revert PermissionDenied(accountId, senderAddress);
+        }
+    }
+
+    /**
+     * @dev Loads the Account object for the specified accountId,
+     * and validates that sender has the specified permission. It also resets
+     * the interaction timeout. These are different actions but they are merged 
+     * in a single function because loading an account and checking for a 
+     * permission is a very common use case in other parts of the code.
+     */
     function loadAccountAndValidatePermission(
         uint128 accountId,
         bytes32 permission,
