@@ -2,14 +2,16 @@
 
 pragma solidity =0.8.17;
 
-import "src/products/dated-irs/externalInterfaces/IAaveV3LendingPool.sol";
+import "../../src/externalInterfaces/IAaveV3LendingPool.sol";
 import "oz/interfaces/IERC20.sol";
-import { UD60x18, ud } from "@prb/math/UD60x18.sol";
+import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
 /// @notice This Mock Aave pool can be used in 3 ways
 /// - change the rate to a fixed value (`setReserveNormalizedIncome`)
 /// - configure the rate to alter over time (`setFactorPerSecondInRay`) for more dynamic testing
 contract MockAaveLendingPool is IAaveV3LendingPool {
+    using { unwrap } for UD60x18;
+
     mapping(address => UD60x18) internal reserveNormalizedIncome;
     // mapping(IERC20 => uint256) internal reserveNormalizedVariableDebt;
     mapping(address => uint40) internal startTime;
@@ -24,7 +26,7 @@ contract MockAaveLendingPool is IAaveV3LendingPool {
         }
 
         // Convert from UD60x18 to Aave's "Ray" (decmimal scaled by 10^27) to confrom to Aave interface
-        return currentIndex.intoUint256() * 1e9;
+        return currentIndex.unwrap() * 1e9;
     }
 
     function setReserveNormalizedIncome(IERC20 _underlyingAsset, UD60x18 _reserveNormalizedIncomeInWeiNotRay) public {

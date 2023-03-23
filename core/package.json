@@ -1,6 +1,6 @@
 {
   "name": "@voltz-protocol/core",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "publishConfig": {
     "access": "restricted",
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
@@ -104,5 +104,8 @@
         }
       ]
     ]
+  },
+  "exports": {
+    "./src/storage/Account.sol": "./src/storage/Account.sol"
   }
 }

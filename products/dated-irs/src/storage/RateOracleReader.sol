@@ -2,14 +2,17 @@
 pragma solidity >=0.8.13;
 
 import "../interfaces/IRateOracle.sol";
-import "src/utils/contracts/src/helpers/Time.sol";
-import { UD60x18 } from "@prb/math/UD60x18.sol";
+import "../utils/contracts/src/helpers/Time.sol";
+import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
 library RateOracleReader {
+
+    using { unwrap } for UD60x18;
     /**
      * @dev Thrown if the index-at-maturity is requested before maturity.
      */
     error MaturityNotReached();
+    error MissingRateIndexAtMaturity();
 
     struct PreMaturityData {
         uint40 lastKnownTimestamp;
@@ -58,7 +61,6 @@ library RateOracleReader {
                         atOrAfterTimestamp: block.timestamp,
                         queryTimestamp: maturityTimestamp
                     });
-
                     self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
                 }
             }
@@ -98,9 +100,8 @@ library RateOracleReader {
                 PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];
 
                 if (cache.lastKnownTimestamp == 0) {
-                    // todo: revert
+                    revert MissingRateIndexAtMaturity();
                 }
-
                 rateIndexMaturity = IRateOracle(self.oracleAddress).interpolateIndexValue({
                     beforeIndex: cache.lastKnownIndex,
                     beforeTimestamp: cache.lastKnownTimestamp,
