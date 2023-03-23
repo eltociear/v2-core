@@ -41,7 +41,7 @@ library AccountRBAC {
     /**
      * @dev Reverts if the specified permission is unknown to the account RBAC system.
      */
-    function isPermissionValid(bytes32 permission) internal pure {
+    function checkPermissionIsValid(bytes32 permission) internal pure {
         if (
             permission != AccountRBAC._ADMIN_PERMISSION
         ) {
@@ -64,9 +64,7 @@ library AccountRBAC {
             revert AddressError.ZeroAddress();
         }
 
-        if (permission == "") {
-            revert InvalidPermission("");
-        }
+        checkPermissionIsValid(permission);
 
         if (!self.permissionAddresses.contains(target)) {
             self.permissionAddresses.add(target);
@@ -79,6 +77,8 @@ library AccountRBAC {
      * @dev Revokes a particular permission from the specified target address.
      */
     function revokePermission(Data storage self, bytes32 permission, address target) internal {
+        checkPermissionIsValid(permission);
+        
         self.permissions[target].remove(permission);
 
         if (self.permissions[target].length() == 0) {
@@ -112,6 +112,8 @@ library AccountRBAC {
         bytes32 permission,
         address target
     ) internal view returns (bool) {
+        checkPermissionIsValid(permission);
+
         return target != address(0) && self.permissions[target].contains(permission);
     }
 
@@ -123,6 +125,8 @@ library AccountRBAC {
         bytes32 permission,
         address target
     ) internal view returns (bool) {
+        checkPermissionIsValid(permission);
+
         return ((target == self.owner) ||
             hasPermission(self, _ADMIN_PERMISSION, target) ||
             hasPermission(self, permission, target));

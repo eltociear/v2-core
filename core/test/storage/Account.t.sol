@@ -169,6 +169,9 @@ contract AccountTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
         accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, randomUser);
+
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        accounts.loadAccountAndValidatePermission(accountId, bytes32("PER123"), Constants.ALICE);
     }
 
     function test_CloseAccount() public {

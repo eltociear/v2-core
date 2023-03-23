@@ -86,7 +86,7 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function isAuthorized(uint128 accountId, bytes32 permission, address user) public view override returns (bool _isAuthorized) {
+    function isAuthorized(uint128 accountId, bytes32 permission, address user) public view override returns (bool) {
         return Account.load(accountId).rbac.authorized(permission, user);
     }
 
@@ -98,8 +98,6 @@ contract AccountModule is IAccountModule {
         bytes32 permission,
         address user
     ) external override {
-        AccountRBAC.isPermissionValid(permission);
-
         Account.Data storage account = Account.loadAccountAndValidatePermission(
             accountId,
             AccountRBAC._ADMIN_PERMISSION,

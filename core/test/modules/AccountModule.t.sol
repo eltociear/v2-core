@@ -129,6 +129,9 @@ contract AccountModuleTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(SetUtil.ValueNotInSet.selector));
         accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
+
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        accountModule.revokePermission(100, "PER123", revokedAddress);
     }
 
     function test_revertWhen_RevokeUnauthorizedPermission() public {

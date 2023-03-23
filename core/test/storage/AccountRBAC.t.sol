@@ -33,8 +33,8 @@ contract ExposedAccountRBAC {
         return item.permissionAddresses.values();
     }
 
-    function isPermissionValid(bytes32 permission) external pure  {
-        AccountRBAC.isPermissionValid(permission);
+    function checkPermissionIsValid(bytes32 permission) external pure  {
+        AccountRBAC.checkPermissionIsValid(permission);
     }
 
     function grantPermission(bytes32 permission, address target) external {
@@ -91,7 +91,7 @@ contract AccountRBACTest is Test {
         assertEq(authorized, true);
     }
 
-    function test_Authorized_False(address owner, address target) public {
+    function test_Authorized_False() public {
         address owner = address(1);
         address target = address(2);
 
@@ -100,6 +100,16 @@ contract AccountRBACTest is Test {
         bool authorized = accountRBAC.authorized("ADMIN", target);
 
         assertEq(authorized, false);
+    }
+
+    function test_revertWhen_InvalidAuthorized() public {
+        address owner = address(1);
+        address target = address(2);
+
+        ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
+
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        accountRBAC.authorized("PER123", target);
     }
 
     function test_Authorized_SetOwner() public {
@@ -117,13 +127,19 @@ contract AccountRBACTest is Test {
 
     function test_ValidPermission() public {
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
-        accountRBAC.isPermissionValid("ADMIN");
+        accountRBAC.checkPermissionIsValid("ADMIN");
     }
 
     function test_revertWhen_InvalidPermission() public {
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
         vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
-        accountRBAC.isPermissionValid("PER123");
+        accountRBAC.checkPermissionIsValid("PER123");
+    }
+
+    function test_revertWhen_HasPermission() public {
+        ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        accountRBAC.hasPermission("PER123", address(2));
     }
 
     function test_GrantPermission() public {
@@ -141,6 +157,18 @@ contract AccountRBACTest is Test {
         assertEq(permissionAddresses[0], randomAddress);
 
         assertEq(accountRBAC.hasPermission("ADMIN", randomAddress), true);
+    }
+
+    function test_revertWhen_GrantPermission() public {
+        address randomAddress = address(1);
+
+        ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
+
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        accountRBAC.grantPermission("PER123", randomAddress);
+
+        vm.expectRevert(abi.encodeWithSelector(AddressError.ZeroAddress.selector));
+        accountRBAC.grantPermission("ADMIN", address(0));
     }
 
     function test_RevokePermission() public {
@@ -173,7 +201,7 @@ contract AccountRBACTest is Test {
         vm.expectRevert(abi.encodeWithSelector(SetUtil.ValueNotInSet.selector));
         accountRBAC.revokePermission("ADMIN", randomAddress);
 
-        vm.expectRevert(abi.encodeWithSelector(SetUtil.ValueNotInSet.selector));
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
         accountRBAC.revokePermission("PER123", randomAddress2);
     }
 
