@@ -21,12 +21,12 @@
     "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
   },
   "devDependencies": {
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^8.0.7",
     "lcov-badge-generator": "1.0.5",
     "prettier": "2.8.4",
-    "solhint": "3.4.0",
     "semantic-release": "^20.1.1",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^8.0.7"
+    "solhint": "3.4.0"
   },
   "release": {
     "branches": [

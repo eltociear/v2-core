@@ -5,7 +5,6 @@
     "access": "restricted",
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
   },
-  "dependencies": {},
   "scripts": {
     "publish:all": "yarn publish",
     "build": "forge build --sizes",
@@ -16,6 +15,5 @@
     "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
     "test": "forge test",
     "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
-  },
-  "devDependencies": {}
+  }
 }
