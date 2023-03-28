@@ -14,13 +14,13 @@
     "license": "MIT",
     "homepage": "https://github.com/Voltz-Protocol/v2-core#readme",
     "scripts": {
-        "publish:all": "yarn workspaces foreach --topological-dev run publish:all",
-        "clean": "yarn workspaces foreach --parallel run clean",
-        "test": "yarn workspaces foreach --parallel run test",
-        "coverage": "yarn workspaces foreach run coverage",
-        "build": "yarn workspaces foreach --topological-dev run build",
-        "lint:check": "yarn workspaces foreach --parallel run lint:check",
-        "lint:write": "yarn workspaces foreach --parallel run lint:write",
+        "publish:all": "yarn workspaces foreach --topological-dev --verbose run publish:all",
+        "clean": "yarn workspaces foreach --parallel --verbose run clean",
+        "test": "yarn workspaces foreach --parallel --verbose run test",
+        "coverage": "yarn workspaces foreach --verbose run coverage",
+        "build": "yarn workspaces foreach --topological-dev --verbose run build",
+        "lint:check": "yarn workspaces foreach --parallel --verbose run lint:check",
+        "lint:write": "yarn workspaces foreach --parallel --verbose run lint:write",
         "lint:js": "prettier --check '**/*.{t,j}s' && eslint --max-warnings=0 '**/*.{t,j}s'",
         "lint:js:fix": "prettier --write '**/*.{t,j}s' && eslint --max-warnings=0 --fix '**/*.{t,j}s'",
         "lint:sol": "prettier --check '(core|utils|products)/**/*.sol' && solhint utils/contracts/src/**/*.sol core/src/**/*.sol",
@@ -47,7 +47,8 @@
     },
     "workspaces": [
         "core",
-        "utils/contracts"
+        "utils/contracts",
+        "utils/modules"
     ],
     "engines": {
         "node": "^18.14.0",
