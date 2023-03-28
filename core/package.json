@@ -23,6 +23,8 @@
   "devDependencies": {
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.0.7",
+    "@voltz-protocol/util-contracts": "workspace:^",
+    "@voltz-protocol/util-modules": "workspace:^",
     "lcov-badge-generator": "1.0.5",
     "prettier": "2.8.4",
     "semantic-release": "^20.1.1",

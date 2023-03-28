@@ -1283,6 +1283,8 @@ __metadata:
     "@semantic-release/git": ^10.0.1
     "@semantic-release/github": ^8.0.7
     "@usecannon/cli": ^2.1.7
+    "@voltz-protocol/util-contracts": "workspace:^"
+    "@voltz-protocol/util-modules": "workspace:^"
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1298,7 +1300,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/util-modules@workspace:utils/modules":
+"@voltz-protocol/util-modules@workspace:^, @voltz-protocol/util-modules@workspace:utils/modules":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/util-modules@workspace:utils/modules"
   dependencies:
