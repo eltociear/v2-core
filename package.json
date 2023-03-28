@@ -1,6 +1,6 @@
 {
     "name": "voltz-v2",
-    "version": "2.0.0",
+    "version": "2.0.2",
     "private": true,
     "description": "Mono Repo with Voltz V2 Contracts and js tooling",
     "repository": {
@@ -10,11 +10,15 @@
     "bugs": {
         "url": "https://github.com/Voltz-Protocol/v2-core/issues"
     },
+    "publishConfig": {
+        "access": "restricted",
+        "@voltz-protocol:registry": "https://npm.pkg.github.com"
+    },
     "author": "Voltz Protocol",
     "license": "MIT",
     "homepage": "https://github.com/Voltz-Protocol/v2-core#readme",
     "scripts": {
-        "publish:all": "yarn workspaces foreach --topological-dev --verbose run publish:all",
+        "publish:all": "yarn workspaces foreach --no-private npm publish --tolerate-republish",
         "clean": "yarn workspaces foreach --parallel --verbose run clean",
         "test": "yarn workspaces foreach --parallel --verbose run test",
         "coverage": "yarn workspaces foreach --verbose run coverage",

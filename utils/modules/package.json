@@ -1,12 +1,11 @@
 {
   "name": "@voltz-protocol/util-modules",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publishConfig": {
     "access": "restricted",
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "publish:all": "yarn publish",
     "build": "forge build --sizes",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
