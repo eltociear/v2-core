@@ -12,7 +12,7 @@ import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 contract MarketConfigurationModule is IMarketConfigurationModule {
     using MarketConfiguration for MarketConfiguration.Data;
 
-    bytes32 private constant _CONFIGURE_MARKET_FEATURE_FLAG = "createOracle";
+    bytes32 private constant _CONFIGURE_MARKET_FEATURE_FLAG = "configureMarket";
 
     /**
      * @inheritdoc IMarketConfigurationModule
