@@ -296,8 +296,8 @@ library Portfolio {
     }
 
     /**
-     * @dev retreives marketId and maturityTimestamp from the list 
-     * of active markets and maturities associated with the collateral type 
+     * @dev retreives marketId and maturityTimestamp from the list
+     * of active markets and maturities associated with the collateral type
      */
     function getMarketAndMaturity(
         Data storage self,

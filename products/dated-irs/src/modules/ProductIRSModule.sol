@@ -71,7 +71,7 @@ contract ProductIRSModule is IProductIRSModule {
 
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external override {
         address coreProxy = ProductConfiguration.getProxyAddress();
-        
+
         // check account access permissions
         IAccountModule(coreProxy).authorize(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
