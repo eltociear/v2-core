@@ -3,7 +3,10 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IProductIRSModule.sol";
 import "../interfaces/IMarketConfigurationModule.sol";
+import "@voltz-protocol/core/src/interfaces/IAccountModule.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
+import "@voltz-protocol/core/src/storage/AccountRBAC.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
 import "../storage/ProductConfiguration.sol";
@@ -21,6 +24,9 @@ contract ProductIRSModule is IProductIRSModule {
     using Portfolio for Portfolio.Data;
     using SafeCastI256 for int256;
 
+    bytes32 private constant _CLOSE_ACCOUNT_FEATURE_FLAG = "closeAccount";
+    bytes32 private constant _CONFIGURE_PRODUCT_FEATURE_FLAG = "configureProduct";
+
     /**
      * @inheritdoc IProductIRSModule
      */
@@ -34,6 +40,11 @@ contract ProductIRSModule is IProductIRSModule {
         override
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)
     {
+        address coreProxy = ProductConfiguration.getProxyAddress();
+
+        // check account access permissions
+        IAccountModule(coreProxy).authorize(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+
         // update rate oracle cache if empty or hasn't been updated in a while
         RateOracleReader.load(marketId).updateCache(maturityTimestamp);
 
@@ -45,7 +56,6 @@ contract ProductIRSModule is IProductIRSModule {
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
-        address coreProxy = ProductConfiguration.getProxyAddress();
         address quoteToken = IMarketConfigurationModule(coreProxy).getMarketConfiguration(marketId).quoteToken;
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = executedBaseAmount;
@@ -60,11 +70,15 @@ contract ProductIRSModule is IProductIRSModule {
      */
 
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external override {
+        address coreProxy = ProductConfiguration.getProxyAddress();
+        
+        // check account access permissions
+        IAccountModule(coreProxy).authorize(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
         int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp, poolAddress);
 
-        address coreProxy = ProductConfiguration.getProxyAddress();
         address quoteToken = IMarketConfigurationModule(coreProxy).getMarketConfiguration(marketId).quoteToken;
 
         uint128 productId = ProductConfiguration.getProductId();
@@ -134,13 +148,16 @@ contract ProductIRSModule is IProductIRSModule {
      * @inheritdoc IProduct
      */
     function closeAccount(uint128 accountId, address collateralType) external override {
+        FeatureFlag.ensureAccessToFeature(_CLOSE_ACCOUNT_FEATURE_FLAG);
+
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
         portfolio.closeAccount(poolAddress, collateralType);
     }
 
-    // todo: introduce in interface or create separate module for exposing this function
     function configureProduct(ProductConfiguration.Data memory config) external {
+        FeatureFlag.ensureAccessToFeature(_CONFIGURE_PRODUCT_FEATURE_FLAG);
+
         ProductConfiguration.set(config);
         emit ProductConfigured(config);
     }
@@ -148,7 +165,7 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IERC165
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external view override(IERC165) returns (bool) {
         return interfaceId == type(IProduct).interfaceId || interfaceId == this.supportsInterface.selector;
     }
 }

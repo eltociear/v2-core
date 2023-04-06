@@ -35,4 +35,17 @@ interface IProductIRSModule is IProduct {
     )
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount);
+
+    /**
+     * @notice Creates or updates the configuration for the given product.
+     * @param config The ProductConfiguration object describing the new configuration.
+     *
+     * Requirements:
+     *
+     * - `msg.sender` must be the owner of the system.
+     *
+     * Emits a {ProductConfigured} event.
+     *
+     */
+    function configureProduct(ProductConfiguration.Data memory config) external;
 }

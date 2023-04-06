@@ -251,7 +251,6 @@ library Portfolio {
 
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
-        // TODO: use PRB math
         UD60x18 liquidityIndexMaturity = RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp);
 
         self.deactivateMarketMaturity(marketId, maturityTimestamp);
