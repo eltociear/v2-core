@@ -93,7 +93,7 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function authorize(
+    function onlyAuthorized(
         uint128 accountId,
         bytes32 permission,
         address target

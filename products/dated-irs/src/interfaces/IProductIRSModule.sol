@@ -8,6 +8,11 @@ import "../storage/ProductConfiguration.sol";
 interface IProductIRSModule is IProduct {
     event ProductConfigured(ProductConfiguration.Data config);
 
+    /**
+     * @notice Thrown when an attempt to access a function without authorization.
+     */
+    error NotAuthorized();
+
     // process taker and maker orders & single pool
 
     /**

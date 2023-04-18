@@ -24,7 +24,6 @@ contract ProductIRSModule is IProductIRSModule {
     using Portfolio for Portfolio.Data;
     using SafeCastI256 for int256;
 
-    bytes32 private constant _CLOSE_ACCOUNT_FEATURE_FLAG = "closeAccount";
     bytes32 private constant _CONFIGURE_PRODUCT_FEATURE_FLAG = "configureProduct";
 
     /**
@@ -43,7 +42,7 @@ contract ProductIRSModule is IProductIRSModule {
         address coreProxy = ProductConfiguration.getProxyAddress();
 
         // check account access permissions
-        IAccountModule(coreProxy).authorize(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+        IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
         // update rate oracle cache if empty or hasn't been updated in a while
         RateOracleReader.load(marketId).updateCache(maturityTimestamp);
@@ -73,7 +72,7 @@ contract ProductIRSModule is IProductIRSModule {
         address coreProxy = ProductConfiguration.getProxyAddress();
 
         // check account access permissions
-        IAccountModule(coreProxy).authorize(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+        IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
@@ -148,7 +147,14 @@ contract ProductIRSModule is IProductIRSModule {
      * @inheritdoc IProduct
      */
     function closeAccount(uint128 accountId, address collateralType) external override {
-        FeatureFlag.ensureAccessToFeature(_CLOSE_ACCOUNT_FEATURE_FLAG);
+        address coreProxy = ProductConfiguration.getProxyAddress();
+
+        if (
+            !IAccountModule(coreProxy).isAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender)
+            && msg.sender != ProductConfiguration.getProxyAddress()
+        ) {
+            revert NotAuthorized();
+        }
 
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();

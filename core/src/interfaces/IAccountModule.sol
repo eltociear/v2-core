@@ -181,7 +181,7 @@ interface IAccountModule {
      * @param permission The bytes32 identifier of the permission.
      * @param target The target address whose permission is being queried.
      */
-    function authorize(
+    function onlyAuthorized(
         uint128 accountId,
         bytes32 permission,
         address target
