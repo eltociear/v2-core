@@ -151,7 +151,7 @@ contract ProductIRSModule is IProductIRSModule {
 
         if (
             !IAccountModule(coreProxy).isAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender)
-            && msg.sender != ProductConfiguration.getProxyAddress()
+                && msg.sender != ProductConfiguration.getProxyAddress()
         ) {
             revert NotAuthorized();
         }
