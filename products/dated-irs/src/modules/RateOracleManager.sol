@@ -5,7 +5,7 @@ import "../interfaces/IRateOracleModule.sol";
 import "../interfaces/IRateOracle.sol";
 import "../storage/RateOracleReader.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
-import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 /**
@@ -16,9 +16,6 @@ import { UD60x18 } from "@prb/math/UD60x18.sol";
  */
 contract RateOracleManager is IRateOracleModule {
     using RateOracleReader for RateOracleReader.Data;
-
-    bytes32 private constant _CREATE_ORACLE_FEATURE_FLAG = "createOracle";
-    bytes32 private constant _CONFIGURE_ORACLE_FEATURE_FLAG = "configureOracle";
 
     /**
      * @inheritdoc IRateOracleModule
@@ -55,7 +52,7 @@ contract RateOracleManager is IRateOracleModule {
      * @inheritdoc IRateOracleModule
      */
     function registerVariableOracle(uint128 marketId, address oracleAddress) external override {
-        FeatureFlag.ensureAccessToFeature(_CREATE_ORACLE_FEATURE_FLAG);
+        OwnableStorage.onlyOwner();
 
         if (_isVariableOracleRegistered(marketId)) {
             revert AlreadyRegisteredVariableOracle(oracleAddress);
@@ -69,7 +66,7 @@ contract RateOracleManager is IRateOracleModule {
      * @inheritdoc IRateOracleModule
      */
     function configureVariableOracle(uint128 marketId, address oracleAddress) external override {
-        FeatureFlag.ensureAccessToFeature(_CONFIGURE_ORACLE_FEATURE_FLAG);
+        OwnableStorage.onlyOwner();
 
         if (!_isVariableOracleRegistered(marketId)) {
             revert UnknownVariableOracle(oracleAddress);

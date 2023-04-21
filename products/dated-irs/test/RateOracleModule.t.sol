@@ -6,12 +6,11 @@ import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
 import "./mocks/MockRateOracle.sol";
 import "../src/oracles/AaveRateOracle.sol";
 import "../src/modules/RateOracleManager.sol";
-import "../src/modules/FeatureFlagModule.sol";
 import "../src/storage/RateOracleReader.sol";
 import "oz/interfaces/IERC20.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
-contract RateOracleManagerExtended is RateOracleManager, FeatureFlagModule {
+contract RateOracleManagerExtended is RateOracleManager {
     function setOwner(address account) external {
         OwnableStorage.Data storage ownable = OwnableStorage.load();
         ownable.owner = account;
@@ -38,7 +37,6 @@ contract RateOracleManagerTest is Test {
 
         maturityTimestamp = Time.blockTimestampTruncated() + 3139000;
 
-        rateOracleManager.addToFeatureFlagAllowlist("createOracle", address(this));
         rateOracleManager.registerVariableOracle(100, address(mockRateOracle));
     }
 

@@ -11,7 +11,7 @@ interface IProductIRSModule is IProduct {
     /**
      * @notice Thrown when an attempt to access a function without authorization.
      */
-    error NotAuthorized();
+    error NotAuthorized(address caller, bytes32 functionName);
 
     // process taker and maker orders & single pool
 

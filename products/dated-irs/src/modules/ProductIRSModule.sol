@@ -6,13 +6,13 @@ import "../interfaces/IMarketConfigurationModule.sol";
 import "@voltz-protocol/core/src/interfaces/IAccountModule.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
 import "@voltz-protocol/core/src/storage/AccountRBAC.sol";
-import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
 import "../storage/ProductConfiguration.sol";
 import "../storage/RateOracleReader.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 
 /**
  * @title Dated Interest Rate Swap Product
@@ -23,8 +23,6 @@ contract ProductIRSModule is IProductIRSModule {
     using RateOracleReader for RateOracleReader.Data;
     using Portfolio for Portfolio.Data;
     using SafeCastI256 for int256;
-
-    bytes32 private constant _CONFIGURE_PRODUCT_FEATURE_FLAG = "configureProduct";
 
     /**
      * @inheritdoc IProductIRSModule
@@ -39,7 +37,7 @@ contract ProductIRSModule is IProductIRSModule {
         override
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)
     {
-        address coreProxy = ProductConfiguration.getProxyAddress();
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
         // check account access permissions
         IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
@@ -69,7 +67,7 @@ contract ProductIRSModule is IProductIRSModule {
      */
 
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external override {
-        address coreProxy = ProductConfiguration.getProxyAddress();
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
         // check account access permissions
         IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
@@ -147,13 +145,13 @@ contract ProductIRSModule is IProductIRSModule {
      * @inheritdoc IProduct
      */
     function closeAccount(uint128 accountId, address collateralType) external override {
-        address coreProxy = ProductConfiguration.getProxyAddress();
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
         if (
             !IAccountModule(coreProxy).isAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender)
-                && msg.sender != ProductConfiguration.getProxyAddress()
+                && msg.sender != ProductConfiguration.getCoreProxyAddress()
         ) {
-            revert NotAuthorized();
+            revert NotAuthorized(msg.sender, "closeAccount");
         }
 
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
@@ -162,7 +160,7 @@ contract ProductIRSModule is IProductIRSModule {
     }
 
     function configureProduct(ProductConfiguration.Data memory config) external {
-        FeatureFlag.ensureAccessToFeature(_CONFIGURE_PRODUCT_FEATURE_FLAG);
+        OwnableStorage.onlyOwner();
 
         ProductConfiguration.set(config);
         emit ProductConfigured(config);
