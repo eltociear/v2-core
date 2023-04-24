@@ -111,6 +111,11 @@ jobs:
           node-version: 18
           registry-url: https://npm.pkg.github.com/
       - run: yarn install
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISHING_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_PUBLISHING_TOKEN }}
+        run: make release
       - run: yarn publish:all
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
