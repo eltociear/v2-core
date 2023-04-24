@@ -6,7 +6,7 @@
   },
   "private": true,
   "scripts": {
-    "publish:all": "yarn publish",
+    "publish": "yarn npm publish --tolerate-republish",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
     "lint:sol:check": "forge fmt --check && yarn solhint \"{src,test}/**/*.sol\" ",
