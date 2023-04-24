@@ -1,6 +1,6 @@
 {
   "name": "@voltz-protocol/util-modules",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publishConfig": {
     "access": "restricted",
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
