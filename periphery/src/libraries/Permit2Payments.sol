@@ -25,18 +25,6 @@ library Permit2Payments {
         Config.load().PERMIT2.transferFrom(from, to, amount, token);
     }
 
-    /// @notice Performs a batch transferFrom on Permit2
-    /// @param batchDetails An array detailing each of the transfers that should occur
-    function permit2TransferFrom(IAllowanceTransfer.AllowanceTransferDetails[] memory batchDetails, address owner)
-        internal
-    {
-        uint256 batchLength = batchDetails.length;
-        for (uint256 i = 0; i < batchLength; ++i) {
-            if (batchDetails[i].from != owner) revert FromAddressIsNotOwner();
-        }
-        Config.load().PERMIT2.transferFrom(batchDetails);
-    }
-
     /// @notice Either performs a regular payment or transferFrom on Permit2, depending on the payer address
     /// @param token The token to transfer
     /// @param payer The address to pay for the transfer
