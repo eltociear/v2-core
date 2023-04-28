@@ -15,7 +15,7 @@
     "build": "forge build",
     "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg",
     "release": "semantic-release",
-    "bump": "yarn version minor"
+    "bump": "yarn version patch"
   },
   "devDependencies": {
     "@voltz-protocol/core": "workspace:^",

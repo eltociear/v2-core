@@ -1,6 +1,7 @@
 name: "Release"
 
 on:
+  pull_request:
   push:
     branches:
       - main
@@ -15,23 +16,31 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: "Check out the repo"
+        uses: "actions/checkout@v3"
         with:
           fetch-depth: 0
-          persist-credentials: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+
+      - name: "Install Foundry"
+        uses: "foundry-rs/foundry-toolchain@v1"
+
+      - name: "Install Node.js"
+        uses: "actions/setup-node@v3"
         with:
-          always-auth: true
+          cache: "yarn"
           node-version: 18
-          registry-url: https://npm.pkg.github.com/
-      - name: Install dependencies
-        run: yarn install
-      - name: Bump versions
-        run: yarn bump
-      - run: yarn config set npmRegistryServer https://npm.pkg.github.com
-      - run: yarn publish
-        env:
-            NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - run: yarn config unset npmRegistryServer
+          always-auth: true
+
+      - name: "Install the Node.js dependencies"
+        run: "yarn install --immutable"
+
+      - name: "Bump versions"
+        run: "yarn bump"
+
+      - name: "Setup GitHub package registry"
+        run: yarn config set npmRegistries --json '{"https://npm.pkg.github.com/":{"npmAuthToken":"${{secrets.NPM_AUTH_TOKEN}}"}}'
+
+      - name: "Change npm registry server"
+        run: "yarn config set npmRegistryServer https://npm.pkg.github.com"
+
+      - run: "yarn publish"

@@ -17,7 +17,7 @@
     "test": "forge test",
     "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg",
     "release": "semantic-release",
-    "bump": "yarn version minor"
+    "bump": "yarn version patch"
   },
   "devDependencies": {
     "solhint": "^3.4.1"
