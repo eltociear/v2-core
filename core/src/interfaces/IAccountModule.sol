@@ -33,7 +33,7 @@ interface IAccountModule {
      */
     event AccountOwnerUpdate(
         uint128 indexed accountId, 
-        address indexed newOwner, 
+        address indexed newOwner,
         uint256 blockTimestamp
     );
 
