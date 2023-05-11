@@ -6,7 +6,7 @@ import "../storage/ProductConfiguration.sol";
 
 /// @title Interface of a dated irs product
 interface IProductIRSModule is IProduct {
-    event ProductConfigured(ProductConfiguration.Data config , uint256 blockTimestamp);
+    event ProductConfigured(ProductConfiguration.Data config, uint256 blockTimestamp);
 
     /**
      * @notice Emitted when a taker order of the account token with id `accountId` is initiated.
@@ -21,12 +21,12 @@ interface IProductIRSModule is IProduct {
      * @param blockTimestamp The current block timestamp.
      */
     event TakerOrder(
-        uint128 indexed accountId, 
+        uint128 indexed accountId,
         uint128 productId,
-        uint128 indexed marketId, 
+        uint128 indexed marketId,
         uint32 indexed maturityTimestamp,
-        address collateralType, 
-        int256 executedBaseAmount, 
+        address collateralType,
+        int256 executedBaseAmount,
         int256 executedQuoteAmount,
         int256 annualizedNotionalAmount,
         uint256 blockTimestamp
@@ -42,11 +42,11 @@ interface IProductIRSModule is IProduct {
      * @param blockTimestamp The current block timestamp.
      */
     event DatedIRSPositionSettled(
-        uint128 indexed accountId, 
+        uint128 indexed accountId,
         uint128 productId,
-        uint128 indexed marketId, 
+        uint128 indexed marketId,
         uint32 indexed maturityTimestamp,
-        address collateralType, 
+        address collateralType,
         int256 settlementCashflowInQuote,
         uint256 blockTimestamp
     );

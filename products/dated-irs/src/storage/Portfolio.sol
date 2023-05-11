@@ -40,9 +40,9 @@ library Portfolio {
      * @param blockTimestamp The current block timestamp.
      */
     event ProductPositionUpdated(
-        uint128 indexed accountId, 
-        uint128 indexed marketId, 
-        uint32 indexed maturityTimestamp, 
+        uint128 indexed accountId,
+        uint128 indexed marketId,
+        uint32 indexed maturityTimestamp,
         int256 baseDelta,
         int256 quoteDelta,
         uint256 blockTimestamp
@@ -219,10 +219,13 @@ library Portfolio {
             (int256 executedBaseAmount, int256 executedQuoteAmount) =
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
             position.update(executedBaseAmount, executedQuoteAmount);
-            emit ProductPositionUpdated(self.accountId, marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount, block.timestamp);
+            emit ProductPositionUpdated(
+                self.accountId, marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount, block.timestamp
+                );
 
             // todo: propagate taker order to core and please uncomment the following event when you do so
-            // emit TakerOrder(accountId, marketId, maturityTimestamp, quoteToken, executedBaseAmount, executedQuoteAmount, annualizedBaseAmount, block.timestamp);
+            // emit TakerOrder(accountId, marketId, maturityTimestamp, quoteToken, executedBaseAmount, executedQuoteAmount,
+            // annualizedBaseAmount, block.timestamp);
 
             pool.closePosition(marketId, maturityTimestamp, self.accountId);
 
@@ -284,7 +287,9 @@ library Portfolio {
         settlementCashflow =
             mulUDxInt(liquidityIndexMaturity, position.baseBalance + closedBasePool) + position.quoteBalance + closedQuotePool;
 
-        emit ProductPositionUpdated(self.accountId, marketId, maturityTimestamp, -position.baseBalance, -position.quoteBalance, block.timestamp);
+        emit ProductPositionUpdated(
+            self.accountId, marketId, maturityTimestamp, -position.baseBalance, -position.quoteBalance, block.timestamp
+            );
         position.update(-position.baseBalance, -position.quoteBalance);
     }
 
