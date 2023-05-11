@@ -48,7 +48,7 @@ contract ProductIRSModule is IProductIRSModule {
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         address poolAddress = ProductConfiguration.getPoolAddress();
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        (executedBaseAmount, executedQuoteAmount) = 
+        (executedBaseAmount, executedQuoteAmount) =
             IPool(poolAddress).executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
@@ -58,11 +58,19 @@ contract ProductIRSModule is IProductIRSModule {
         baseAmounts[0] = executedBaseAmount;
         int256 annualizedNotionalAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
         uint128 productId = ProductConfiguration.getProductId();
-        IProductModule(coreProxy).propagateTakerOrder(
-            accountId, productId, marketId, quoteToken, annualizedNotionalAmount
-        );
+        IProductModule(coreProxy).propagateTakerOrder(accountId, productId, marketId, quoteToken, annualizedNotionalAmount);
 
-        emit TakerOrder(accountId, productId, marketId, maturityTimestamp, quoteToken, executedBaseAmount, executedQuoteAmount, annualizedNotionalAmount, block.timestamp);
+        emit TakerOrder(
+            accountId,
+            productId,
+            marketId,
+            maturityTimestamp,
+            quoteToken,
+            executedBaseAmount,
+            executedQuoteAmount,
+            annualizedNotionalAmount,
+            block.timestamp
+            );
     }
 
     /**
@@ -85,7 +93,9 @@ contract ProductIRSModule is IProductIRSModule {
 
         IProductModule(coreProxy).propagateCashflow(accountId, productId, quoteToken, settlementCashflowInQuote);
 
-        emit DatedIRSPositionSettled(accountId, productId, marketId, maturityTimestamp, quoteToken, settlementCashflowInQuote, block.timestamp);
+        emit DatedIRSPositionSettled(
+            accountId, productId, marketId, maturityTimestamp, quoteToken, settlementCashflowInQuote, block.timestamp
+            );
     }
 
     /**

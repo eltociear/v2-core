@@ -42,9 +42,9 @@ library Portfolio {
      * @param blockTimestamp The current block timestamp.
      */
     event ProductPositionUpdated(
-        uint128 indexed accountId, 
-        uint128 indexed marketId, 
-        uint32 indexed maturityTimestamp, 
+        uint128 indexed accountId,
+        uint128 indexed marketId,
+        uint32 indexed maturityTimestamp,
         int256 baseDelta,
         int256 quoteDelta,
         uint256 blockTimestamp
@@ -245,6 +245,10 @@ library Portfolio {
             // todo: trader position balance can get out of line if LP
             position.update(executedBaseAmount, executedQuoteAmount);
 
+            emit ProductPositionUpdated(
+                self.accountId, marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount, block.timestamp
+                );
+            
             if (position.baseBalance == 0 && position.quoteBalance == 0) {
                 self.deactivateMarketMaturity(marketId, maturityTimestamp);
             }
@@ -303,7 +307,9 @@ library Portfolio {
         settlementCashflow =
             mulUDxInt(liquidityIndexMaturity, position.baseBalance + filledBase) + position.quoteBalance + filledQuote;
 
-        emit ProductPositionUpdated(self.accountId, marketId, maturityTimestamp, -position.baseBalance, -position.quoteBalance, block.timestamp);
+        emit ProductPositionUpdated(
+            self.accountId, marketId, maturityTimestamp, -position.baseBalance, -position.quoteBalance, block.timestamp
+            );
         position.update(-position.baseBalance, -position.quoteBalance);
     }
 

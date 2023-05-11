@@ -21,7 +21,9 @@ library RateOracleReader {
      * @param rate The value of the rate.
      * @param blockTimestamp The current block timestamp.
      */
-    event RateOracleCacheUpdated(uint128 indexed marketId, address oracleAddress, uint32 timestamp, uint256 rate, uint256 blockTimestamp);
+    event RateOracleCacheUpdated(
+        uint128 indexed marketId, address oracleAddress, uint32 timestamp, uint256 rate, uint256 blockTimestamp
+    );
 
     struct PreMaturityData {
         uint32 lastKnownTimestamp;
@@ -72,7 +74,13 @@ library RateOracleReader {
                     self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
                 }
 
-                emit RateOracleCacheUpdated(self.marketId, self.oracleAddress, maturityTimestamp, self.rateIndexAtMaturity[maturityTimestamp].unwrap(), block.timestamp);
+                emit RateOracleCacheUpdated(
+                    self.marketId,
+                    self.oracleAddress,
+                    maturityTimestamp,
+                    self.rateIndexAtMaturity[maturityTimestamp].unwrap(),
+                    block.timestamp
+                    );
             }
         } else {
             // timestamp has not yet passed
@@ -96,7 +104,9 @@ library RateOracleReader {
                 cache.lastKnownTimestamp = Time.blockTimestampTruncated();
                 cache.lastKnownIndex = currentIndex;
 
-                emit RateOracleCacheUpdated(self.marketId, self.oracleAddress, cache.lastKnownTimestamp, cache.lastKnownIndex.unwrap(), block.timestamp);
+                emit RateOracleCacheUpdated(
+                    self.marketId, self.oracleAddress, cache.lastKnownTimestamp, cache.lastKnownIndex.unwrap(), block.timestamp
+                    );
             }
         }
     }
