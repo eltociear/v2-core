@@ -30,6 +30,24 @@ library Portfolio {
     error SettlementBeforeMaturity(uint128 marketId, uint32 maturityTimestamp, uint256 accountId);
     error UnknownMarket(uint128 marketId);
 
+    /**
+     * @notice Emitted when a new product is registered in the protocol.
+     * @param accountId The id of the account.
+     * @param marketId The id of the market.
+     * @param maturityTimestamp The maturity timestamp of the position.
+     * @param baseDelta The delta in position base balance.
+     * @param quoteDelta The delta in position quote balance.
+     * @param blockTimestamp The current block timestamp.
+     */
+    event ProductPositionUpdated(
+        uint128 indexed accountId, 
+        uint128 indexed marketId, 
+        uint32 indexed maturityTimestamp, 
+        int256 baseDelta,
+        int256 quoteDelta,
+        uint256 blockTimestamp
+    );
+
     struct Data {
         /**
          * @dev Numeric identifier for the account that owns the portfolio.
@@ -201,6 +219,10 @@ library Portfolio {
             (int256 executedBaseAmount, int256 executedQuoteAmount) =
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
             position.update(executedBaseAmount, executedQuoteAmount);
+            emit ProductPositionUpdated(self.accountId, marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount, block.timestamp);
+
+            // todo: propagate taker order to core and please uncomment the following event when you do so
+            // emit TakerOrder(accountId, marketId, maturityTimestamp, quoteToken, executedBaseAmount, executedQuoteAmount, annualizedBaseAmount, block.timestamp);
 
             pool.closePosition(marketId, maturityTimestamp, self.accountId);
 
@@ -230,6 +252,7 @@ library Portfolio {
         }
 
         position.update(baseDelta, quoteDelta);
+        emit ProductPositionUpdated(self.accountId, marketId, maturityTimestamp, baseDelta, quoteDelta, block.timestamp);
     }
 
     /**
@@ -261,7 +284,8 @@ library Portfolio {
         settlementCashflow =
             mulUDxInt(liquidityIndexMaturity, position.baseBalance + closedBasePool) + position.quoteBalance + closedQuotePool;
 
-        position.settle();
+        emit ProductPositionUpdated(self.accountId, marketId, maturityTimestamp, -position.baseBalance, -position.quoteBalance, block.timestamp);
+        position.update(-position.baseBalance, -position.quoteBalance);
     }
 
     /**

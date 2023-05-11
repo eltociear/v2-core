@@ -51,6 +51,7 @@ contract RateOracleManager is IRateOracleModule {
     /**
      * @inheritdoc IRateOracleModule
      */
+    // note: merge registerVariableOracle and configureVariableOracle into one function
     function registerVariableOracle(uint128 marketId, address oracleAddress) external override {
         OwnableStorage.onlyOwner();
 
@@ -59,7 +60,6 @@ contract RateOracleManager is IRateOracleModule {
         }
 
         validateAndConfigureOracleAddress(marketId, oracleAddress);
-        emit RateOracleRegistered(marketId, oracleAddress);
     }
 
     /**
@@ -73,7 +73,6 @@ contract RateOracleManager is IRateOracleModule {
         }
 
         validateAndConfigureOracleAddress(marketId, oracleAddress);
-        emit RateOracleConfigured(marketId, oracleAddress);
     }
 
     /**
@@ -86,6 +85,8 @@ contract RateOracleManager is IRateOracleModule {
 
         // configure the variable rate oracle
         RateOracleReader.set(marketId, oracleAddress);
+
+        emit RateOracleConfigured(marketId, oracleAddress, block.timestamp);
     }
 
     function _isVariableOracleRegistered(uint128 marketId) internal returns (bool) {

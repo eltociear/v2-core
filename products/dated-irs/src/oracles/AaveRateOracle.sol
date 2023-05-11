@@ -22,6 +22,8 @@ contract AaveRateOracle is IRateOracle {
     /// @inheritdoc IRateOracle
     function getLastUpdatedIndex() public view override returns (uint32 timestamp, UD60x18 liquidityIndex) {
         uint256 liquidityIndexInRay = aaveLendingPool.getReserveNormalizedIncome(underlying);
+        // note: Should we delete this commented code?
+        ///
         // if (liquidityIndex == 0) {
         //     revert CustomErrors.AavePoolGetReserveNormalizedIncomeReturnedZero();
         // }
@@ -33,6 +35,7 @@ contract AaveRateOracle is IRateOracle {
     /// @inheritdoc IRateOracle
     function getCurrentIndex() external view override returns (UD60x18 liquidityIndex) {
         uint256 liquidityIndexInRay = aaveLendingPool.getReserveNormalizedIncome(underlying);
+        // note: Should we delete this commented code?
         // if (liquidityIndex == 0) {
         //     revert CustomErrors.AavePoolGetReserveNormalizedIncomeReturnedZero();
         // }
