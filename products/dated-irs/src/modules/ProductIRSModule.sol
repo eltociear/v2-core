@@ -11,6 +11,7 @@ import "../storage/ProductConfiguration.sol";
 import "../storage/RateOracleReader.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
+import "@voltz-protocol/core/src/storage/Permit.sol";
 import "@voltz-protocol/core/src/interfaces/IRiskConfigurationModule.sol";
 import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 
@@ -41,7 +42,12 @@ contract ProductIRSModule is IProductIRSModule {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
         // check account access permissions
-        IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+        IAccountModule(coreProxy).onlyAuthorized(
+            accountId,
+            AccountRBAC._ADMIN_PERMISSION,
+            msg.sender,
+            abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, marketId, maturityTimestamp, baseAmount)
+        );
 
         // update rate oracle cache if empty or hasn't been updated in a while
         RateOracleReader.load(marketId).updateCache(maturityTimestamp);
@@ -81,7 +87,13 @@ contract ProductIRSModule is IProductIRSModule {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
         // check account access permissions
-        IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+        bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_SETTLE, accountId, marketId, maturityTimestamp);
+        IAccountModule(coreProxy).onlyAuthorized(
+            accountId,
+            AccountRBAC._ADMIN_PERMISSION,
+            msg.sender,
+            abi.encode()
+        );
 
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
@@ -161,11 +173,11 @@ contract ProductIRSModule is IProductIRSModule {
     function closeAccount(uint128 accountId, address collateralType) external override {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
-        if (
-            !IAccountModule(coreProxy).isAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender)
-                && msg.sender != ProductConfiguration.getCoreProxyAddress()
-        ) {
-            revert NotAuthorized(msg.sender, "closeAccount");
+        if (msg.sender != ProductConfiguration.getCoreProxyAddress()) {
+            bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_CLOSE_ACCOUNT, ProductConfiguration.getProductId(), accountId, collateralType);
+            if (!IAccountModule(coreProxy).isAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender, encodedCommand)) {
+                revert NotAuthorized(msg.sender, "closeAccount");
+            }
         }
 
         Portfolio.Data storage portfolio = Portfolio.load(accountId);

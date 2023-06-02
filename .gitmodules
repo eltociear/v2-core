@@ -43,3 +43,6 @@
 [submodule "community/lib/openzeppelin-contracts"]
 	path = community/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "utils/contracts/lib/openzeppelin-contracts"]
+	path = utils/contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts

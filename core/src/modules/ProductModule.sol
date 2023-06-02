@@ -76,7 +76,8 @@ contract ProductModule is IProductModule {
     function closeAccount(uint128 productId, uint128 accountId, address collateralType) external override {
         // todo: consider returning data that might be useful in the future
 
-        Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+        bytes memory encodedCommand = abi.encode(Permit.V2_CORE_WITHDRAW, productId, accountId, collateralType);
+        Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, encodedCommand);
         Product.load(productId).closeAccount(accountId, collateralType);
     }
 

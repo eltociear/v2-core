@@ -51,6 +51,20 @@ library Dispatcher {
                 maturityTimestamp := calldataload(add(inputs.offset, 0x20))
             }
             V2DatedIRS.settle(accountId, marketId, maturityTimestamp);
+        } else if (command == Commands.V2_VAMM_EXCHANGE_LP) {
+            // equivalent: abi.decode(inputs, (uint128, uint128, uint32))
+            uint128 accountId;
+            uint128 marketId;
+            uint32 maturityTimestamp;
+            assembly {
+                accountId := calldataload(inputs.offset)
+                marketId := calldataload(add(inputs.offset, 0x20))
+                maturityTimestamp := calldataload(add(inputs.offset, 0x40)) // to check 
+                tickLower := calldataload(add(inputs.offset, 0x44))
+                tickUpper := calldataload(add(inputs.offset, 0x47))
+                liquidityDelta := calldataload(add(inputs.offset, 0x4A))
+            }
+            V2DatedIRSVamm.mint(accountId, marketId, maturityTimestamp, tickLower, tickUpper, liquidityDelta);
         } else if (command == Commands.V2_CORE_DEPOSIT) {
             // equivalent: abi.decode(inputs, (uint128, address, uint256))
             uint128 accountId;

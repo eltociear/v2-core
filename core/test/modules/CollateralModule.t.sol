@@ -168,7 +168,7 @@ contract CollateralModuleTest is Test {
         emit Deposited(100, Constants.TOKEN_0, depositAmount + boosterAmount, depositor, block.timestamp);
 
         // Deposit
-        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, depositAmount);
 
         // Check the collateral balance post deposit
         assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
@@ -210,7 +210,7 @@ contract CollateralModuleTest is Test {
         emit Deposited(100, Constants.TOKEN_0, depositAmount + boosterAmount, depositor, block.timestamp);
 
         // Deposit
-        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, depositAmount);
 
         // Check the collateral balance post deposit
         assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
@@ -252,7 +252,7 @@ contract CollateralModuleTest is Test {
         emit Deposited(100, Constants.TOKEN_0, depositAmount + boosterAmount, depositor, block.timestamp);
 
         // Deposit
-        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, depositAmount);
 
         // Check the collateral balance post deposit
         assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
@@ -294,7 +294,7 @@ contract CollateralModuleTest is Test {
         emit Deposited(100, Constants.TOKEN_0, depositAmount + boosterAmount, depositor, block.timestamp);
 
         // Deposit
-        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, depositAmount);
 
         // Check the collateral balance post deposit
         assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
@@ -343,7 +343,7 @@ contract CollateralModuleTest is Test {
         );
 
         // Deposit
-        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, depositAmount);
     }
 
     function test_RevertWhen_deposit_CollateralAndLiquidationBooster_InsufficientAllowance() public {
@@ -384,7 +384,7 @@ contract CollateralModuleTest is Test {
         );
 
         // Deposit
-        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, depositAmount);
     }
 
     function test_RevertWhen_deposit_LiquidationBooster_InsufficientAllowance() public {
@@ -425,7 +425,7 @@ contract CollateralModuleTest is Test {
         );
 
         // Deposit
-        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, depositAmount);
     }
 
     function testFuzz_Deposit(address depositor) public {
@@ -457,7 +457,7 @@ contract CollateralModuleTest is Test {
         emit Deposited(100, Constants.TOKEN_0, amount, depositor, block.timestamp);
 
         // Deposit
-        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, amount);
 
         // Check the collateral balance post deposit
         assertEq(
@@ -482,7 +482,7 @@ contract CollateralModuleTest is Test {
 
         // Expect revert due to insufficient allowance
         vm.expectRevert(abi.encodeWithSelector(IERC20.InsufficientAllowance.selector, amount, 0));
-        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, amount);
     }
 
     function testFuzz_RevertWhen_Deposit_WithCollateralTypeNotEnabled(address depositor) public {
@@ -496,7 +496,7 @@ contract CollateralModuleTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_1)
         );
-        collateralModule.deposit(100, Constants.TOKEN_1, amount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_1, amount);
     }
 
     function test_Withdraw_Collateral() public {
@@ -653,7 +653,7 @@ contract CollateralModuleTest is Test {
                 ICollateralModule.CollateralCapExceeded.selector, Constants.TOKEN_0, Constants.TOKEN_0_CAP, 0, amount, 0
             )
         );
-        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, amount);
     }
 
     function test_RevertWhen_CapExceeded_MultipleDeposits() public {
@@ -677,7 +677,7 @@ contract CollateralModuleTest is Test {
         vm.prank(depositor);
         vm.expectEmit(true, true, true, true, address(collateralModule));
         emit Deposited(100, Constants.TOKEN_0, amount, depositor, block.timestamp);
-        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, amount);
 
         // Second Deposit
         vm.mockCall(
@@ -704,7 +704,7 @@ contract CollateralModuleTest is Test {
                 0
             )
         );
-        collateralModule.deposit(100, Constants.TOKEN_0, amount + 1);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, amount + 1);
     }
 
     function test_Deposit_DifferentCaps() public {
@@ -729,7 +729,7 @@ contract CollateralModuleTest is Test {
         vm.prank(depositor);
         vm.expectEmit(true, true, true, true, address(collateralModule));
         emit Deposited(100, Constants.TOKEN_0, amount, depositor, block.timestamp);
-        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_0, amount);
 
         assertEq(
             collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0),
@@ -756,7 +756,7 @@ contract CollateralModuleTest is Test {
         vm.prank(depositor);
         vm.expectEmit(true, true, true, true, address(collateralModule));
         emit Deposited(100, Constants.TOKEN_1, amount, depositor, block.timestamp);
-        collateralModule.deposit(100, Constants.TOKEN_1, amount);
+        collateralModule.deposit(depositor, 100, Constants.TOKEN_1, amount);
 
         assertEq(
             collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_1),

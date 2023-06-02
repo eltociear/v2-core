@@ -8,6 +8,7 @@ import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "./Collateral.sol";
 import "./Product.sol";
+import "./Permit.sol";
 
 import "oz/utils/math/Math.sol";
 import "oz/utils/math/SignedMath.sol";
@@ -27,6 +28,7 @@ library Account {
     using SafeCastU128 for uint128;
     using SafeCastU256 for uint256;
     using SafeCastI256 for int256;
+    using Permit for Permit.Data;
 
     /**
      * @dev Thrown when the given target address does not own the given account.
@@ -188,14 +190,17 @@ library Account {
      * in a single function because loading an account and checking for a
      * permission is a very common use case in other parts of the code.
      */
-    function loadAccountAndValidatePermission(uint128 accountId, bytes32 permission, address senderAddress)
+    function loadAccountAndValidatePermission(uint128 accountId, bytes32 permission, bytes memory encodedCommand)
         internal
-        view
         returns (Data storage account)
     {
         account = Account.load(accountId);
-        if (!account.rbac.authorized(permission, senderAddress)) {
-            revert PermissionDenied(accountId, senderAddress);
+        if (!account.rbac.authorized(permission, msg.sender)) {
+            /// @dev permit returns true if a permission was given to msg.sender
+            if (Permit.load().validatePermit(encodedCommand, accountId, msg.sender)) {
+                return account;
+            }
+            revert PermissionDenied(accountId, msg.sender);
         }
     }
 

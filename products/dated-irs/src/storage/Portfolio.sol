@@ -200,12 +200,12 @@ library Portfolio {
             (uint256 unfilledBaseLong, uint256 unfilledBaseShort) =
                 IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
             {
-                UD60x18 annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
+                UD60x18 factor = annualizedExposureFactor(marketId, maturityTimestamp);
                 exposures[i] = Account.Exposure({
                     marketId: marketId,
-                    filled: mulUDxInt(annualizedExposureFactor, baseBalance + baseBalancePool),
-                    unfilledLong: mulUDxUint(annualizedExposureFactor, unfilledBaseLong),
-                    unfilledShort: mulUDxUint(annualizedExposureFactor, unfilledBaseShort)
+                    filled: mulUDxInt(factor, baseBalance + baseBalancePool),
+                    unfilledLong: mulUDxUint(factor, unfilledBaseLong),
+                    unfilledShort: mulUDxUint(factor, unfilledBaseShort)
                 });
             }
         }

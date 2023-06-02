@@ -105,13 +105,14 @@ interface ICollateralModule {
     /**
      * @notice Deposits `tokenAmount` of collateral of type `collateralType` into account `accountId`.
      * @dev Anyone can deposit into anyone's active account without restriction.
+     * @param depositFrom Address from which to transfer tokens to the contract.
      * @param accountId The id of the account that is making the deposit.
      * @param collateralType The address of the token to be deposited.
      * @param tokenAmount The amount being deposited, denominated in the token's native decimal representation.
      *
      * Emits a {Deposited} event.
      */
-    function deposit(uint128 accountId, address collateralType, uint256 tokenAmount) external;
+    function deposit(address depositFrom, uint128 accountId, address collateralType, uint256 tokenAmount) external;
 
     /**
      * @notice Withdraws `tokenAmount` of collateral of type `collateralType` from account `accountId`.

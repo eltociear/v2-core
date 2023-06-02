@@ -48,12 +48,11 @@ contract ExposedAccounts is CoreState {
         }
     }
 
-    function loadAccountAndValidatePermission(uint128 id, bytes32 permission, address senderAddress)
+    function loadAccountAndValidatePermission(uint128 id, bytes32 permission, bytes memory encodedCommand)
         external
-        view
         returns (bytes32 s)
     {
-        Account.Data storage account = Account.loadAccountAndValidatePermission(id, permission, senderAddress);
+        Account.Data storage account = Account.loadAccountAndValidatePermission(id, permission, encodedCommand);
         assembly {
             s := account.slot
         }
@@ -209,7 +208,7 @@ contract AccountTest is Test {
     function test_LoadAccountAndValidatePermission() public {
         vm.prank(Constants.ALICE);
         bytes32 slot =
-            accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, Constants.ALICE);
+            accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, bytes("dummyCommand"));
 
         assertEq(slot, accountSlot);
     }
@@ -217,11 +216,13 @@ contract AccountTest is Test {
     function testFuzz_RevertWhen_LoadAccountAndValidatePermission(address randomUser) public {
         vm.assume(randomUser != Constants.ALICE);
 
+        vm.prank(randomUser);
         vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
-        accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, randomUser);
+        accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, bytes("dummyCommand"));
 
+        vm.prank(randomUser);
         vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector, bytes32("PER123")));
-        accounts.loadAccountAndValidatePermission(accountId, bytes32("PER123"), Constants.ALICE);
+        accounts.loadAccountAndValidatePermission(accountId, bytes32("PER123"), bytes("dummyCommand"));
     }
 
     function test_CloseAccount() public {

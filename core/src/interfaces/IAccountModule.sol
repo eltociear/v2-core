@@ -96,6 +96,7 @@ interface IAccountModule {
     /**
      * @notice Mints an account token with id `requestedAccountId` to `msg.sender`.
      * @param requestedAccountId The id requested for the account being created. Reverts if id already exists.
+     * @param owner The address to which the account will be minted. Owner permissions wil be granted to this address.
      *
      * Requirements:
      *
@@ -103,7 +104,7 @@ interface IAccountModule {
      *
      * Emits a {AccountCreated} event.
      */
-    function createAccount(uint128 requestedAccountId) external;
+    function createAccount(uint128 requestedAccountId, address owner) external;
 
     /**
      * @notice Called by AccountTokenModule to notify the system when the account token is transferred.
@@ -186,9 +187,8 @@ interface IAccountModule {
      * @param target The target address whose permission is being queried.
      * @return isAuthorized A boolean with the response of the query.
      */
-    function isAuthorized(uint128 accountId, bytes32 permission, address target)
+    function isAuthorized(uint128 accountId, bytes32 permission, address target, bytes memory encodedCommand)
         external
-        view
         returns (bool isAuthorized);
 
     /**
@@ -197,5 +197,5 @@ interface IAccountModule {
      * @param permission The bytes32 identifier of the permission.
      * @param target The target address whose permission is being queried.
      */
-    function onlyAuthorized(uint128 accountId, bytes32 permission, address target) external view;
+    function onlyAuthorized(uint128 accountId, bytes32 permission, address target, bytes memory encodedCommand) external;
 }

@@ -16,6 +16,7 @@ contract AccountModule is IAccountModule {
     using SetUtil for SetUtil.Bytes32Set;
     using AccountRBAC for AccountRBAC.Data;
     using Account for Account.Data;
+    using Permit for Permit.Data;
 
     bytes32 private constant _ACCOUNT_SYSTEM = "accountNFT";
 
@@ -50,11 +51,11 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function createAccount(uint128 requestedAccountId) external override {
+    function createAccount(uint128 requestedAccountId, address owner) external override {
         IAccountTokenModule accountTokenModule = IAccountTokenModule(getAccountTokenAddress());
-        accountTokenModule.safeMint(msg.sender, requestedAccountId, "");
-        Account.create(requestedAccountId, msg.sender);
-        emit AccountCreated(requestedAccountId, msg.sender, block.timestamp);
+        accountTokenModule.safeMint(owner, requestedAccountId, "");
+        Account.create(requestedAccountId, owner);
+        emit AccountCreated(requestedAccountId, owner, block.timestamp);
     }
 
     /**
@@ -85,15 +86,16 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function isAuthorized(uint128 accountId, bytes32 permission, address user) public view override returns (bool) {
-        return Account.load(accountId).rbac.authorized(permission, user);
+    function isAuthorized(uint128 accountId, bytes32 permission, address user, bytes memory encodedCommand) public override returns (bool) {
+        return Permit.load().validatePermit(encodedCommand, accountId, user) || 
+            Account.load(accountId).rbac.authorized(permission, user);
     }
 
     /**
      * @inheritdoc IAccountModule
      */
-    function onlyAuthorized(uint128 accountId, bytes32 permission, address target) public view override {
-        if (!isAuthorized(accountId, permission, target)) {
+    function onlyAuthorized(uint128 accountId, bytes32 permission, address target, bytes memory encodedCommand) public override {
+        if (!isAuthorized(accountId, permission, target, encodedCommand)) {
             revert PermissionNotGranted(accountId, AccountRBAC._ADMIN_PERMISSION, target);
         }
     }

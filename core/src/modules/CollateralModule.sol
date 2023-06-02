@@ -19,14 +19,30 @@ contract CollateralModule is ICollateralModule {
     using Collateral for Collateral.Data;
     using SafeCastI256 for int256;
     using SafeCastU256 for uint256;
+    using Permit for Permit.Data;
 
     /**
-     * @inheritdoc ICollateralModule
+     * ICollateralModule
+     * how to know who to take money from in case of a deposit?
+     * * send it to periphery & periphery to Core? neah, gas costs & who knows what the priphery does meanwhile
+     * * we discussed putting permissions of depositiong for accounts? if we permission them, it's easy to know if
+     * it's owner or admin
+     * * if we asssume we should take it from owner, not cool cause admin is just useless 
+     * * pass sender as param, if sender != msg.sender then sender should have gave msg.sender 
+     * permission to execute this command (not enough to check if contract has allowance because
+     * someone can give it allowance for more than neccessary & anyone can then deposit from their account)
      */
-    function deposit(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
+    function deposit(address depositFrom, uint128 accountId, address collateralType, uint256 tokenAmount) external override {
         CollateralConfiguration.collateralEnabled(collateralType);
         Account.Data storage account = Account.exists(accountId);
-        address depositFrom = msg.sender;
+        if (msg.sender != depositFrom) {
+            // as ADMIN you can only call this function directly
+            // you cannot give permissions to another contract to call it
+            Permit.load().onlyPermit(
+                abi.encode(Permit.V2_CORE_DEPOSIT, depositFrom, accountId, collateralType, tokenAmount),
+                accountId
+            );
+        }
         address self = address(this);
 
         uint256 actualTokenAmount = tokenAmount;
@@ -60,15 +76,16 @@ contract CollateralModule is ICollateralModule {
         account.collaterals[collateralType].increaseCollateralBalance(tokenAmount);
         emit Collateral.CollateralUpdate(accountId, collateralType, tokenAmount.toInt(), block.timestamp);
 
-        emit Deposited(accountId, collateralType, actualTokenAmount, msg.sender, block.timestamp);
+        emit Deposited(accountId, collateralType, actualTokenAmount, depositFrom, block.timestamp);
     }
 
     /**
      * @inheritdoc ICollateralModule
      */
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
+        bytes memory encodedCommand = abi.encode(Permit.V2_CORE_WITHDRAW, accountId, collateralType, tokenAmount);
         Account.Data storage account =
-            Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+            Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, encodedCommand);
 
         uint256 collateralBalance = account.collaterals[collateralType].balance;
         if (tokenAmount > collateralBalance) {
