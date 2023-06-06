@@ -17,6 +17,11 @@
       }
     },
     "packages": [
-      "packages/*"
+        "periphery",
+        "core",
+        "utils/contracts",
+        "utils/modules",
+        "products/dated-irs",
+        "community"
     ]
   }
