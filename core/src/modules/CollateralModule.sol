@@ -39,8 +39,6 @@ contract CollateralModule is ICollateralModule {
             if (depositFrom != Account.load(accountId).rbac.owner) {
                 revert NotAllowedToDepositFrom(accountId, depositFrom);
             }
-            // as ADMIN you can only call this function directly
-            // you cannot give permissions to another contract to call it
             Permit.load().onlyPermit(
                 abi.encode(Permit.V2_CORE_DEPOSIT, depositFrom, accountId, collateralType, tokenAmount),
                 accountId

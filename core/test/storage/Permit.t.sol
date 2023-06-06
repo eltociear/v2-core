@@ -99,7 +99,7 @@ contract PermitTest is Test {
         permitContract.createAccount(accountId, from);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand:  abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 1, 12653, 200), 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: accountId
         });
@@ -115,7 +115,7 @@ contract PermitTest is Test {
         // check if permit was recorded correctly
         Permit.PackedAllowance memory resultingPermit = permitContract.getAllowance(accountId);
         assertEq(resultingPermit.encodedCommand, abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, 100, 1, 12653, 200));
-        assertEq(resultingPermit.expiration, uint48(block.timestamp));
+        assertEq(resultingPermit.expiration, uint48(block.number));
         assertEq(resultingPermit.spender, address(this));
         assertEq(resultingPermit.accountId, accountId);
         assertEq(permitContract.getNonce(accountId), 1);
@@ -128,7 +128,7 @@ contract PermitTest is Test {
         permitContract.createAccount(accountId, from);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand:  abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 1, 12653, 200), 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: accountId
         });
@@ -144,7 +144,7 @@ contract PermitTest is Test {
         // check if permit was recorded correctly
         Permit.PackedAllowance memory resultingPermit = permitContract.getAllowance(accountId);
         assertEq(resultingPermit.encodedCommand, abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, 100, 1, 12653, 200));
-        assertEq(resultingPermit.expiration, uint48(block.timestamp));
+        assertEq(resultingPermit.expiration, uint48(block.number));
         assertEq(resultingPermit.spender, address(this));
         assertEq(resultingPermit.accountId, accountId);
         assertEq(permitContract.getNonce(accountId), 1);
@@ -165,7 +165,7 @@ contract PermitTest is Test {
         bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 1, 12653, 200);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand: encodedCommand, 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: accountId
         });
@@ -181,7 +181,7 @@ contract PermitTest is Test {
 
         Permit.PackedAllowance memory resultingPermit = permitContract.getAllowance(accountId);
         assertEq(resultingPermit.encodedCommand, abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, 100, 1, 12653, 200));
-        assertEq(resultingPermit.expiration, uint48(block.timestamp));
+        assertEq(resultingPermit.expiration, uint48(block.number));
         assertEq(resultingPermit.spender, address(this));
         assertEq(resultingPermit.accountId, accountId);
         assertEq(permitContract.getNonce(accountId), 1);
@@ -195,7 +195,7 @@ contract PermitTest is Test {
         bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 1, 12653, 200);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand: encodedCommand, 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: 101
         });
@@ -219,7 +219,7 @@ contract PermitTest is Test {
         bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 1, 12653, 200);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand: encodedCommand, 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: 101
         });
@@ -242,7 +242,7 @@ contract PermitTest is Test {
         bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 2, 12653, 200);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand: encodedCommand, 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: accountId
         });
@@ -264,7 +264,7 @@ contract PermitTest is Test {
         bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 2, 12653, 200);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand: encodedCommand, 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: accountId
         });
@@ -300,7 +300,7 @@ contract PermitTest is Test {
         bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 1, 12653, 200);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand: encodedCommand, 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: accountId
         });
@@ -337,7 +337,7 @@ contract PermitTest is Test {
         bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 1, 12653, 200);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand: encodedCommand, 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: accountId
         });
@@ -369,7 +369,7 @@ contract PermitTest is Test {
         // check details were not deleted
         Permit.PackedAllowance memory resultingPermit = permitContract.getAllowance(accountId);
         assertEq(resultingPermit.encodedCommand, encodedCommand);
-        assertEq(resultingPermit.expiration, uint48(block.timestamp));
+        assertEq(resultingPermit.expiration, uint48(block.number));
         assertEq(resultingPermit.spender, address(this));
         assertEq(resultingPermit.accountId, accountId);
         assertEq(permitContract.getNonce(accountId), 1);
@@ -390,14 +390,14 @@ contract PermitTest is Test {
         bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_TAKER_ORDER, accountId, 1, 12653, 200);
         Permit.PackedAllowance memory permit = Permit.PackedAllowance({
             encodedCommand: encodedCommand, 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: accountId
         });
 
         Permit.PackedAllowance memory falsePermit = Permit.PackedAllowance({
             encodedCommand: encodedCommand, 
-            expiration: uint48(block.timestamp),
+            expiration: uint48(block.number),
             spender: address(this),
             accountId: accountId
         });
@@ -433,14 +433,14 @@ contract PermitTest is Test {
         falsePermit.encodedCommand = encodedCommand;
 
         // check false for wrong expiration
-        falsePermit.expiration = uint48(block.timestamp - 1);
+        falsePermit.expiration = uint48(block.number - 1);
         valid = permitContract.isPermitValid(falsePermit);
         assertFalse(valid);
 
         // check details were not deleted
         Permit.PackedAllowance memory resultingPermit = permitContract.getAllowance(accountId);
         assertEq(resultingPermit.encodedCommand, encodedCommand);
-        assertEq(resultingPermit.expiration, uint48(block.timestamp));
+        assertEq(resultingPermit.expiration, uint48(block.number));
         assertEq(resultingPermit.spender, address(this));
         assertEq(resultingPermit.accountId, accountId);
 

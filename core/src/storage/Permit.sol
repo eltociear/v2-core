@@ -69,8 +69,8 @@ library Permit {
         PackedAllowance memory allowance = self.allowance[_permit.accountId];
         if (
             allowance.spender != _permit.spender ||
-            allowance.expiration != block.timestamp ||
-            _permit.expiration != block.timestamp ||
+            allowance.expiration != block.number ||
+            _permit.expiration != block.number ||
             keccak256(allowance.encodedCommand) != keccak256(_permit.encodedCommand) ||
             allowance.accountId != _permit.accountId
         ) {
@@ -87,7 +87,7 @@ library Permit {
     ) internal returns (bool) {
         PackedAllowance memory allowance = PackedAllowance({
                 encodedCommand: encodedCommand, 
-                expiration: uint48(block.timestamp),
+                expiration: uint48(block.number),
                 spender: sender,
                 accountId: accountId
         });
@@ -121,7 +121,7 @@ library Permit {
         signature.verify(EIP712._hashTypedData(hash(allowanceDetails, nonce)), owner);
 
         // note limits spender approval to 1 single command and single spender at a time
-        allowanceDetails.expiration = uint48(block.timestamp);
+        allowanceDetails.expiration = uint48(block.number);
         self.allowance[accountId] = allowanceDetails;
         self.nonce[accountId] = nonce;
     }

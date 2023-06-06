@@ -21,7 +21,7 @@ contract PermitModule is IPermitModule {
     ) external override {
         Permit.PackedAllowance memory allowance = Permit.PackedAllowance({
                 encodedCommand: encodedCommand, 
-                expiration: uint48(block.timestamp),
+                expiration: uint48(block.number),
                 spender: spender,
                 accountId: accountId
         });
