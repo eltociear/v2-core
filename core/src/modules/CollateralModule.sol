@@ -36,6 +36,9 @@ contract CollateralModule is ICollateralModule {
         CollateralConfiguration.collateralEnabled(collateralType);
         Account.Data storage account = Account.exists(accountId);
         if (msg.sender != depositFrom) {
+            if (depositFrom != Account.load(accountId).rbac.owner) {
+                revert NotAllowedToDepositFrom(accountId, depositFrom);
+            }
             // as ADMIN you can only call this function directly
             // you cannot give permissions to another contract to call it
             Permit.load().onlyPermit(
@@ -104,7 +107,8 @@ contract CollateralModule is ICollateralModule {
 
         account.imCheck(collateralType);
 
-        collateralType.safeTransfer(msg.sender, tokenAmount);
+        // only transfers too account owner
+        collateralType.safeTransfer(account.rbac.owner, tokenAmount);
 
         emit Withdrawn(accountId, collateralType, tokenAmount, msg.sender, block.timestamp);
     }

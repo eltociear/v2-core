@@ -24,6 +24,12 @@ interface ICollateralModule {
     );
 
     /**
+     * @notice Thrown on deposit when the param depositFrom is not msg.sender nor account owner
+     */
+    error NotAllowedToDepositFrom(uint128 accountId, address depositFrom);
+
+
+    /**
      * @notice Emitted when `tokenAmount` of collateral of type `collateralType` is deposited to account `accountId` by `sender`.
      * @param accountId The id of the account that deposited collateral.
      * @param collateralType The address of the collateral that was deposited.

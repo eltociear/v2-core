@@ -499,6 +499,47 @@ contract CollateralModuleTest is Test {
         collateralModule.deposit(depositor, 100, Constants.TOKEN_1, amount);
     }
 
+    function test_RevertWhen_depositFrom_NotAllowed() public {
+        uint256 depositAmount = 0;
+        uint256 boosterAmount = 10e18;
+        uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
+        address depositor = Constants.ALICE;
+        collateralModule.changeAccountBalance(
+            100,
+            MockAccountStorage.CollateralBalance({token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: 0})
+        );
+
+        // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule),
+            abi.encode(depositAndBoosterAmount)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, depositAndBoosterAmount),
+            abi.encode()
+        );
+
+        // Route the deposit from depositor
+        vm.prank(depositor);
+
+        // Expect Revert not Allowed
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ICollateralModule.NotAllowedToDepositFrom.selector, 100, address(56)
+            )
+        );
+
+        // Deposit
+        collateralModule.deposit(address(56), 100, Constants.TOKEN_0, depositAmount);
+    }
+
     function test_Withdraw_Collateral() public {
         // Amount to withdraw
         uint256 amount = 500e18;

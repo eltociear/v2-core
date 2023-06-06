@@ -105,7 +105,6 @@ contract PermitTest is Test {
         });
 
         bytes memory sig = permitContract.getPermitSignature(permit, 1, fromPrivateKey);
-        bytes memory sigExtra = bytes.concat(sig, bytes1(uint8(1)));
         vm.prank(from);
         permitContract.permit(
             permit,
@@ -135,7 +134,6 @@ contract PermitTest is Test {
         });
 
         bytes memory sig = permitContract.getPermitSignature(permit, 1, fromPrivateKey);
-        bytes memory sigExtra = bytes.concat(sig, bytes1(uint8(1)));
         vm.prank(from);
         permitContract.permit(
             permit,

@@ -19,12 +19,12 @@ library Permit {
      * @notice Permissioned commands code  
      * @dev Command Types. Maximum supported command at this moment is 0x3f.
      */
-    uint256 constant V2_CORE_DEPOSIT = 0x00;
-    uint256 constant V2_CORE_WITHDRAW = 0x01;
-    uint256 constant V2_INSTRUMENT_CLOSE_ACCOUNT = 0x02;
-    uint256 constant V2_INSTRUMENT_SETTLE = 0x03;
-    uint256 constant V2_CORE_CREATE_ACCOUNT = 0x04;
-    uint256 constant V2_INSTRUMENT_TAKER_ORDER = 0x05;
+    uint256 public constant V2_CORE_DEPOSIT = 0x00;
+    uint256 public constant V2_CORE_WITHDRAW = 0x01;
+    uint256 public constant V2_INSTRUMENT_CLOSE_ACCOUNT = 0x02;
+    uint256 public constant V2_INSTRUMENT_SETTLE = 0x03;
+    uint256 public constant V2_CORE_CREATE_ACCOUNT = 0x04;
+    uint256 public constant V2_INSTRUMENT_TAKER_ORDER = 0x05;
 
     bytes32 public constant _ALLOWANCE_HASH =
         keccak256("PackedAllowance(bytes encodedCommand,uint48 expiration,address spender,uint128 accountId,uint256 nonce)");
