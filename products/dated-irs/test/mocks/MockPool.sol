@@ -28,6 +28,16 @@ contract MockPool is IPool {
         executedQuoteAmount = baseAmount;
     }
 
+     function initiateDatedMakerOrder(
+        uint128 accountId,
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        int24 tickLower,
+        int24 tickUpper,
+        int128 liquidityDelta
+    )
+        external {}
+
     function setBalances(
         int256 _baseBalancePool,
         int256 _quoteBalancePool,
