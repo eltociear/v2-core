@@ -174,7 +174,12 @@ contract ProductIRSModule is IProductIRSModule {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
         if (msg.sender != ProductConfiguration.getCoreProxyAddress()) {
-            bytes memory encodedCommand = abi.encode(Permit.V2_INSTRUMENT_CLOSE_ACCOUNT, ProductConfiguration.getProductId(), accountId, collateralType);
+            bytes memory encodedCommand = abi.encode(
+                Permit.V2_INSTRUMENT_CLOSE_ACCOUNT,
+                ProductConfiguration.getProductId(),
+                accountId,
+                collateralType
+            );
             if (!IAccountModule(coreProxy).isAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender, encodedCommand)) {
                 revert NotAuthorized(msg.sender, "closeAccount");
             }

@@ -4,7 +4,6 @@ import "forge-std/Test.sol";
 import "../../src/storage/Permit.sol";
 import "../../src/storage/Account.sol";
 import "../test-utils/MockCoreStorage.sol";
-import "forge-std/console2.sol";
 
 contract ExposedPermit is CoreState, Test {
     using Permit for Permit.Data;
@@ -43,8 +42,19 @@ contract ExposedPermit is CoreState, Test {
         return Permit.load().isPermissionValid(allowanceDetails);
     }
 
-    function getPermitSignature(Permit.PackedAllowance memory allowanceDetails, uint256 nonce, uint256 privateKey) external returns (bytes memory) {
-        bytes32 permitHash = keccak256(abi.encode(Permit._ALLOWANCE_HASH, allowanceDetails.encodedCommand, allowanceDetails.expiration, allowanceDetails.spender, allowanceDetails.accountId, nonce));
+    function getPermitSignature(
+        Permit.PackedAllowance memory allowanceDetails,
+        uint256 nonce,
+        uint256 privateKey
+    ) external returns (bytes memory) {
+        bytes32 permitHash = keccak256(abi.encode(
+            Permit._ALLOWANCE_HASH,
+            allowanceDetails.encodedCommand,
+            allowanceDetails.expiration,
+            allowanceDetails.spender,
+            allowanceDetails.accountId,
+            nonce
+        ));
 
         bytes32 _HASHED_NAME = keccak256("Permit2");
         bytes32 _TYPE_HASH =
@@ -73,8 +83,8 @@ contract PermitTest is Test {
 
     ExposedPermit internal permitContract;
 
-    address from;
-    uint256 fromPrivateKey;
+    address internal from;
+    uint256 internal fromPrivateKey;
 
     function setUp() public {
         permitContract = new ExposedPermit();

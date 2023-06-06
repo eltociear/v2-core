@@ -7,12 +7,15 @@ import "./V2DatedIRS.sol";
 import "./V2DatedIRSVamm.sol";
 import "./V2Core.sol";
 import "./Payments.sol";
+import "@voltz-protocol/util-contracts/src/signature/BytesLib.sol";
 
 /**
  * @title This library decodes and executes commands
  * @notice This library is called by the ExecutionModule to efficiently decode and execute a singular command
  */
 library Dispatcher {
+    using BytesLib for bytes;
+
     error InvalidCommandType(uint256 commandType);
     error BalanceTooLow();
 
@@ -97,6 +100,19 @@ library Dispatcher {
                 amountMin := calldataload(inputs.offset)
             }
             Payments.wrapETH(address(this), amountMin);
+        } else if (command == Commands.PERMIT_PERIPHERY) {
+            // equivalent: abi.decode(inputs, (uint256))
+            uint128 accountId;
+            uint256 nonce;
+            address spender;
+            assembly {
+                accountId := calldataload(inputs.offset)
+                nonce := calldataload(add(inputs.offset, 0x20))
+                spender := calldataload(add(inputs.offset, 0x40))
+            }
+            bytes calldata encodedCommand = inputs.toBytes(3);
+            bytes calldata signature = inputs.toBytes(encodedCommand.length);
+            V2Core.permit(accountId, nonce, spender, encodedCommand, signature);
         } else {
             // placeholder area for commands ...
             revert InvalidCommandType(command);

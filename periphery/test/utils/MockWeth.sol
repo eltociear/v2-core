@@ -5,10 +5,7 @@ import "../../src/interfaces/external/IWETH9.sol";
 contract MockWeth is IWETH9 {
     constructor(string memory name, string memory symbol)
         payable
-    {
-        // be default 18 decimals: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/abdb20a6bdb1700d58ea9e01b7471dafdef52a68/contracts/token/ERC20/ERC20.sol#L48
-        //mint(msg.sender, 1e12);
-    }
+    {}
 
     function deposit() public payable override {
     }

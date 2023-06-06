@@ -125,6 +125,29 @@ contract ExecutionModuleTest is Test {
         exec.execute(commands, inputs, deadline);
     }
 
+    function testExecCommand_Permit() public {
+        uint256 deadline = block.timestamp + 1;
+        bytes memory sig = bytes("1000010000100001000010000100001000010000100001000010000100001000");
+        bytes memory encodedCommand = abi.encode(Permit.V2_CORE_WITHDRAW, 1, address(56), 100000);
+        address spender = address(2);
+        uint256 nonce = 1;
+
+        bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V2_CORE_DEPOSIT)));
+        bytes[] memory inputs = new bytes[](1);
+        inputs[0] = abi.encode(1, nonce, spender, sig, encodedCommand);
+
+        vm.mockCall(
+            core,
+            abi.encodeWithSelector(
+                IPermitModule.permit.selector,
+                1, nonce, spender, sig, encodedCommand
+            ),
+            abi.encode()
+        );
+
+        exec.execute(commands, inputs, deadline);
+    }
+
     function testExecCommand_WrapETH() public {
         uint256 deadline = block.timestamp + 1;
         bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.WRAP_ETH)));
@@ -180,7 +203,7 @@ contract ExecutionModuleTest is Test {
 
     function test_RevertWhen_UnknownCommand() public {
         uint256 deadline = block.timestamp + 1;
-        uint256 mockCommand = 0x06;
+        uint256 mockCommand = 0x07;
         bytes memory commands = abi.encodePacked(bytes1(uint8(mockCommand)));
         bytes[] memory inputs = new bytes[](1);
         inputs[0] = abi.encode(1, 101, 1678786786, 100, 0);

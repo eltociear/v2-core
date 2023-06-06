@@ -15,4 +15,5 @@ library Commands {
     uint256 constant V2_CORE_DEPOSIT = 0x03;
     uint256 constant V2_CORE_WITHDRAW = 0x04;
     uint256 constant WRAP_ETH = 0x05;
+    uint256 constant PERMIT_PERIPHERY = 0x06;
 }

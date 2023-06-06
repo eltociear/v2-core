@@ -86,7 +86,12 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function isAuthorized(uint128 accountId, bytes32 permission, address user, bytes memory encodedCommand) public override returns (bool) {
+    function isAuthorized(
+        uint128 accountId,
+        bytes32 permission,
+        address user,
+        bytes memory encodedCommand
+    ) public override returns (bool) {
         return Permit.load().validatePermit(encodedCommand, accountId, user) || 
             Account.load(accountId).rbac.authorized(permission, user);
     }

@@ -3,7 +3,6 @@ pragma solidity >=0.8.19;
 import "./Account.sol";
 import "@voltz-protocol/util-contracts/src/signature/SignatureVerification.sol";
 import "@voltz-protocol/util-contracts/src/signature/EIP712.sol";
-import "forge-std/console2.sol";
 
 /**
  * @title Object for tracking an accounts permissions based on one time permits.
@@ -20,12 +19,12 @@ library Permit {
      * @notice Permissioned commands code  
      * @dev Command Types. Maximum supported command at this moment is 0x3f.
      */
-    uint256 constant V2_CORE_DEPOSIT = 0x00; //
-    uint256 constant V2_CORE_WITHDRAW = 0x01; //
-    uint256 constant V2_INSTRUMENT_CLOSE_ACCOUNT = 0x02; //
-    uint256 constant V2_INSTRUMENT_SETTLE = 0x03; //
+    uint256 constant V2_CORE_DEPOSIT = 0x00;
+    uint256 constant V2_CORE_WITHDRAW = 0x01;
+    uint256 constant V2_INSTRUMENT_CLOSE_ACCOUNT = 0x02;
+    uint256 constant V2_INSTRUMENT_SETTLE = 0x03;
     uint256 constant V2_CORE_CREATE_ACCOUNT = 0x04;
-    uint256 constant V2_INSTRUMENT_TAKER_ORDER = 0x05; //
+    uint256 constant V2_INSTRUMENT_TAKER_ORDER = 0x05;
 
     bytes32 public constant _ALLOWANCE_HASH =
         keccak256("PackedAllowance(bytes encodedCommand,uint48 expiration,address spender,uint128 accountId,uint256 nonce)");
@@ -36,12 +35,9 @@ library Permit {
     struct PackedAllowance {
         // encoded imputs of the command alongsinde the command code
         bytes encodedCommand;
-        // permission expiry
         /// @dev ensures the permission is used in the same tx
         uint48 expiration;
-        // spender
         address spender;
-        // spender
         uint128 accountId;
     }
 
@@ -50,6 +46,8 @@ library Permit {
         /// @dev Indexed in the order of account Id, spender address, alowence details
         /// @dev The stored word saves the allowed amount, expiration on the allowance, and nonce
         mapping(uint128 => PackedAllowance) allowance;
+
+        /// @dev account Id permission nonce to prevent reusing signature
         mapping(uint128 => uint256) nonce;
     }
 
@@ -78,19 +76,15 @@ library Permit {
         ) {
             return false;
         }
-        // check command params match -> encoded params match encoding
-
-        // if we only checked encoding,
-        // can someone create a different encoding that matches the sigend one?
-        // the functions that call this check send the given params
-        // the encoding format is the same as the one signed by the user =>
-        // if encodings match => each parameter has the correct value
-        // don't do packed encoding
-        
         return true;
     }
 
-    function validatePermit(Data storage self, bytes memory encodedCommand, uint128 accountId, address sender) internal returns (bool) {
+    function validatePermit(
+        Data storage self,
+        bytes memory encodedCommand,
+        uint128 accountId,
+        address sender
+    ) internal returns (bool) {
         PackedAllowance memory allowance = PackedAllowance({
                 encodedCommand: encodedCommand, 
                 expiration: uint48(block.timestamp),
