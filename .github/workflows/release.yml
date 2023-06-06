@@ -38,7 +38,7 @@ jobs:
         run : |
           git config --global user.name "voltzprotocol"
           git config --global user.email "dev@voltz.xyz"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Voltz-Protocol/v2-off-chain-monorepo.git
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Voltz-Protocol/v2-core.git
           lerna run generate:coverage-badges 
           git add .
           git commit -m "chore: update coverage badges"

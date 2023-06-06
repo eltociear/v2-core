@@ -1,6 +1,6 @@
 {
   "name": "@voltz-protocol/products-dated-irs",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "license": "Voltz V2 License",
   "dependencies": {
     "core": "link:../../core"
