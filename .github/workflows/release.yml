@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/lerna-ci-pub
 
 jobs:
   release:
@@ -31,8 +32,18 @@ jobs:
         run: yarn install
       - name: Run tests
         run: lerna run test
-      - name: Run tests
-        run: lerna run test
+      - name: Configure Git and Bump Updated Packages
+        run : |
+          git config --global user.name "voltzprotocol"
+          git config --global user.email "dev@voltz.xyz"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Voltz-Protocol/v2-off-chain-monorepo.git
+          lerna run generate:coverage-badges 
+          git add .
+          git commit -m "chore: update coverage badges"
+          lerna version
+          git stash
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Publish packages with Lerna
         run: lerna publish from-package
         env:
