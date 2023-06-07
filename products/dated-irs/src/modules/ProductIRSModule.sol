@@ -92,7 +92,7 @@ contract ProductIRSModule is IProductIRSModule {
             accountId,
             AccountRBAC._ADMIN_PERMISSION,
             msg.sender,
-            abi.encode()
+            encodedCommand
         );
 
         Portfolio.Data storage portfolio = Portfolio.load(accountId);

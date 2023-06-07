@@ -202,6 +202,7 @@ library Account {
             }
             revert PermissionDenied(accountId, msg.sender);
         }
+        return account;
     }
 
     /**

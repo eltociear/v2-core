@@ -22,15 +22,7 @@ contract CollateralModule is ICollateralModule {
     using Permit for Permit.Data;
 
     /**
-     * ICollateralModule
-     * how to know who to take money from in case of a deposit?
-     * * send it to periphery & periphery to Core? neah, gas costs & who knows what the priphery does meanwhile
-     * * we discussed putting permissions of depositiong for accounts? if we permission them, it's easy to know if
-     * it's owner or admin
-     * * if we asssume we should take it from owner, not cool cause admin is just useless 
-     * * pass sender as param, if sender != msg.sender then sender should have gave msg.sender 
-     * permission to execute this command (not enough to check if contract has allowance because
-     * someone can give it allowance for more than neccessary & anyone can then deposit from their account)
+     * @inheritdoc ICollateralModule
      */
     function deposit(address depositFrom, uint128 accountId, address collateralType, uint256 tokenAmount) external override {
         CollateralConfiguration.collateralEnabled(collateralType);

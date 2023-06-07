@@ -19,7 +19,7 @@ interface IPermitModule {
      *
      * Requirements:
      *
-     * - accountId owner must own the account to give permission
+     * - the signature must come from the account owner
      */
     function permit(
         uint128 accountId,

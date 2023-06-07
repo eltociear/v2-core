@@ -42,7 +42,7 @@ library Permit {
     }
 
     struct Data {
-        /// note: this mappring can be singular (one at the time) as it's removed after being used in the same tx
+        /// note: this mapping can be singular (one at the time) as it's removed after being used in the same tx
         /// @dev Indexed in the order of account Id, spender address, alowence details
         /// @dev The stored word saves the allowed amount, expiration on the allowance, and nonce
         mapping(uint128 => PackedAllowance) allowance;
