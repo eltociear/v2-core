@@ -4,8 +4,10 @@ pragma solidity >=0.8.19;
 import "./Constants.sol";
 import "./Commands.sol";
 import "./V2DatedIRS.sol";
+import "./V2DatedIRSVamm.sol";
 import "./V2Core.sol";
 import "./Payments.sol";
+import "./Permit2Payments.sol";
 
 /**
  * @title This library decodes and executes commands
@@ -33,10 +35,10 @@ library Dispatcher {
 
             assembly {
                 accountId := calldataload(inputs.offset)
-                marketId := calldataload(add(inputs.offset, 0x10))
-                maturityTimestamp := calldataload(add(inputs.offset, 0x20))
-                baseAmount := calldataload(add(inputs.offset, 0x40))
-                priceLimit := calldataload(add(inputs.offset, 0x60))
+                marketId := calldataload(add(inputs.offset, 0x20))
+                maturityTimestamp := calldataload(add(inputs.offset, 0x40))
+                baseAmount := calldataload(add(inputs.offset, 0x60))
+                priceLimit := calldataload(add(inputs.offset, 0x80))
             }
 
             V2DatedIRS.swap(accountId, marketId, maturityTimestamp, baseAmount, priceLimit);
@@ -51,6 +53,23 @@ library Dispatcher {
                 maturityTimestamp := calldataload(add(inputs.offset, 0x20))
             }
             V2DatedIRS.settle(accountId, marketId, maturityTimestamp);
+        } else if (command == Commands.V2_VAMM_EXCHANGE_LP) {
+            // equivalent: abi.decode(inputs, (uint128, uint128, uint32, int24, int24, int128))
+            uint128 accountId;
+            uint128 marketId;
+            uint32 maturityTimestamp;
+            int24 tickLower;
+            int24 tickUpper;
+            int128 liquidityDelta;
+            assembly {
+                accountId := calldataload(inputs.offset)
+                marketId := calldataload(add(inputs.offset, 0x20))
+                maturityTimestamp := calldataload(add(inputs.offset, 0x40))
+                tickLower := calldataload(add(inputs.offset, 0x44))
+                tickUpper := calldataload(add(inputs.offset, 0x47))
+                liquidityDelta := calldataload(add(inputs.offset, 0x4A))
+            }
+            V2DatedIRSVamm.initiateDatedMakerOrder(accountId, marketId, maturityTimestamp, tickLower, tickUpper, liquidityDelta);
         } else if (command == Commands.V2_CORE_DEPOSIT) {
             // equivalent: abi.decode(inputs, (uint128, address, uint256))
             uint128 accountId;
@@ -83,47 +102,32 @@ library Dispatcher {
                 recipient := calldataload(add(inputs.offset, 0x20))
                 value := calldataload(add(inputs.offset, 0x40))
             }
-            // todo: check why we need to do map(recipient)
             // ref: https://github.com/Uniswap/universal-router/
             // blob/3ccbe972fe6f7dc1347d6974e45ea331321de714/contracts/base/Dispatcher.sol#L113
-            Payments.pay(token, map(recipient), value);
+            Payments.pay(token, recipient, value);
         } else if (command == Commands.WRAP_ETH) {
-            // equivalent: abi.decode(inputs, (address, uint256))
-            address recipient;
+            // equivalent: abi.decode(inputs, (uint256))
             uint256 amountMin;
             assembly {
-                recipient := calldataload(inputs.offset)
-                amountMin := calldataload(add(inputs.offset, 0x20))
+                amountMin := calldataload(inputs.offset)
             }
-            Payments.wrapETH(map(recipient), amountMin);
-        } else if (command == Commands.UNWRAP_ETH) {
-            // equivalent: abi.decode(inputs, (address, uint256))
-            address recipient;
-            uint256 amountMin;
+            Payments.wrapETH(msg.sender, amountMin);
+        } else if (command == Commands.TRANSFER_FROM) {
+            // equivalent: abi.decode(inputs, (address, address, address, uint160))
+            address token;
+            address from;
+            address to;
+            uint160 value;
             assembly {
-                recipient := calldataload(inputs.offset)
-                amountMin := calldataload(add(inputs.offset, 0x20))
+                token := calldataload(inputs.offset)
+                from := calldataload(add(inputs.offset, 0x20))
+                to := calldataload(add(inputs.offset, 0x40))
+                value := calldataload(add(inputs.offset, 0x60))
             }
-            Payments.unwrapWETH9(map(recipient), amountMin);
+            Permit2Payments.permit2TransferFrom(token, from, to, value);
         } else {
             // placeholder area for commands ...
             revert InvalidCommandType(command);
-        }
-    }
-
-    /// @notice Calculates the recipient address for a command
-    /// @param recipient The recipient or recipient-flag for the command
-    /// @return output The resultant recipient for the command
-    function map(address recipient) internal view returns (address) {
-        if (recipient == Constants.MSG_SENDER) {
-            // todo: check the purpose of the locked flow:
-            // https://github.com/Uniswap/universal-router/
-            // blob/a88bc6e15af738b61d7bee8feb7df8d2a6e26347/contracts/base/LockAndMsgSender.sol#L26
-            return msg.sender;
-        } else if (recipient == Constants.ADDRESS_THIS) {
-            return address(this);
-        } else {
-            return recipient;
         }
     }
 }
