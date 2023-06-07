@@ -100,61 +100,53 @@ contract ExecutionModuleTest is Test {
         uint256 deadline = block.timestamp + 1;
         bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V2_CORE_WITHDRAW)));
         bytes[] memory inputs = new bytes[](1);
-        inputs[0] = abi.encode(1, address(56), 100000);
+
+        MockERC20 token = new MockERC20();
+        token.transfer(address(exec), 100000);
+        uint256 initBalanceThis = token.balanceOf(address(this));
+
+        inputs[0] = abi.encode(1, address(token), 100000);
 
         vm.mockCall(
             core,
             abi.encodeWithSelector(
                 ICollateralModule.deposit.selector,
-                1, address(56), 100000
+                1, address(token), 100000
             ),
             abi.encode()
         );
 
         exec.execute(commands, inputs, deadline);
+
+        assertEq(token.balanceOf(address(this)), initBalanceThis + 100000);
+        assertEq(token.balanceOf(address(exec)), 0);
     }
 
-    function testExecCommand_TransferERC20() public {
+    function testExecCommand_Withdraw_Reverted() public {
         uint256 deadline = block.timestamp + 1;
-        bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.TRANSFER)));
+        bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V2_CORE_WITHDRAW)));
         bytes[] memory inputs = new bytes[](1);
 
         MockERC20 token = new MockERC20();
         token.transfer(address(exec), 100000);
+        uint256 initBalanceThis = token.balanceOf(address(this));
 
-        inputs[0] = abi.encode(address(token), address(56), 100000);
+        inputs[0] = abi.encode(1, address(token), 100000);
 
+        vm.mockCallRevert(
+            core,
+            abi.encodeWithSelector(
+                ICollateralModule.deposit.selector,
+                1, address(token), 100000
+            ),
+            abi.encode("REVERT_MESSAGE")
+        );
+
+        vm.expectRevert();
         exec.execute(commands, inputs, deadline);
-        assertEq(token.balanceOf(address(56)), 100000);
-        assertEq(token.balanceOf(address(exec)), 0);
-    }
 
-    function testExecCommand_TransferERC20_AllBalance() public {
-        uint256 deadline = block.timestamp + 1;
-        bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.TRANSFER)));
-        bytes[] memory inputs = new bytes[](1);
-
-        MockERC20 token = new MockERC20();
-        token.transfer(address(exec), 500);
-
-        inputs[0] = abi.encode(address(token), address(56), Constants.CONTRACT_BALANCE);
-
-        exec.execute(commands, inputs, deadline);
-        assertEq(token.balanceOf(address(56)), 500);
-        assertEq(token.balanceOf(address(exec)), 0);
-    }
-
-    function testExecCommand_TransferETH() public {
-        uint256 deadline = block.timestamp + 1;
-        bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.TRANSFER)));
-        bytes[] memory inputs = new bytes[](1);
-
-        vm.deal(address(exec), 100000);
-        inputs[0] = abi.encode(address(0), address(56), 100000);
-
-        exec.execute(commands, inputs, deadline);
-        assertEq(address(56).balance, 100000);
-        assertEq(address(exec).balance, 0);
+        assertEq(token.balanceOf(address(this)), initBalanceThis);
+        assertEq(token.balanceOf(address(exec)), 100000);
     }
 
     function testExecCommand_Deposit() public {

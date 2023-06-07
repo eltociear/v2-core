@@ -92,19 +92,6 @@ library Dispatcher {
                 tokenAmount := calldataload(add(inputs.offset, 0x40))
             }
             V2Core.withdraw(accountId, collateralType, tokenAmount);
-        } else if (command == Commands.TRANSFER) {
-            // equivalent:  abi.decode(inputs, (address, address, uint256))
-            address token;
-            address recipient;
-            uint256 value;
-            assembly {
-                token := calldataload(inputs.offset)
-                recipient := calldataload(add(inputs.offset, 0x20))
-                value := calldataload(add(inputs.offset, 0x40))
-            }
-            // ref: https://github.com/Uniswap/universal-router/
-            // blob/3ccbe972fe6f7dc1347d6974e45ea331321de714/contracts/base/Dispatcher.sol#L113
-            Payments.pay(token, recipient, value);
         } else if (command == Commands.WRAP_ETH) {
             // equivalent: abi.decode(inputs, (uint256))
             uint256 amountMin;

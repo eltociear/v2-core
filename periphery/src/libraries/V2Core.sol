@@ -16,5 +16,6 @@ library V2Core {
 
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) internal {
         ICollateralModule(Config.load().VOLTZ_V2_CORE_PROXY).withdraw(accountId, collateralType, tokenAmount);
+        Payments.pay(collateralType, msg.sender, tokenAmount);
     }
 }
