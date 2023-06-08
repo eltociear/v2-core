@@ -167,6 +167,33 @@ contract ExecutionModuleTest is Test {
         exec.execute(commands, inputs, deadline);
     }
 
+    function testExecCommand_CreateAccount() public {
+        uint256 deadline = block.timestamp + 1;
+        bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)));
+        bytes[] memory inputs = new bytes[](1);
+        inputs[0] = abi.encode(127637236);
+
+        vm.mockCall(
+            core,
+            abi.encodeWithSelector(
+                IAccountModule.createAccount.selector,
+                127637236
+            ),
+            abi.encode()
+        );
+
+        vm.mockCall(
+            core,
+            abi.encodeWithSelector(
+                bytes4(abi.encodeWithSignature("safeTransferFrom(address from, address to, uint256 tokenId)")),
+                address(exec), address(this), 127637236
+            ),
+            abi.encode()
+        );
+
+        exec.execute(commands, inputs, deadline);
+    }
+
     function testExecCommand_TransferFrom() public {
         uint256 deadline = block.timestamp + 1;
         bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.TRANSFER_FROM)));
