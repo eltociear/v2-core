@@ -82,7 +82,7 @@ contract ExecutionModuleTest is Test {
         uint256 deadline = block.timestamp + 1;
         bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP)));
         bytes[] memory inputs = new bytes[](1);
-        inputs[0] = abi.encode(1, 101, 1678786786);
+        inputs[0] = abi.encode(1, 101, 1678786786, -6600, -6000, 10389000);
 
         vm.mockCall(
             exchange,
@@ -183,7 +183,7 @@ contract ExecutionModuleTest is Test {
             ),
             abi.encode()
         );
-        inputs[0] = abi.encode(address(token), address(56), address(exec), 50);
+        inputs[0] = abi.encode(address(token), address(56), 50);
 
         exec.execute(commands, inputs, deadline);
     }

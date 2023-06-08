@@ -49,8 +49,8 @@ library Dispatcher {
             uint32 maturityTimestamp;
             assembly {
                 accountId := calldataload(inputs.offset)
-                marketId := calldataload(add(inputs.offset, 0x10))
-                maturityTimestamp := calldataload(add(inputs.offset, 0x20))
+                marketId := calldataload(add(inputs.offset, 0x20))
+                maturityTimestamp := calldataload(add(inputs.offset, 0x40))
             }
             V2DatedIRS.settle(accountId, marketId, maturityTimestamp);
         } else if (command == Commands.V2_VAMM_EXCHANGE_LP) {
@@ -65,9 +65,9 @@ library Dispatcher {
                 accountId := calldataload(inputs.offset)
                 marketId := calldataload(add(inputs.offset, 0x20))
                 maturityTimestamp := calldataload(add(inputs.offset, 0x40))
-                tickLower := calldataload(add(inputs.offset, 0x44))
-                tickUpper := calldataload(add(inputs.offset, 0x47))
-                liquidityDelta := calldataload(add(inputs.offset, 0x4A))
+                tickLower := calldataload(add(inputs.offset, 0x60))
+                tickUpper := calldataload(add(inputs.offset, 0x80))
+                liquidityDelta := calldataload(add(inputs.offset, 0xA0))
             }
             V2DatedIRSVamm.initiateDatedMakerOrder(accountId, marketId, maturityTimestamp, tickLower, tickUpper, liquidityDelta);
         } else if (command == Commands.V2_CORE_DEPOSIT) {
@@ -98,20 +98,18 @@ library Dispatcher {
             assembly {
                 amountMin := calldataload(inputs.offset)
             }
-            Payments.wrapETH(msg.sender, amountMin);
+            Payments.wrapETH(address(this), amountMin);
         } else if (command == Commands.TRANSFER_FROM) {
-            // equivalent: abi.decode(inputs, (address, address, address, uint160))
+            // equivalent: abi.decode(inputs, (address, address, uint160))
             address token;
             address from;
-            address to;
             uint160 value;
             assembly {
                 token := calldataload(inputs.offset)
                 from := calldataload(add(inputs.offset, 0x20))
-                to := calldataload(add(inputs.offset, 0x40))
-                value := calldataload(add(inputs.offset, 0x60))
+                value := calldataload(add(inputs.offset, 0x40))
             }
-            Permit2Payments.permit2TransferFrom(token, from, to, value);
+            Permit2Payments.permit2TransferFrom(token, from, address(this), value);
         } else {
             // placeholder area for commands ...
             revert InvalidCommandType(command);
