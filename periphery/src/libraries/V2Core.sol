@@ -22,8 +22,8 @@ library V2Core {
     }
 
     function createAccount(uint128 requestedId) internal {
-        address coreProxy = Config.load().VOLTZ_V2_CORE_PROXY;
-        IAccountModule(coreProxy).createAccount(requestedId);
-        IERC721(coreProxy).safeTransferFrom(address(this), msg.sender, requestedId);
+        Config.Data memory config = Config.load();
+        IAccountModule(config.VOLTZ_V2_CORE_PROXY).createAccount(requestedId);
+        IERC721(config.VOLTZ_V2_ACCOUNT_NFT_PROXY).safeTransferFrom(address(this), msg.sender, requestedId);
     }
 }
