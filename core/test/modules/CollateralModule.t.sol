@@ -594,6 +594,7 @@ contract CollateralModuleTest is Test {
 
     function test_RevertWhen_Withdraw_UnautohorizedAccount(address otherAddress) public {
         vm.assume(otherAddress != Constants.ALICE);
+        vm.assume(otherAddress != Constants.PERIPHERY);
 
         // Amount to withdraw
         uint256 amount = 500e18;
@@ -606,7 +607,7 @@ contract CollateralModuleTest is Test {
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 
-    function test_Withdraw_FromPeriphery(address otherAddress) public {
+    function test_Withdraw_FromPeriphery() public {
         // Amount to withdraw
         uint256 amount = 500e18;
 
