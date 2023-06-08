@@ -606,6 +606,32 @@ contract CollateralModuleTest is Test {
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 
+    function test_Withdraw_FromPeriphery(address otherAddress) public {
+        // Amount to withdraw
+        uint256 amount = 500e18;
+
+        // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.transfer.selector, Constants.PERIPHERY, amount), abi.encode()
+        );
+
+        // Route the deposit from Alice
+        vm.prank(Constants.PERIPHERY);
+
+        // Expect Withdrawn event
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Withdrawn(100, Constants.TOKEN_0, amount, Constants.PERIPHERY, block.timestamp);
+
+        // Withdraw
+        collateralModule.withdraw(100, Constants.TOKEN_0, amount);
+
+        // Check the collateral balance post withdraw
+        assertEq(
+            collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0),
+            Constants.DEFAULT_TOKEN_0_BALANCE - amount
+        );
+    }
+
     function test_RevertWhen_Withdraw_MoreThanBalance() public {
         // Amount to withdraw
         uint256 amount = 10500e18;
