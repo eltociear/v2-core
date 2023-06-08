@@ -1627,7 +1627,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": ^1.4.0
+    "@voltz-protocol/v2-vamm": 1.4.0
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1695,7 +1695,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@voltz-protocol/v2-vamm@npm:^1.4.0":
+"@voltz-protocol/v2-vamm@npm:1.4.0":
   version: 1.4.0
   resolution: "@voltz-protocol/v2-vamm@npm:1.4.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.4.0%2F5a3c195d337ca8d3faf289b5d5a1914d1dce7ce8"
   dependencies:
