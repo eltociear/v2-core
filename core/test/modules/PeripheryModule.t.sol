@@ -14,6 +14,13 @@ contract ExtendedPeripheryModule is PeripheryModule {
     function isPeriphery(address p) external returns (bool) {
         return Periphery.isPeriphery(p);
     }
+
+    function load() external returns (bytes32 s) {
+        Periphery.Data storage periphery = Periphery.load();
+        assembly {
+            s := periphery.slot
+        }
+    }
 }
 
 contract PeripheryModuleTest is Test {
@@ -23,6 +30,12 @@ contract PeripheryModuleTest is Test {
     function setUp() public {
         peripheryModule = new ExtendedPeripheryModule();
         peripheryModule.setOwner(address(this));
+    }
+
+    function test_LoadAtCorrectSlot() public {
+        bytes32 peripherySlot = keccak256(abi.encode("xyz.voltz.Periphery"));
+        bytes32 slot = peripheryModule.load();
+        assertEq(slot, peripherySlot);
     }
 
     function test_SetPeriphery() public {
