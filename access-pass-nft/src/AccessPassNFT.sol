@@ -1,11 +1,11 @@
 pragma solidity >=0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "oz/token/ERC721/ERC721.sol";
+import "oz/token/ERC721/extensions/ERC721URIStorage.sol";
+import "oz/utils/Strings.sol";
+import "oz/utils/cryptography/MerkleProof.sol";
+import "oz/utils/Counters.sol";
+import "oz/access/Ownable.sol";
 import "./interfaces/IERC5192.sol";
 
 contract AccessPassNFT is Ownable, ERC721URIStorage, IERC5192 {
