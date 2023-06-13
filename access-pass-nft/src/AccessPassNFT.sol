@@ -10,7 +10,7 @@ import "./interfaces/IERC5192.sol";
 
 // todo: add IAccessPassNFT and push some of the events and structs in there
 
-contract AccessPassNFT is Ownable, ERC721URIStorage, IERC5192 {
+contract AccessPassNFT is Ownable, ERC721URIStorage {
     struct RootData {
         bool isValid;
         string metadataURI;
@@ -82,39 +82,23 @@ contract AccessPassNFT is Ownable, ERC721URIStorage, IERC5192 {
         emit InvalidatedRoot(merkleRoot);
     }
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override {
-        require(from == address(0), "Soul Bound Token");
-        super._beforeTokenTransfer(from, to, tokenId);
-    }
-
-    /** @notice Total supply getter. Returns the total number of minted badges so far.
+    /** @notice Total supply getter. Returns the total number of minted access passes so far.
      */
     function totalSupply() public view returns (uint256) {
         return _tokenSupply.current();
     }
 
-    /** @notice Total supply getter. Returns the total number of minted badges so far.
+    /** @notice Total supply getter. Returns the total number of minted access passes so far.
      * @param account: user's address
      * @param merkleRoot: merkle root associated with this badge
-     * @param badgeId: badge ID
+     * @param accessPassId: access pass ID
      */
     function getTokenIdHash(
         address account,
         bytes32 merkleRoot,
-        uint96 badgeId
+        uint96 accessPassId
     ) public view returns (bytes32) {
         return keccak256(abi.encodePacked(account, merkleRoot, badgeId));
-    }
-
-    /// @inheritdoc IERC5192
-    function locked(
-        uint256 tokenId
-    ) external view override(IERC5192) returns (bool) {
-        return true; // All tokens are locked.
     }
 
     function tokenURI(
