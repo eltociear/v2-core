@@ -175,10 +175,10 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
     }
 
     /** @notice Encoded the leaf information
-     * @param leafInfo: merkle tree leaf with badge information
+     * @param leafInfo: merkle tree leaf with access pass information
      */
     function _leaf(LeafInfo memory leafInfo) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(leafInfo.account, leafInfo.badgeId));
+        return keccak256(abi.encodePacked(leafInfo.account, leafInfo.accessPassId));
     }
 
     /** @notice Verification that the hash of the actor address and information
