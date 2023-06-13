@@ -8,17 +8,14 @@ import "oz/utils/Counters.sol";
 import "oz/access/Ownable.sol";
 
 contract AccessPassNFT is Ownable, ERC721URIStorage {
-    struct RootData {
-        bool isValid;
-        string metadataURI;
-    }
+
     struct TokenData {
         uint96 accessPassId;
         bytes32 merkleRoot;
     }
 
     /// @dev mapping used to track whitelisted merkle roots
-    mapping(bytes32 => RootData) public rootData;
+    mapping(bytes32 => string) public rootData;
 
     // the root used to claim a given token ID. Required to get the base URI.
     mapping(uint256 => TokenData) public tokenData;
@@ -55,27 +52,25 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
      * @dev Apart from the root and the URI, the input values are only used for logging
      */
     function addNewRoot(RootInfo memory rootInfo) public onlyOwner {
-        // todo: can/should this be simplified?
-        rootData[rootInfo.merkleRoot].isValid = true;
         require(
             bytes(rootInfo.baseMetadataURI).length > 0,
             "cannot set empty root URI"
         );
         require(
-            bytes(rootData[rootInfo.merkleRoot].metadataURI).length == 0,
+            bytes(rootData[rootInfo.merkleRoot]).length == 0,
             "cannot overwrite non-empty URI"
         );
-        rootData[rootInfo.merkleRoot].metadataURI = rootInfo.baseMetadataURI;
+        rootData[rootInfo.merkleRoot] = rootInfo.baseMetadataURI;
         emit NewValidRoot(rootInfo);
     }
 
-    /** @notice Removes a root from whitelist. It ca no longer be used for access pass validations.
+    /** @notice Removes a root from whitelist. It can no longer be used for access pass validations.
      * @notice This should only be used in case a faulty root was submitted.
      * @notice If a user already redeemed an access pass based on the faulty root,
      * the badge cannot be burnt.
      */
-    function invalidateRoot(bytes32 merkleRoot) public onlyOwner {
-        rootData[merkleRoot].isValid = false;
+    function deleteRoot(bytes32 merkleRoot) public onlyOwner {
+        delete rootData[merkleRoot];
         emit InvalidatedRoot(merkleRoot);
     }
 
@@ -101,8 +96,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721URIStorage) returns (string memory) {
-        string memory rootURI = rootData[tokenData[tokenId].merkleRoot]
-        .metadataURI;
+        string memory rootURI = rootData[tokenData[tokenId].merkleRoot];
         return
         string(
             abi.encodePacked(
@@ -186,7 +180,8 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         bytes32[] memory proof,
         bytes32 merkleRoot
     ) internal view returns (bool) {
-        require(rootData[merkleRoot].isValid, "Unrecognised merkle root");
+        require(bytes(rootData[merkleRoot]).length > 0, "Unrecognised merkle root");
         return MerkleProof.verify(proof, merkleRoot, encodedLeaf);
     }
 }
+
