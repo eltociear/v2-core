@@ -95,7 +95,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         bytes32 merkleRoot,
         uint96 accessPassId
     ) public view returns (bytes32) {
-        return keccak256(abi.encodePacked(account, merkleRoot, badgeId));
+        return keccak256(abi.encodePacked(account, merkleRoot, accessPassId));
     }
 
     function tokenURI(
