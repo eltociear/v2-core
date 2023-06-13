@@ -8,13 +8,15 @@ import "oz/utils/Counters.sol";
 import "oz/access/Ownable.sol";
 import "./interfaces/IERC5192.sol";
 
+// todo: add IAccessPassNFT and push some of the events and structs in there
+
 contract AccessPassNFT is Ownable, ERC721URIStorage, IERC5192 {
     struct RootData {
         bool isValid;
         string metadataURI;
     }
     struct TokenData {
-        uint96 badgeId;
+        uint96 accessPassId;
         bytes32 merkleRoot;
     }
 
@@ -24,18 +26,17 @@ contract AccessPassNFT is Ownable, ERC721URIStorage, IERC5192 {
     // the root used to claim a given token ID. Required to get the base URI.
     mapping(uint256 => TokenData) public tokenData;
 
-    /// @notice tracks the number of minted badges
+    /// @notice tracks the number of minted access passes
     using Counters for Counters.Counter;
     Counters.Counter private _tokenSupply;
 
     /// @notice leaf details that seat at the bottom of each merkle tree
     struct LeafInfo {
         address account;
-        uint96 badgeId;
+        uint96 accessPassId;
     }
 
-    /** @notice Information needed for the NewValidRoot event. It is used to track
-     * badges registration in the subgraph. Everything other than the merkleRoot is discarded.
+    /** @notice Information needed for the NewValidRoot event.
      */
     struct RootInfo {
         bytes32 merkleRoot;
@@ -44,7 +45,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage, IERC5192 {
         uint32 endTimestamp; // Only logged, not stored
     }
 
-    event RedeemCommunitySBT(LeafInfo leafInfo, uint256 tokenId);
+    event RedeemAccessPassNFT(LeafInfo leafInfo, uint256 tokenId);
     event NewValidRoot(RootInfo rootInfo);
     event InvalidatedRoot(bytes32 merkleRoot);
 
@@ -53,10 +54,11 @@ contract AccessPassNFT is Ownable, ERC721URIStorage, IERC5192 {
         string memory symbol
     ) ERC721(name, symbol) {}
 
-    /** @notice Registers a new root as being valid. This allows it to be used in badges verifications.
+    /** @notice Registers a new root as being valid. This allows it to be used in access pass verifications.
      * @dev Apart from the root and the URI, the input values are only used for logging
      */
     function addNewRoot(RootInfo memory rootInfo) public onlyOwner {
+        // todo: can/should this be simplified?
         rootData[rootInfo.merkleRoot].isValid = true;
         require(
             bytes(rootInfo.baseMetadataURI).length > 0,
@@ -70,9 +72,9 @@ contract AccessPassNFT is Ownable, ERC721URIStorage, IERC5192 {
         emit NewValidRoot(rootInfo);
     }
 
-    /** @notice Removes a root from whitelist. It ca no longer be used for badges validations.
+    /** @notice Removes a root from whitelist. It ca no longer be used for access pass validations.
      * @notice This should only be used in case a faulty root was submitted.
-     * @notice If a user already redeemed a badge based on the faulty root,
+     * @notice If a user already redeemed an access pass based on the faulty root,
      * the badge cannot be burnt.
      */
     function invalidateRoot(bytes32 merkleRoot) public onlyOwner {
