@@ -150,10 +150,10 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         return tokenId;
     }
 
-    /** @notice Supports redemption of multiple SBTs in one transaction
+    /** @notice Supports redemption of multiple access passes in one transaction
      * @dev Each claim must present its own root and a full proof, even if this involves duplication
-     * @param leafInfos the leaves of the merkle trees from which to claim an SBT
-     * @param proofs the proofs - one bytes32[] for each leaf
+     * @param leafInfos are the leaves of the merkle trees from which to claim an access pass
+     * @param proofs are the one bytes32[] proofs for each leaf
      * @param merkleRoots the merkel roots - one bytes32 for each leaf
      */
     function multiRedeem(
