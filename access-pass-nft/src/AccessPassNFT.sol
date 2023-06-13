@@ -135,7 +135,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         bytes32 tokenIdHash = getTokenIdHash(
             leafInfo.account,
             merkleRoot,
-            leafInfo.badgeId
+            leafInfo.accessPassId
         );
         uint256 tokenId = uint256(tokenIdHash);
 
@@ -143,11 +143,9 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         _safeMint(leafInfo.account, tokenId);
 
         tokenData[tokenId].merkleRoot = merkleRoot;
-        tokenData[tokenId].badgeId = leafInfo.badgeId;
+        tokenData[tokenId].accessPassId = leafInfo.accessPassId;
 
-        emit RedeemCommunitySBT(leafInfo, tokenId);
-        // https://eips.ethereum.org/EIPS/eip-5192
-        emit Locked(tokenId);
+        emit RedeemAccessPassNFT(leafInfo, tokenId);
 
         return tokenId;
     }
