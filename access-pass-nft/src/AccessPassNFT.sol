@@ -6,9 +6,6 @@ import "oz/utils/Strings.sol";
 import "oz/utils/cryptography/MerkleProof.sol";
 import "oz/utils/Counters.sol";
 import "oz/access/Ownable.sol";
-import "./interfaces/IERC5192.sol";
-
-// todo: add IAccessPassNFT and push some of the events and structs in there
 
 contract AccessPassNFT is Ownable, ERC721URIStorage {
     struct RootData {
