@@ -110,22 +110,12 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         string(
             abi.encodePacked(
                 rootURI,
-                Strings.toString(uint256(tokenData[tokenId].badgeId)),
+                Strings.toString(uint256(tokenData[tokenId].accessPassId)),
                 ".json"
             )
         );
     }
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override returns (bool) {
-        return
-        interfaceId == type(IERC5192).interfaceId ||
-        super.supportsInterface(interfaceId);
-    }
 
     /** @notice Total supply getter. Returns the total number of minted badges so far.
      * @param leafInfo: merkle tree leaf with badge information
