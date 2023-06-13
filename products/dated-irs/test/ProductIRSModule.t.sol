@@ -1,4 +1,11 @@
-pragma solidity 0.8.19;
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+*/
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
@@ -14,7 +21,9 @@ import "@voltz-protocol/core/src/modules/ProductModule.sol";
 import "oz/interfaces/IERC20.sol";
 import "./mocks/MockRateOracle.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
+import "@voltz-protocol/core/src/modules/RiskConfigurationModule.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
+import { sd } from "@prb/math/SD59x18.sol";
 
 contract ProductIRSModuleExtended is ProductIRSModule {
     function setOwner(address account) external {
@@ -42,12 +51,12 @@ contract ProductIRSModuleExtended is ProductIRSModule {
     }
 }
 
-contract MockCoreStorage is AccountModule, ProductModule { }
+contract MockCoreStorage is AccountModule, ProductModule, RiskConfigurationModule { }
 
 contract ProductIRSModuleTest is Test {
     using ProductConfiguration for ProductConfiguration.Data;
 
-    event ProductConfigured(ProductConfiguration.Data config);
+    event ProductConfigured(ProductConfiguration.Data config, uint256 blockTimestamp);
 
     address constant MOCK_QUOTE_TOKEN = 0x1122334455667788990011223344556677889900;
     uint32 maturityTimestamp;
@@ -83,12 +92,12 @@ contract ProductIRSModuleTest is Test {
     }
 
     function test_ProductConfiguredCorrectly() public {
-        // expect RateOracleRegistered event
+        // expect ProductConfigured event
         ProductConfiguration.Data memory config =
             ProductConfiguration.Data({ productId: 124, coreProxy: address(3), poolAddress: address(4) });
 
         vm.expectEmit(true, true, false, true);
-        emit ProductConfigured(config);
+        emit ProductConfigured(config, block.timestamp);
 
         productIrs.configureProduct(config);
 
@@ -121,6 +130,35 @@ contract ProductIRSModuleTest is Test {
         productIrs.closeAccount(178, MOCK_QUOTE_TOKEN);
     }
 
+    function test_CloseAccount_Periphery() public {
+        address peripheryAddress = address(1234);
+        uint128 accountId = 178;
+        vm.mockCall(
+            address(mockCoreStorage),
+            abi.encodeWithSelector(
+                IAccountModule.isAuthorized.selector,
+                accountId, AccountRBAC._ADMIN_PERMISSION, address(this)
+            ),
+            abi.encode(true)
+        );
+        productIrs.closeAccount(accountId, MOCK_QUOTE_TOKEN);
+    }
+
+    function test_RevertWhen_CloseAccount_NotAllowed() public {
+        address peripheryAddress = address(1234);
+        uint128 accountId = 178;
+        vm.mockCall(
+            address(mockCoreStorage),
+            abi.encodeWithSelector(
+                IAccountModule.isAuthorized.selector,
+                accountId, AccountRBAC._ADMIN_PERMISSION, address(this)
+            ),
+            abi.encode(false)
+        );
+        vm.expectRevert();
+        productIrs.closeAccount(accountId, MOCK_QUOTE_TOKEN);
+    }
+
     function test_InitiateTakerOrder() public {
         address thisAddress = address(this);
 
@@ -133,7 +171,7 @@ contract ProductIRSModuleTest is Test {
         );
         vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.executeDatedTakerOrder.selector, MOCK_MARKET_ID, maturityTimestamp, 100),
+            abi.encodeWithSelector(IPool.executeDatedTakerOrder.selector, MOCK_MARKET_ID, maturityTimestamp, 100, 0),
             abi.encode(10, -10)
         );
         vm.mockCall(
@@ -141,12 +179,22 @@ contract ProductIRSModuleTest is Test {
             abi.encodeWithSelector(
                 IProductModule.propagateTakerOrder.selector, MOCK_ACCOUNT_ID, MOCK_PRODUCT_ID, MOCK_MARKET_ID, MOCK_QUOTE_TOKEN, 10
             ),
-            abi.encode(0)
+            abi.encode(0, 0)
         );
         vm.startPrank(MOCK_USER);
 
-        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100);
+        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100, 0);
         vm.stopPrank();
+    }
+
+    function test_RevertWhen_InitiateTakerOrder_NotAllowed() public {
+        address thisAddress = address(this);
+
+        vm.expectRevert(abi.encodeWithSelector(
+            IAccountModule.PermissionNotGranted.selector,
+            MOCK_ACCOUNT_ID, AccountRBAC._ADMIN_PERMISSION, address(this)
+        ));
+        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100, 0);
     }
 
     function test_CloseExistingAccount() public {
@@ -155,13 +203,18 @@ contract ProductIRSModuleTest is Test {
 
         vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.executeDatedTakerOrder.selector, MOCK_MARKET_ID, maturityTimestamp, -10),
+            abi.encodeWithSelector(IPool.executeDatedTakerOrder.selector, MOCK_MARKET_ID, maturityTimestamp, -20, 0),
             abi.encode(10, -10)
         );
         vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.closePosition.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
+            abi.encodeWithSelector(IPool.getAccountFilledBalances.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
             abi.encode(10, -10)
+        );
+        vm.mockCall(
+            address(2),
+            abi.encodeWithSelector(IPool.closeUnfilledBase.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
+            abi.encode(10)
         );
 
         vm.prank(address(mockCoreStorage));
@@ -217,8 +270,20 @@ contract ProductIRSModuleTest is Test {
             abi.encode(10, 12)
         );
         vm.mockCall(
+            address(mockCoreStorage),
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, MOCK_PRODUCT_ID, MOCK_MARKET_ID),
+            abi.encode(
+                MarketRiskConfiguration.Data({
+                    productId: MOCK_PRODUCT_ID,
+                    marketId: MOCK_MARKET_ID,
+                    riskParameter: sd(0),
+                    twapLookbackWindow: 86400
+                })
+            )
+        );
+        vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.getDatedIRSGwap.selector, MOCK_MARKET_ID, maturityTimestamp),
+            abi.encodeWithSelector(IPool.getAdjustedDatedIRSTwap.selector, MOCK_MARKET_ID, maturityTimestamp, 20, 86400),
             abi.encode(UD60x18.wrap(1e18))
         );
 
@@ -239,19 +304,27 @@ contract ProductIRSModuleTest is Test {
 
         vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.closePosition.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
-            abi.encode(10, -11)
+            abi.encodeWithSelector(IPool.getAccountFilledBalances.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
+            abi.encode(10, -20)
         );
         vm.mockCall(
             address(mockCoreStorage),
             abi.encodeWithSelector(
-                IProductModule.propagateCashflow.selector, MOCK_ACCOUNT_ID, MOCK_PRODUCT_ID, MOCK_QUOTE_TOKEN, -1
+                IProductModule.propagateCashflow.selector, MOCK_ACCOUNT_ID, MOCK_PRODUCT_ID, MOCK_QUOTE_TOKEN, -10
             ),
             abi.encode()
         );
 
         vm.warp(maturityTimestamp + 1);
         vm.prank(MOCK_USER);
+        productIrs.settle(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp);
+    }
+
+    function test_RevertWhen_Settle_NotAllowed() public {
+        vm.expectRevert(abi.encodeWithSelector(
+            IAccountModule.PermissionNotGranted.selector,
+            MOCK_ACCOUNT_ID, AccountRBAC._ADMIN_PERMISSION, address(this)
+        ));
         productIrs.settle(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp);
     }
 }

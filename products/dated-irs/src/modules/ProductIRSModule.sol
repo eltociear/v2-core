@@ -1,3 +1,10 @@
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+*/
 pragma solidity >=0.8.19;
 
 import "../interfaces/IProductIRSModule.sol";
@@ -10,6 +17,7 @@ import "../storage/ProductConfiguration.sol";
 import "../storage/RateOracleReader.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
+import "@voltz-protocol/core/src/interfaces/IRiskConfigurationModule.sol";
 import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 
 /**
@@ -29,11 +37,12 @@ contract ProductIRSModule is IProductIRSModule {
         uint128 accountId,
         uint128 marketId,
         uint32 maturityTimestamp,
-        int256 baseAmount
+        int256 baseAmount,
+        uint160 priceLimit
     )
         external
         override
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount)
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im)
     {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
@@ -44,26 +53,50 @@ contract ProductIRSModule is IProductIRSModule {
         RateOracleReader.load(marketId).updateCache(maturityTimestamp);
 
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
-        address poolAddress = ProductConfiguration.getPoolAddress();
-        Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        IPool pool = IPool(poolAddress);
-        (executedBaseAmount, executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
-        portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
+        (executedBaseAmount, executedQuoteAmount) =
+            IPool(ProductConfiguration.getPoolAddress()).executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount, priceLimit);
+        Portfolio.load(accountId).updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
         address quoteToken = MarketConfiguration.load(marketId).quoteToken;
+        int256 annualizedNotionalAmount = getSingleAnnualizedExposure(executedBaseAmount, marketId, maturityTimestamp);
+        
+        uint128 productId = ProductConfiguration.getProductId();
+        (fee, im) = IProductModule(coreProxy).propagateTakerOrder(
+            accountId,
+            productId,
+            marketId,
+            quoteToken,
+            annualizedNotionalAmount
+        );
+
+        emit TakerOrder(
+            accountId,
+            productId,
+            marketId,
+            maturityTimestamp,
+            quoteToken,
+            executedBaseAmount,
+            executedQuoteAmount,
+            annualizedNotionalAmount,
+            block.timestamp
+            );
+    }
+
+    function getSingleAnnualizedExposure(
+        int256 executedBaseAmount,
+        uint128 marketId,
+        uint32 maturityTimestamp
+    ) internal returns (int256 annualizedNotionalAmount) {
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = executedBaseAmount;
-        int256 annualizedBaseAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
-        IProductModule(coreProxy).propagateTakerOrder(
-            accountId, ProductConfiguration.getProductId(), marketId, quoteToken, annualizedBaseAmount
-        );
+        annualizedNotionalAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
     }
 
     /**
      * @inheritdoc IProductIRSModule
      */
-
+    // note: return settlementCashflowInQuote?
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external override {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
@@ -79,6 +112,10 @@ contract ProductIRSModule is IProductIRSModule {
         uint128 productId = ProductConfiguration.getProductId();
 
         IProductModule(coreProxy).propagateCashflow(accountId, productId, quoteToken, settlementCashflowInQuote);
+
+        emit DatedIRSPositionSettled(
+            accountId, productId, marketId, maturityTimestamp, quoteToken, settlementCashflowInQuote, block.timestamp
+            );
     }
 
     /**
@@ -160,7 +197,35 @@ contract ProductIRSModule is IProductIRSModule {
         OwnableStorage.onlyOwner();
 
         ProductConfiguration.set(config);
-        emit ProductConfigured(config);
+        emit ProductConfigured(config, block.timestamp);
+    }
+
+    /**
+     * @inheritdoc IProductIRSModule
+     */
+    function getCoreProxyAddress() external returns (address) {
+        return ProductConfiguration.getCoreProxyAddress();
+    }
+
+    /**
+     * @inheritdoc IProductIRSModule
+     */
+    function propagateMakerOrder(
+        uint128 accountId,
+        uint128 marketId,
+        int256 annualizedBaseAmount
+    ) external returns (uint256 fee, uint256 im) {
+        if (msg.sender != ProductConfiguration.getPoolAddress()) {
+            revert NotAuthorized(msg.sender, "propagateMakerOrder");
+        }
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
+        (fee, im) = IProductModule(coreProxy).propagateMakerOrder(
+            accountId,
+            ProductConfiguration.getProductId(),
+            marketId,
+            MarketConfiguration.load(marketId).quoteToken,
+            annualizedBaseAmount
+        );
     }
 
     /**

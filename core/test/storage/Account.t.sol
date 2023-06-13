@@ -1,3 +1,10 @@
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/core/LICENSE
+*/
 pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
@@ -215,6 +222,7 @@ contract AccountTest is Test {
 
     function testFuzz_RevertWhen_LoadAccountAndValidatePermission(address randomUser) public {
         vm.assume(randomUser != Constants.ALICE);
+        vm.assume(randomUser != Constants.PERIPHERY);
 
         vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
         accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, randomUser);

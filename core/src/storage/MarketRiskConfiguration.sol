@@ -1,3 +1,10 @@
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/core/LICENSE
+*/
 pragma solidity >=0.8.19;
 
 import { SD59x18 } from "@prb/math/SD59x18.sol";
@@ -19,6 +26,10 @@ library MarketRiskConfiguration {
          * @dev Risk Parameters are multiplied by notional exposures to derived shocked cashflow calculations
          */
         SD59x18 riskParameter;
+        /**
+         * @dev Number of seconds in the past from which to calculate the time-weighted average fixed rate (average = geometric mean)
+         */
+        uint32 twapLookbackWindow;
     }
 
     /**
@@ -44,5 +55,6 @@ library MarketRiskConfiguration {
         storedConfig.productId = config.productId;
         storedConfig.marketId = config.marketId;
         storedConfig.riskParameter = config.riskParameter;
+        storedConfig.twapLookbackWindow = config.twapLookbackWindow;
     }
 }

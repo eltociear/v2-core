@@ -1,3 +1,10 @@
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+*/
 pragma solidity >=0.8.19;
 
 import "../interfaces/IRateOracleModule.sol";
@@ -50,30 +57,13 @@ contract RateOracleManager is IRateOracleModule {
     /**
      * @inheritdoc IRateOracleModule
      */
-    function registerVariableOracle(uint128 marketId, address oracleAddress) external override {
+    function setVariableOracle(uint128 marketId, address oracleAddress) external override {
         OwnableStorage.onlyOwner();
 
-        if (_isVariableOracleRegistered(marketId)) {
-            revert AlreadyRegisteredVariableOracle(oracleAddress);
-        }
-
         validateAndConfigureOracleAddress(marketId, oracleAddress);
-        emit RateOracleRegistered(marketId, oracleAddress);
     }
 
-    /**
-     * @inheritdoc IRateOracleModule
-     */
-    function configureVariableOracle(uint128 marketId, address oracleAddress) external override {
-        OwnableStorage.onlyOwner();
-
-        if (!_isVariableOracleRegistered(marketId)) {
-            revert UnknownVariableOracle(oracleAddress);
-        }
-
-        validateAndConfigureOracleAddress(marketId, oracleAddress);
-        emit RateOracleConfigured(marketId, oracleAddress);
-    }
+    // todo: add getVariableOracle function
 
     /**
      * @dev Validates the address interface and creates or configures a rate oracle
@@ -85,10 +75,8 @@ contract RateOracleManager is IRateOracleModule {
 
         // configure the variable rate oracle
         RateOracleReader.set(marketId, oracleAddress);
-    }
 
-    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool) {
-        return RateOracleReader.load(marketId).oracleAddress != address(0);
+        emit RateOracleConfigured(marketId, oracleAddress, block.timestamp);
     }
 
     function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {

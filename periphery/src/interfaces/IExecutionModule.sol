@@ -5,7 +5,7 @@ pragma solidity >=0.8.19;
  */
 interface IExecutionModule {
     /// @notice Thrown when a required command has failed
-    error ExecutionFailed(uint256 commandIndex, bytes message);
+    error ExecutionFailed(uint256 commandIndex);
 
     /// @notice Thrown when attempting to send ETH directly to the contract
     error ETHNotAccepted();
@@ -20,5 +20,9 @@ interface IExecutionModule {
     /// @param commands A set of concatenated commands, each 1 byte in length
     /// @param inputs An array of byte strings containing abi encoded inputs for each command
     /// @param deadline The deadline by which the transaction must be executed
-    function execute(bytes calldata commands, bytes[] calldata inputs, uint256 deadline) external payable;
+    function execute(
+        bytes calldata commands,
+        bytes[] calldata inputs,
+        uint256 deadline
+    ) external payable returns (bytes[] memory outputs);
 }

@@ -1,3 +1,10 @@
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/core/LICENSE
+*/
 pragma solidity >=0.8.19;
 
 import "../interfaces/external/IProduct.sol";
@@ -77,8 +84,6 @@ contract ProductModule is IProductModule {
 
         Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
         Product.load(productId).closeAccount(accountId, collateralType);
-
-        emit AccountClosed(accountId, productId, collateralType, block.timestamp);
     }
 
     /**
@@ -113,7 +118,7 @@ contract ProductModule is IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external override returns (uint256 fee) {
+    ) external override returns (uint256 fee, uint256 im) {
         Product.onlyProductAddress(productId, msg.sender);
 
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
@@ -122,15 +127,10 @@ contract ProductModule is IProductModule {
         );
 
         Account.Data storage account = Account.exists(accountId);
-        account.imCheck(collateralType);
+        im = account.imCheck(collateralType);
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
-            emit NewActiveProduct(accountId, productId, block.timestamp);
         }
-
-        emit TakerOrderPropagated(
-            accountId, productId, marketId, collateralType, annualizedNotional, fee, block.timestamp
-        );
     }
 
     function propagateMakerOrder(
@@ -139,7 +139,7 @@ contract ProductModule is IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external override returns (uint256 fee) {
+    ) external override returns (uint256 fee, uint256 im) {
         Product.onlyProductAddress(productId, msg.sender);
 
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
@@ -148,15 +148,10 @@ contract ProductModule is IProductModule {
         );
 
         Account.Data storage account = Account.exists(accountId);
-        account.imCheck(collateralType);
+        im = account.imCheck(collateralType);
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
-            emit NewActiveProduct(accountId, productId, block.timestamp);
         }
-
-        emit MakerOrderPropagated(
-            accountId, productId, marketId, collateralType, annualizedNotional, fee, block.timestamp
-        );
     }
 
     function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
@@ -175,7 +170,5 @@ contract ProductModule is IProductModule {
         }
 
         //todo: imcheck?
-
-        emit CashflowPropagated(accountId, productId, collateralType, amount, block.timestamp);
     }
 }

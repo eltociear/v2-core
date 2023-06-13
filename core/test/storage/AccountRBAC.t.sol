@@ -1,3 +1,10 @@
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/core/LICENSE
+*/
 pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
@@ -55,6 +62,12 @@ contract ExposedAccountRBAC {
     function authorized(bytes32 permission, address target) external view returns (bool) {
         return AccountRBAC.authorized(item, permission, target);
     }
+
+    /// HELPERS
+
+    function setPeriphery(address _peripheryAddress) external {
+        Periphery.setPeriphery(_peripheryAddress);
+    }
 }
 
 contract AccountRBACTest is Test {
@@ -95,6 +108,21 @@ contract AccountRBACTest is Test {
         bool authorized = accountRBAC.authorized("ADMIN", target);
 
         assertEq(authorized, false);
+    }
+
+    function test_Authorized_Periphery() public {
+        address owner = address(1);
+        address periphery = address(2);
+
+        ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
+        accountRBAC.setPeriphery(periphery);
+
+        bool authorized = accountRBAC.authorized("ADMIN", periphery);
+
+        assertEq(authorized, true);
+
+        bool authorized2 = accountRBAC.authorized("ADMIN", address(3));
+        assertEq(authorized2, false);
     }
 
     function test_RevertWhen_InvalidAuthorized() public {

@@ -1,3 +1,10 @@
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/core/LICENSE
+*/
 pragma solidity >=0.8.19;
 
 import "./MockAccountStorage.sol";
@@ -7,6 +14,7 @@ import "./Constants.sol";
 import "../../src/storage/MarketRiskConfiguration.sol";
 import "../../src/storage/CollateralConfiguration.sol";
 import "../../src/storage/MarketFeeConfiguration.sol";
+import "../../src/storage/Periphery.sol";
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
 import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
@@ -154,6 +162,9 @@ contract CoreState is MockCoreStorage, Ownable {
             })
         );
 
+        // set periphery address
+        Periphery.setPeriphery(Constants.PERIPHERY);
+
         // Create product (id: 1)
         {
             products.push(new MockProduct("Product 1"));
@@ -219,13 +230,13 @@ contract CoreState is MockCoreStorage, Ownable {
 
         // Set market risk configuration
         MarketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)})
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18), twapLookbackWindow: 86400})
         );
         MarketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 1, marketId: 11, riskParameter: SD59x18.wrap(1e18)})
+            MarketRiskConfiguration.Data({productId: 1, marketId: 11, riskParameter: SD59x18.wrap(1e18), twapLookbackWindow: 86400})
         );
         MarketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: SD59x18.wrap(1e18)})
+            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: SD59x18.wrap(1e18), twapLookbackWindow: 86400})
         );
 
         // Set market fee configuration

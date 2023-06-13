@@ -1,4 +1,11 @@
-pragma solidity 0.8.19;
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+*/
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
@@ -43,8 +50,7 @@ contract RateOracleManagerTest is Test {
 
     using RateOracleReader for RateOracleReader.Data;
 
-    event RateOracleRegistered(uint128 indexed marketId, address indexed oracleAddress);
-    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress);
+    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp);
 
     MockRateOracle mockRateOracle;
     uint32 public maturityTimestamp;
@@ -59,51 +65,29 @@ contract RateOracleManagerTest is Test {
         maturityTimestamp = Time.blockTimestampTruncated() + 31536000;
         marketId = 100;
 
-        rateOracleManager.registerVariableOracle(marketId, address(mockRateOracle));
+        rateOracleManager.setVariableOracle(marketId, address(mockRateOracle));
     }
 
-    function test_InitRegisterVariableOracle() public {
-        // expect RateOracleRegistered event
+    function test_InitSetVariableOracle() public {
+        // expect RateOracleConfigured event
         vm.expectEmit(true, true, false, true);
-        emit RateOracleRegistered(200, address(mockRateOracle));
+        emit RateOracleConfigured(200, address(mockRateOracle), block.timestamp);
 
-        rateOracleManager.registerVariableOracle(200, address(mockRateOracle));
+        rateOracleManager.setVariableOracle(200, address(mockRateOracle));
     }
 
-    function test_RevertWhen_RegisterExistingOracle() public {
-        vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.AlreadyRegisteredVariableOracle.selector, address(mockRateOracle)));
-
-        rateOracleManager.registerVariableOracle(marketId, address(mockRateOracle));
+    function test_ResetExistingOracle() public {
+        address newRateOracle = address(new MockRateOracle());
+        rateOracleManager.setVariableOracle(marketId, address(newRateOracle));
+        // todo: check set variable oracle once we add getter function
     }
 
-    function test_RevertWhen_RegisterOracleWrongInterface() public {
+    function test_RevertWhen_SetOracleWrongInterface() public {
         ERC165 fakeOracle = new ERC165();
 
         vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.InvalidVariableOracleAddress.selector, address(fakeOracle)));
 
-        rateOracleManager.registerVariableOracle(200, address(fakeOracle));
-    }
-
-    function test_ConfigureVariableOracle() public {
-        // expect RateOracleRegistered event
-        vm.expectEmit(true, true, false, true);
-        emit RateOracleConfigured(marketId, address(mockRateOracle));
-
-        rateOracleManager.configureVariableOracle(marketId, address(mockRateOracle));
-    }
-
-    function test_RevertWhen_ConfigureUnknownOracle() public {
-        vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.UnknownVariableOracle.selector, address(mockRateOracle)));
-
-        rateOracleManager.configureVariableOracle(200, address(mockRateOracle));
-    }
-
-    function test_RevertWhen_ConfigureOracleWrongInterface() public {
-        ERC165 fakeOracle = new ERC165();
-
-        vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.InvalidVariableOracleAddress.selector, address(fakeOracle)));
-
-        rateOracleManager.configureVariableOracle(marketId, address(fakeOracle));
+        rateOracleManager.setVariableOracle(200, address(fakeOracle));
     }
 
     function test_InitGetRateIndexCurrent() public {

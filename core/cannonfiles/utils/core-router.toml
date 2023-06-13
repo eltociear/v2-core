@@ -15,6 +15,8 @@ artifact = "FeatureFlagModule"
 artifact = "FeeConfigurationModule"
 [contract.LiquidationModule]
 artifact = "LiquidationModule"
+[contract.PeripheryModule]
+artifact = "PeripheryModule"
 [contract.ProductModule]
 artifact = "ProductModule"
 [contract.RiskConfigurationModule]
@@ -23,16 +25,17 @@ artifact = "RiskConfigurationModule"
 # Deploys Core Router
 [router.CoreRouter]
 contracts = [
-    "OwnerUpgradeModule",
-    "AccountModule",
-    "AssociatedSystemsModule",
-    "CollateralConfigurationModule",
-    "CollateralModule",
-    "FeatureFlagModule",
-    "FeeConfigurationModule",
-    "LiquidationModule",
-    "ProductModule",
-    "RiskConfigurationModule"
+  "OwnerUpgradeModule",
+  "AccountModule",
+  "AssociatedSystemsModule",
+  "CollateralConfigurationModule",
+  "CollateralModule",
+  "FeatureFlagModule",
+  "FeeConfigurationModule",
+  "LiquidationModule",
+  "PeripheryModule",
+  "ProductModule",
+  "RiskConfigurationModule"
 ]
 depends = [
   "contract.OwnerUpgradeModule",
@@ -43,6 +46,7 @@ depends = [
   "contract.FeatureFlagModule",
   "contract.FeeConfigurationModule",
   "contract.LiquidationModule",
+  "contract.PeripheryModule",
   "contract.ProductModule",
   "contract.RiskConfigurationModule"
 ]

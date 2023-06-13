@@ -1,3 +1,10 @@
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+*/
 pragma solidity >=0.8.19;
 
 import { UD60x18 } from "@prb/math/UD60x18.sol";
@@ -9,30 +16,14 @@ interface IRateOracleModule {
      * @param oracleAddress Invalid oracle address
      */
     error InvalidVariableOracleAddress(address oracleAddress);
-    /**
-     * @notice Emitted when attempting to configure an unregistered oracle
-     * @param oracleAddress Invalid oracle address
-     */
-    error UnknownVariableOracle(address oracleAddress);
-    /**
-     * @notice Emitted when attempting to register an already registered oracle
-     * @param oracleAddress Invalid oracle address
-     */
-    error AlreadyRegisteredVariableOracle(address oracleAddress);
 
     /**
-     * @notice Emitted when `registerRateOracle` is called.
+     * @notice Emitted when an oracle is configured for a market.
      * @param marketId The id of the market (e.g. aUSDC lend) associated with the rate oracle
      * @param oracleAddress Address of the variable rate oracle contract
+     * @param blockTimestamp The current block timestamp.
      */
-    event RateOracleRegistered(uint128 indexed marketId, address indexed oracleAddress);
-
-    /**
-     * @notice Emitted when `configureRateOracle` is called.
-     * @param marketId The id of the market (e.g. aUSDC lend) associated with the rate oracle
-     * @param oracleAddress Address of the variable rate oracle contract
-     */
-    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress);
+    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC lend)
@@ -55,12 +46,5 @@ interface IRateOracleModule {
      * @param marketId Market Id
      * @param oracleAddress Oracle Address
      */
-    function registerVariableOracle(uint128 marketId, address oracleAddress) external;
-
-    /**
-     * @notice Configure a variable rate oralce
-     * @param marketId Market Id
-     * @param oracleAddress Oracle Address
-     */
-    function configureVariableOracle(uint128 marketId, address oracleAddress) external;
+    function setVariableOracle(uint128 marketId, address oracleAddress) external;
 }

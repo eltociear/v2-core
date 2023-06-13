@@ -1,15 +1,25 @@
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+*/
 pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Pack.sol";
+import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
 import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./MarketConfiguration.sol";
+import "./ProductConfiguration.sol";
 import "../interfaces/IPool.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
-import { UD60x18, UNIT } from "@prb/math/UD60x18.sol";
+import "@voltz-protocol/core/src/interfaces/IRiskConfigurationModule.sol";
+import { UD60x18, UNIT, unwrap } from "@prb/math/UD60x18.sol";
 import { SD59x18 } from "@prb/math/SD59x18.sol";
 import { mulUDxUint, mulUDxInt } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
@@ -28,6 +38,24 @@ library Portfolio {
      */
     error SettlementBeforeMaturity(uint128 marketId, uint32 maturityTimestamp, uint256 accountId);
     error UnknownMarket(uint128 marketId);
+
+    /**
+     * @notice Emitted when a new product is registered in the protocol.
+     * @param accountId The id of the account.
+     * @param marketId The id of the market.
+     * @param maturityTimestamp The maturity timestamp of the position.
+     * @param baseDelta The delta in position base balance.
+     * @param quoteDelta The delta in position quote balance.
+     * @param blockTimestamp The current block timestamp.
+     */
+    event ProductPositionUpdated(
+        uint128 indexed accountId,
+        uint128 indexed marketId,
+        uint32 indexed maturityTimestamp,
+        int256 baseDelta,
+        int256 quoteDelta,
+        uint256 blockTimestamp
+    );
 
     struct Data {
         /**
@@ -115,9 +143,14 @@ library Portfolio {
 
         UD60x18 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp);
 
-        UD60x18 gwap = IPool(poolAddress).getDatedIRSGwap(marketId, maturityTimestamp);
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
+        uint128 productId = ProductConfiguration.getProductId();
+        uint32 lookbackWindow =
+            IRiskConfigurationModule(coreProxy).getMarketRiskConfiguration(productId, marketId).twapLookbackWindow;
 
-        unwindQuote = mulUDxInt(gwap.mul(timeDeltaAnnualized).add(UNIT), mulUDxInt(currentLiquidityIndex, baseAmount));
+        UD60x18 twap = IPool(poolAddress).getAdjustedDatedIRSTwap(marketId, maturityTimestamp, baseAmount, lookbackWindow);
+
+        unwindQuote = mulUDxInt(twap.mul(timeDeltaAnnualized).add(UNIT), mulUDxInt(currentLiquidityIndex, baseAmount));
     }
 
     /**
@@ -197,12 +230,31 @@ library Portfolio {
 
             Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
+            pool.closeUnfilledBase(marketId, maturityTimestamp, self.accountId);
+
+            // left-over exposure in pool
+            (int256 filledBasePool,) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+
+            int256 unwindBase = -(position.baseBalance + filledBasePool);
+
             (int256 executedBaseAmount, int256 executedQuoteAmount) =
-                pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
+                pool.executeDatedTakerOrder(marketId, maturityTimestamp, unwindBase, 0);
+
+            UD60x18 annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
+            IProductModule(ProductConfiguration.getCoreProxyAddress()).propagateTakerOrder(
+                self.accountId,
+                ProductConfiguration.getProductId(),
+                marketId,
+                collateralType,
+                mulUDxInt(annualizedExposureFactor, executedBaseAmount)
+            );
+
             position.update(executedBaseAmount, executedQuoteAmount);
 
-            pool.closePosition(marketId, maturityTimestamp, self.accountId);
-
+            emit ProductPositionUpdated(
+                self.accountId, marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount, block.timestamp
+                );
+            
             if (position.baseBalance == 0 && position.quoteBalance == 0) {
                 self.deactivateMarketMaturity(marketId, maturityTimestamp);
             }
@@ -229,6 +281,7 @@ library Portfolio {
         }
 
         position.update(baseDelta, quoteDelta);
+        emit ProductPositionUpdated(self.accountId, marketId, maturityTimestamp, baseDelta, quoteDelta, block.timestamp);
     }
 
     /**
@@ -255,12 +308,15 @@ library Portfolio {
 
         IPool pool = IPool(poolAddress);
 
-        (int256 closedBasePool, int256 closedQuotePool) = pool.closePosition(marketId, maturityTimestamp, self.accountId);
+        (int256 filledBase, int256 filledQuote) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
 
         settlementCashflow =
-            mulUDxInt(liquidityIndexMaturity, position.baseBalance + closedBasePool) + position.quoteBalance + closedQuotePool;
+            mulUDxInt(liquidityIndexMaturity, position.baseBalance + filledBase) + position.quoteBalance + filledQuote;
 
-        position.settle();
+        emit ProductPositionUpdated(
+            self.accountId, marketId, maturityTimestamp, -position.baseBalance, -position.quoteBalance, block.timestamp
+            );
+        position.update(-position.baseBalance, -position.quoteBalance);
     }
 
     /**

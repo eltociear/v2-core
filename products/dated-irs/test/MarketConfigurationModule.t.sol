@@ -1,4 +1,11 @@
-pragma solidity 0.8.19;
+/*
+Licensed under the Voltz v2 License (the "License"); you 
+may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+*/
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
@@ -29,7 +36,7 @@ contract MarketConfigurationModuleTest is Test {
 
     MarketConfigurationModuleExtended marketConfiguration;
 
-    event MarketConfigured(MarketConfiguration.Data data);
+    event MarketConfigured(MarketConfiguration.Data data, uint256 blockTimestamp);
 
     address constant MOCK_QUOTE_TOKEN = 0x1122334455667788990011223344556677889900;
     uint128 constant MOCK_MARKET_ID = 100;
@@ -42,9 +49,9 @@ contract MarketConfigurationModuleTest is Test {
     }
 
     function test_InitRegisterMarket() public {
-        // expect RateOracleRegistered event
+        // expect MarketConfigured event
         vm.expectEmit(true, true, false, true);
-        emit MarketConfigured(MarketConfiguration.Data({ marketId: 200, quoteToken: MOCK_QUOTE_TOKEN }));
+        emit MarketConfigured(MarketConfiguration.Data({ marketId: 200, quoteToken: MOCK_QUOTE_TOKEN }), block.timestamp);
 
         marketConfiguration.configureMarket(MarketConfiguration.Data({ marketId: 200, quoteToken: MOCK_QUOTE_TOKEN }));
     }
