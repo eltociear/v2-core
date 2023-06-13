@@ -5,8 +5,6 @@
     "access": "restricted",
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
   },
-  "dependencies": {
-  },
   "scripts": {
     "publish": "echo \"Cannot publish community yet\"",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
