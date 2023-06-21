@@ -154,7 +154,7 @@ contract ProductModule is IProductModule {
         }
     }
 
-    function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
+    function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
         external
         override
     {

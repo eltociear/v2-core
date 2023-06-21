@@ -295,43 +295,43 @@ contract ProductModuleTest is Test {
         );
     }
 
-    function test_propagateCashflow() public {
+    function test_propagateSettlementCashflow() public {
         //todo: event
         vm.prank(address(productModule.getProducts()[0]));
-        productModule.propagateCashflow(100, 1, Constants.TOKEN_0, 123e18);
+        productModule.propagateSettlementCashflow(100, 1, Constants.TOKEN_0, 123e18);
         assertEq(productModule.getCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE + 123e18);
 
         vm.prank(address(productModule.getProducts()[0]));
-        productModule.propagateCashflow(100, 1, Constants.TOKEN_0, -120e18);
+        productModule.propagateSettlementCashflow(100, 1, Constants.TOKEN_0, -120e18);
         assertEq(productModule.getCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE + 3e18);
     }
 
-    function test_RevertWhen_propagateCashflow_InsufficientFunds() public {
+    function test_RevertWhen_propagateSettlementCashflow_InsufficientFunds() public {
         vm.prank(address(productModule.getProducts()[0]));
         vm.expectRevert(
             abi.encodeWithSelector(Collateral.InsufficientCollateral.selector, Constants.DEFAULT_TOKEN_0_BALANCE + 1)
         );
-        productModule.propagateCashflow(100, 1, Constants.TOKEN_0, -int256(Constants.DEFAULT_TOKEN_0_BALANCE + 1));
+        productModule.propagateSettlementCashflow(100, 1, Constants.TOKEN_0, -int256(Constants.DEFAULT_TOKEN_0_BALANCE + 1));
     }
 
-    function test_RevertWhen_propagateCashflow_NotProduct() public {
+    function test_RevertWhen_propagateSettlementCashflow_NotProduct() public {
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, address(this)));
-        productModule.propagateCashflow(100, 1, Constants.TOKEN_0, 1);
+        productModule.propagateSettlementCashflow(100, 1, Constants.TOKEN_0, 1);
     }
 
-    function test_RevertWhen_propagateCashflow_InvalidAccountId() public {
+    function test_RevertWhen_propagateSettlementCashflow_InvalidAccountId() public {
         vm.prank(address(productModule.getProducts()[0]));
         vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 454545));
-        productModule.propagateCashflow(454545, 1, Constants.TOKEN_0, 1);
+        productModule.propagateSettlementCashflow(454545, 1, Constants.TOKEN_0, 1);
     }
 
     // todo: see if imcheck is needed in propagate cashflow
-    // function test_RevertWhen_propagateCashflow_ImCheck() public {
+    // function test_RevertWhen_propagateSettlementCashflow_ImCheck() public {
     //   uint256 uPnL = 100e18;
     //   uint256 im = 1800e18;
 
     //   vm.prank(address(productModule.getProducts()[0]));
     //   vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100));
-    //   productModule.propagateCashflow(100, 1, Constants.TOKEN_0, -int256(Constants.DEFAULT_TOKEN_0_BALANCE - im - uPnL + 1));
+    //   productModule.propagateSettlementCashflow(100, 1, Constants.TOKEN_0, -int256(Constants.DEFAULT_TOKEN_0_BALANCE - im - uPnL + 1));
     // }
 }
