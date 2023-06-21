@@ -14,6 +14,7 @@ import "@voltz-protocol/util-contracts/src/errors/ParameterError.sol";
 import "../interfaces/ILiquidationModule.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "../storage/Collateral.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
 import {mulUDxUint} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
@@ -67,6 +68,7 @@ contract LiquidationModule is ILiquidationModule {
         external
         returns (uint256 liquidatorRewardAmount)
     {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Account.Data storage account = Account.exists(liquidatedAccountId);
         (bool liquidatable, uint256 imPreClose,) = account.isLiquidatable(collateralType);
 
