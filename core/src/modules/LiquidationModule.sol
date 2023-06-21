@@ -31,6 +31,8 @@ contract LiquidationModule is ILiquidationModule {
     using SafeCastI256 for int256;
     using Collateral for Collateral.Data;
 
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+
     function extractLiquidatorReward(
         uint128 liquidatedAccountId,
         address collateralType,
