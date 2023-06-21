@@ -10,6 +10,9 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "../../src/modules/AccountModule.sol";
 import "../../src/storage/AccountRBAC.sol";
+import "../test-utils/MockCoreStorage.sol";
+
+contract EnhancedAccountModuleTest is AccountModule, CoreState {}
 
 contract AccountModuleTest is Test {
     event AccountCreated(uint128 indexed accountId, address indexed owner, uint256 blockTimestamp);
@@ -28,11 +31,11 @@ contract AccountModuleTest is Test {
         uint256 blockTimestamp
     );
 
-    AccountModule internal accountModule;
+    EnhancedAccountModuleTest internal accountModule;
     address internal proxyAddress = vm.addr(1);
 
     function setUp() public {
-        accountModule = new AccountModule();
+        accountModule = new EnhancedAccountModuleTest();
 
         mockAssociatedSystem();
     }
