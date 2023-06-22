@@ -32,6 +32,8 @@ contract CollateralModuleTest is Test {
 
     bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
 
+    address internal owner = vm.addr(1);
+
     event Deposited(
         uint128 indexed accountId,
         address indexed collateralType,
@@ -44,6 +46,16 @@ contract CollateralModuleTest is Test {
     );
 
     EnhancedCollateralModule internal collateralModule;
+
+    function setUp() public {
+        collateralModule = new EnhancedCollateralModule();
+
+        vm.store(
+            address(collateralModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
+        );
+    }
 
     function changeIMRequirementToZero() internal {
         // Mock second calls to products
@@ -91,10 +103,6 @@ contract CollateralModuleTest is Test {
             // todo: test single account single-token mode
             // products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_1, 1e17);
         }
-    }
-
-    function setUp() public {
-        collateralModule = new EnhancedCollateralModule();
     }
 
     function test_GetAccountCollateralBalance() public {
@@ -187,6 +195,7 @@ contract CollateralModuleTest is Test {
 
     function test_depositCollateralFailDenyAll() public {
 
+        vm.prank(owner);
         collateralModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
 
         collateralModule.changeAccountBalance(
@@ -198,9 +207,11 @@ contract CollateralModuleTest is Test {
             })
         );
 
+//        IERC20.InsufficientAllowance.selector, depositAndBoosterAmount, depositAndBoosterAmount - 1
+
         vm.expectRevert(
             abi.encodeWithSelector(
-                FeatureFlag.FeatureUnavailable(_GLOBAL_FEATURE_FLAG)
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
             )
         );
 
