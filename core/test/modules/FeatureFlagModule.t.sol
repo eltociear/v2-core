@@ -13,7 +13,6 @@ import "../../src/modules/FeatureFlagModule.sol";
 
 contract ExposedFeatureFlagModule is FeatureFlagModule {
     constructor() {
-//        Account.create(13, address(1));
     }
 }
 
@@ -36,6 +35,8 @@ contract FeatureFlagModuleTest is Test {
     }
 
     function test_FeatureFlagAllowAll() public {
+        vm.prank(owner);
+        featureFlagModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
         // Expect FeatureFlagAllowAllSet event
         vm.expectEmit(address(featureFlagModule));
         emit FeatureFlagAllowAllSet(_GLOBAL_FEATURE_FLAG, true);
@@ -43,7 +44,9 @@ contract FeatureFlagModuleTest is Test {
         featureFlagModule.setFeatureFlagAllowAll(_GLOBAL_FEATURE_FLAG, true);
 
         bool isAllowAll = featureFlagModule.getFeatureFlagAllowAll(_GLOBAL_FEATURE_FLAG);
+        bool isDenyAll = featureFlagModule.getFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG);
         assertEq(isAllowAll, true);
+        assertEq(isDenyAll, false);
     }
 
 }
