@@ -57,6 +57,7 @@ contract AccountModule is IAccountModule {
      * @inheritdoc IAccountModule
      */
     function createAccount(uint128 requestedAccountId) external override {
+        // todo: access pass check, while access pass is running account nfts should ideally not be transferrable
         IAccountTokenModule accountTokenModule = IAccountTokenModule(getAccountTokenAddress());
         accountTokenModule.safeMint(msg.sender, requestedAccountId, "");
         Account.create(requestedAccountId, msg.sender);
