@@ -105,6 +105,20 @@ contract ProductModuleTest is Test {
         productModule.registerProduct(address(product3), "Product 3");
     }
 
+    function test_RevertWhen_RegisterProduct_Global_Deny_All() public {
+        vm.prank(owner);
+        productModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+        MockProduct product3 = new MockProduct("Product 3");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        productModule.registerProduct(address(product3), "Product 3");
+    }
+
     function test_RevertWhen_RegisterProduct_NoPermission() public {
         MockProduct product3 = new MockProduct("Product 3");
 
@@ -133,6 +147,20 @@ contract ProductModuleTest is Test {
         Account.Exposure[] memory exposuresAfter =
             productModule.getProducts()[0].getAccountAnnualizedExposures(100, Constants.TOKEN_0);
         assertEq(exposuresAfter.length, 0);
+    }
+
+    function test_RevertWhen_CloseAccount_Global_Deny_All() public {
+        vm.prank(owner);
+        productModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        productModule.closeAccount(1, 100, Constants.TOKEN_0);
+
     }
 
     function test_RevertWhen_CloseAccount_NoPermission() public {
@@ -206,6 +234,24 @@ contract ProductModuleTest is Test {
         assertEq(productModule.getActiveProduct(100, productModule.getActiveProductsLength(100)), productId);
     }
 
+    function test_RevertWhen_PropagateTakerOrder_Global_Deny_All() public {
+        vm.prank(owner);
+        productModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        (uint128 productId, uint128 marketId) =
+        productModule.configureNewProductAndMarket("Product3", UD60x18.wrap(2e16), UD60x18.wrap(25e15));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        productModule.propagateTakerOrder(100, productId, marketId, Constants.TOKEN_0, 100e18);
+
+    }
+
+
     function test_RevertWhen_propagateTakerOrder_NotProduct() public {
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, address(this)));
         productModule.propagateTakerOrder(100, 1, 10, Constants.TOKEN_0, 100e18);
@@ -275,6 +321,23 @@ contract ProductModuleTest is Test {
         assertEq(productModule.getActiveProduct(100, productModule.getActiveProductsLength(100)), productId);
     }
 
+    function test_RevertWhen_PropagateMakerOrder_Global_Deny_All() public {
+        vm.prank(owner);
+        productModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        (uint128 productId, uint128 marketId) =
+        productModule.configureNewProductAndMarket("Product3", UD60x18.wrap(2e16), UD60x18.wrap(25e15));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        productModule.propagateMakerOrder(100, productId, marketId, Constants.TOKEN_0, 100e18);
+
+    }
+
     function test_RevertWhen_propagateMakerOrder_NotProduct() public {
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, address(this)));
         productModule.propagateMakerOrder(100, 1, 10, Constants.TOKEN_0, 100e18);
@@ -316,6 +379,20 @@ contract ProductModuleTest is Test {
         vm.prank(address(productModule.getProducts()[0]));
         productModule.propagateSettlementCashflow(100, 1, Constants.TOKEN_0, -120e18);
         assertEq(productModule.getCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE + 3e18);
+    }
+
+    function test_RevertWhen_PropagateSettlementCashflow_Global_Deny_All() public {
+        vm.prank(owner);
+        productModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        productModule.propagateSettlementCashflow(100, 1, Constants.TOKEN_0, -120e18);
+
     }
 
     function test_RevertWhen_propagateSettlementCashflow_InsufficientFunds() public {
