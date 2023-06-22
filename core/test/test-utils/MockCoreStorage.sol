@@ -280,7 +280,7 @@ contract CoreState is MockCoreStorage, Ownable {
         // MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 2, marketId: 21, riskParameter: 1e18}));
     }
 
-    function setFeatureFlagAllowAll(bytes32 feature, bool allowAll) external {
+    function setFeatureFlagAllowAll(bytes32 feature, bool allowAll) public {
         // todo: consider abstracting feature flag specific functions into a separate contract to inherit from
         OwnableStorage.onlyOwner();
         FeatureFlag.load(feature).allowAll = allowAll;
@@ -292,7 +292,7 @@ contract CoreState is MockCoreStorage, Ownable {
         emit FeatureFlagAllowAllSet(feature, allowAll);
     }
 
-    function setFeatureFlagDenyAll(bytes32 feature, bool denyAll) external {
+    function setFeatureFlagDenyAll(bytes32 feature, bool denyAll) public {
         FeatureFlag.Data storage flag = FeatureFlag.load(feature);
 
         if (!denyAll || !flag.isDenier(msg.sender)) {

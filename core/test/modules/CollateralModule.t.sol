@@ -10,6 +10,7 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "../../src/modules/CollateralModule.sol";
 import "../test-utils/MockCoreStorage.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
 contract EnhancedCollateralModule is CollateralModule, CoreState {
     function enableDepositing(address tokenAddress) public {
@@ -28,6 +29,8 @@ contract EnhancedCollateralModule is CollateralModule, CoreState {
 contract CollateralModuleTest is Test {
     using SafeCastU256 for uint256;
     using SafeCastI256 for int256;
+
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
 
     event Deposited(
         uint128 indexed accountId,
@@ -180,6 +183,27 @@ contract CollateralModuleTest is Test {
         // Check the collateral balance post deposit
         assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
         assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), 10e18);
+    }
+
+    function test_depositCollateralFailDenyAll() public {
+
+        collateralModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        collateralModule.changeAccountBalance(
+            100,
+            MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0,
+                balance: 0,
+                liquidationBoosterBalance: 10e18
+            })
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable(_GLOBAL_FEATURE_FLAG)
+            )
+        );
+
     }
 
     function test_deposit_CollateralAndLiquidationBooster() public {
