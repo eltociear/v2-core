@@ -6,7 +6,6 @@ You may obtain a copy of the License at
 https://github.com/Voltz-Protocol/v2-core/blob/main/core/LICENSE
 */
 pragma solidity >=0.8.19;
-import "../interfaces/external/AccessPassNFT.sol";
 
 
 /**

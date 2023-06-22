@@ -14,7 +14,7 @@ import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 /**
  * @title Module for access pass nft configuration
  * @dev See IAccessPassConfigurationModule
- */
+*/
 contract AccessPassConfigurationModule is IAccessPassConfigurationModule {
 
     /**
