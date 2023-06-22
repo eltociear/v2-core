@@ -414,13 +414,4 @@ contract ProductModuleTest is Test {
         productModule.propagateSettlementCashflow(454545, 1, Constants.TOKEN_0, 1);
     }
 
-    // todo: see if imcheck is needed in propagate cashflow
-    // function test_RevertWhen_propagateSettlementCashflow_ImCheck() public {
-    //   uint256 uPnL = 100e18;
-    //   uint256 im = 1800e18;
-
-    //   vm.prank(address(productModule.getProducts()[0]));
-    //   vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100));
-    //   productModule.propagateSettlementCashflow(100, 1, Constants.TOKEN_0, -int256(Constants.DEFAULT_TOKEN_0_BALANCE - im - uPnL + 1));
-    // }
 }
