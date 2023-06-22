@@ -136,6 +136,7 @@ contract CollateralModuleTest is Test {
     }
 
     function test_deposit_Collateral() public {
+
         uint256 depositAmount = 500e18;
         uint256 boosterAmount = 0;
         uint256 depositAndBoosterAmount = depositAmount + boosterAmount;

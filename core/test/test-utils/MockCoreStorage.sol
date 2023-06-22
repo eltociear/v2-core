@@ -126,6 +126,7 @@ contract MockCoreStorage is MockAccountStorage, MockProductStorage {}
  */
 contract CoreState is MockCoreStorage, Ownable {
     using SetUtil for SetUtil.AddressSet;
+    using FeatureFlag for FeatureFlag.Data;
     event FeatureFlagDenyAllSet(bytes32 indexed feature, bool denyAll);
     event FeatureFlagAllowAllSet(bytes32 indexed feature, bool allowAll);
 
