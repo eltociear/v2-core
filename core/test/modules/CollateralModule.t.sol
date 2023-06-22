@@ -193,7 +193,7 @@ contract CollateralModuleTest is Test {
         assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), 10e18);
     }
 
-    function test_depositCollateralDenyAll() public {
+    function test_depositCollateralDenyAllExpectReverts() public {
 
         vm.prank(owner);
         collateralModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
@@ -207,6 +207,23 @@ contract CollateralModuleTest is Test {
         collateralModule.deposit(1,address(0),1e18);
 
     }
+
+    function test_withdrawCollateralDenyAllExpectReverts() public {
+
+        vm.prank(owner);
+        collateralModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        collateralModule.withdraw(1,address(0),1e18);
+
+    }
+
+
 
     function test_deposit_CollateralAndLiquidationBooster() public {
         uint256 depositAmount = 500e18;
