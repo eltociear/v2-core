@@ -193,27 +193,18 @@ contract CollateralModuleTest is Test {
         assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), 10e18);
     }
 
-    function test_depositCollateralFailDenyAll() public {
+    function test_depositCollateralDenyAll() public {
 
         vm.prank(owner);
         collateralModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
-
-        collateralModule.changeAccountBalance(
-            100,
-            MockAccountStorage.CollateralBalance({
-                token: Constants.TOKEN_0,
-                balance: 0,
-                liquidationBoosterBalance: 10e18
-            })
-        );
-
-//        IERC20.InsufficientAllowance.selector, depositAndBoosterAmount, depositAndBoosterAmount - 1
 
         vm.expectRevert(
             abi.encodeWithSelector(
                 FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
             )
         );
+
+        collateralModule.deposit(1,address(0),1e18);
 
     }
 
