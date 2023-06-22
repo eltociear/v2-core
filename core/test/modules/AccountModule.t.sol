@@ -73,6 +73,21 @@ contract AccountModuleTest is Test {
         accountModule.createAccount(100);
     }
 
+    function test_RevertWhen_CreateAccount_Global_Deny_All() public {
+        vm.prank(owner);
+        accountModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        accountModule.createAccount(100);
+    }
+
+//test_RevertWhen_RevokePermission_Global_Deny_All
+
     function test_RevertWhen_CreateAccount_UnmockedMint() public {
         vm.expectRevert();
         accountModule.createAccount(100);
@@ -108,6 +123,20 @@ contract AccountModuleTest is Test {
         assertEq(accountPerms[0].user, authorizedAddress);
         assertEq(accountPerms[0].permissions.length, 1);
         assertEq(accountPerms[0].permissions[0], AccountRBAC._ADMIN_PERMISSION);
+    }
+
+    function test_RevertWhen_GrantPermission_Global_Deny_All() public {
+        vm.prank(owner);
+        accountModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        address authorizedAddress = address(1);
+        accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, authorizedAddress);
     }
 
     function test_RevertWhen_GrantPermission() public {
@@ -258,6 +287,19 @@ contract AccountModuleTest is Test {
         accountModule.renouncePermission(100, AccountRBAC._ADMIN_PERMISSION);
         accountPerms = accountModule.getAccountPermissions(100);
         assertEq(accountPerms.length, 0);
+    }
+
+    function test_RevertWhen_RenouncePermission_Global_Deny_All() public {
+        vm.prank(owner);
+        accountModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        accountModule.renouncePermission(100, AccountRBAC._ADMIN_PERMISSION);
     }
 
     function test_RevertWhen_RenounceInexistentPermission() public {
