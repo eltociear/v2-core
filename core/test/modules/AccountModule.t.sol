@@ -34,8 +34,18 @@ contract AccountModuleTest is Test {
     EnhancedAccountModuleTest internal accountModule;
     address internal proxyAddress = vm.addr(1);
 
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+
+    address internal owner = vm.addr(2);
+
     function setUp() public {
         accountModule = new EnhancedAccountModuleTest();
+
+        vm.store(
+            address(accountModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
+        );
 
         mockAssociatedSystem();
     }
@@ -150,6 +160,19 @@ contract AccountModuleTest is Test {
         accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
         accountPerms = accountModule.getAccountPermissions(100);
         assertEq(accountPerms.length, 0);
+    }
+
+    function test_RevertWhen_RevokePermission_Global_Deny_All() public {
+        vm.prank(owner);
+        accountModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+        address revokedAddress = address(1);
+        accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
     }
 
     function test_RevertWhen_RevokeInexistentPermission() public {
