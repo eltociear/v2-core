@@ -126,6 +126,8 @@ contract MockCoreStorage is MockAccountStorage, MockProductStorage {}
  */
 contract CoreState is MockCoreStorage, Ownable {
     using SetUtil for SetUtil.AddressSet;
+    event FeatureFlagDenyAllSet(bytes32 indexed feature, bool denyAll);
+    event FeatureFlagAllowAllSet(bytes32 indexed feature, bool allowAll);
 
     MockProduct[] internal products;
 
@@ -276,6 +278,31 @@ contract CoreState is MockCoreStorage, Ownable {
         // Set market risk configuration
         // MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 2, marketId: 21, riskParameter: 1e18}));
     }
+
+    function setFeatureFlagAllowAll(bytes32 feature, bool allowAll) external {
+        // todo: consider abstracting feature flag specific functions into a separate contract to inherit from
+        OwnableStorage.onlyOwner();
+        FeatureFlag.load(feature).allowAll = allowAll;
+
+        if (allowAll) {
+            FeatureFlag.load(feature).denyAll = false;
+        }
+
+        emit FeatureFlagAllowAllSet(feature, allowAll);
+    }
+
+    function setFeatureFlagDenyAll(bytes32 feature, bool denyAll) external {
+        FeatureFlag.Data storage flag = FeatureFlag.load(feature);
+
+        if (!denyAll || !flag.isDenier(msg.sender)) {
+            OwnableStorage.onlyOwner();
+        }
+
+        flag.denyAll = denyAll;
+
+        emit FeatureFlagDenyAllSet(feature, denyAll);
+    }
+
 
     function getProducts() external view returns (MockProduct[] memory) {
         return products;
