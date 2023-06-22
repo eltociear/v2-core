@@ -10,6 +10,7 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "../../src/modules/ProductModule.sol";
 import "../test-utils/MockCoreStorage.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
 contract EnhancedProductModule is ProductModule, CoreState {
     function _distributeFees(
@@ -52,8 +53,19 @@ contract ProductModuleTest is Test {
 
     EnhancedProductModule internal productModule;
 
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+
+    address internal owner = vm.addr(1);
+
     function setUp() public {
         productModule = new EnhancedProductModule();
+
+        vm.store(
+            address(productModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
+        );
+
     }
 
     function test_GetAccountUnrealizedPnL() public {
