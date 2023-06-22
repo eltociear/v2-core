@@ -42,6 +42,8 @@ contract FeatureFlagModuleTest is Test {
         vm.prank(owner);
         featureFlagModule.setFeatureFlagAllowAll(_GLOBAL_FEATURE_FLAG, true);
 
+        bool isAllowAll = featureFlagModule.getFeatureFlagAllowAll(_GLOBAL_FEATURE_FLAG);
+        assertEq(isAllowAll, true);
     }
 
 }
