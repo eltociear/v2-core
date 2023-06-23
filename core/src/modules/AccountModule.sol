@@ -12,6 +12,8 @@ import "../interfaces/IAccountModule.sol";
 import "@voltz-protocol/util-modules/src/storage/AssociatedSystem.sol";
 import "../storage/Account.sol";
 import "../storage/AccountRBAC.sol";
+import "../storage/AccessPassConfiguration.sol";
+import "../interfaces/external/IAccessPassNFT.sol";
 
 /**
  * @title Account Manager.
@@ -56,8 +58,16 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function createAccount(uint128 requestedAccountId) external override {
-        // todo: access pass check, while access pass is running account nfts should ideally not be transferrable
+    function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId) external override {
+        // todo:  while access pass programme is running account nfts should ideally not be transferrable
+
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        address accessPassOwnerAddress = IAccessPassNFT(accessPassNFTAddress).ownerOf(accessPassTokenId);
+
+        if (accessPassOwnerAddress != msg.sender) {
+            OnlyAccessPassOwner(requestedAccountId, accessPassTokenId);
+        }
+
         IAccountTokenModule accountTokenModule = IAccountTokenModule(getAccountTokenAddress());
         accountTokenModule.safeMint(msg.sender, requestedAccountId, "");
         Account.create(requestedAccountId, msg.sender);
