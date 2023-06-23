@@ -14,6 +14,7 @@ import "../storage/Account.sol";
 import "../storage/AccountRBAC.sol";
 import "../storage/AccessPassConfiguration.sol";
 import "../interfaces/external/IAccessPassNFT.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
 /**
  * @title Account Manager.
@@ -25,6 +26,7 @@ contract AccountModule is IAccountModule {
     using AccountRBAC for AccountRBAC.Data;
     using Account for Account.Data;
 
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
     bytes32 private constant _ACCOUNT_SYSTEM = "accountNFT";
 
     /**
@@ -59,13 +61,12 @@ contract AccountModule is IAccountModule {
      * @inheritdoc IAccountModule
      */
     function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId) external override {
-        // todo:  while access pass programme is running account nfts should ideally not be transferrable
-
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
         address accessPassOwnerAddress = IAccessPassNFT(accessPassNFTAddress).ownerOf(accessPassTokenId);
 
         if (accessPassOwnerAddress != msg.sender) {
-            revert OnlyAccessPassOwner(requestedAccountId, accessPassTokenId);
+        revert OnlyAccessPassOwner(requestedAccountId, accessPassTokenId);
         }
 
         IAccountTokenModule accountTokenModule = IAccountTokenModule(getAccountTokenAddress());
@@ -78,6 +79,7 @@ contract AccountModule is IAccountModule {
      * @inheritdoc IAccountModule
      */
     function notifyAccountTransfer(address to, uint128 accountId) external override {
+        // todo: check if need a global feature flag check in here and its implications on account nft transfers
         _onlyAccountToken();
 
         Account.Data storage account = Account.load(accountId);
@@ -119,6 +121,7 @@ contract AccountModule is IAccountModule {
      * @inheritdoc IAccountModule
      */
     function grantPermission(uint128 accountId, bytes32 permission, address user) external override {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, msg.sender);
 
         account.rbac.grantPermission(permission, user);
@@ -130,6 +133,7 @@ contract AccountModule is IAccountModule {
      * @inheritdoc IAccountModule
      */
     function revokePermission(uint128 accountId, bytes32 permission, address user) external override {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, msg.sender);
 
         account.rbac.revokePermission(permission, user);
@@ -141,6 +145,7 @@ contract AccountModule is IAccountModule {
      * @inheritdoc IAccountModule
      */
     function renouncePermission(uint128 accountId, bytes32 permission) external override {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         if (!Account.load(accountId).rbac.hasPermission(permission, msg.sender)) {
             revert PermissionNotGranted(accountId, permission, msg.sender);
         }
