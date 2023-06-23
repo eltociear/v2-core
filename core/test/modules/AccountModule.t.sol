@@ -94,7 +94,15 @@ contract AccountModuleTest is Test {
             )
         );
 
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+
+        accountModule.createAccount(100, 1);
     }
 
 //test_RevertWhen_RevokePermission_Global_Deny_All
