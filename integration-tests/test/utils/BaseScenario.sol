@@ -22,6 +22,7 @@ contract BaseScenario is Test {
   AaveRateOracle aaveRateOracle;
 
   uint128 constant feeCollectorAccountId = 999;
+  uint256 constant accessPassTokenId = 1;
 
   bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
 
@@ -58,7 +59,7 @@ contract BaseScenario is Test {
     aaveLendingPool = new MockAaveLendingPool();
     aaveRateOracle = new AaveRateOracle(aaveLendingPool, address(token));
 
-    coreProxy.createAccount(feeCollectorAccountId);
+    coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId);
     coreProxy.addToFeatureFlagAllowlist(bytes32("registerProduct"), owner);
 
     coreProxy.setPeriphery(address(peripheryProxy));
