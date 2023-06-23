@@ -117,7 +117,7 @@ interface IAccountModule {
      *
      * Emits a {AccountCreated} event.
      */
-    function createAccount(uint128 requestedAccountId) external;
+    function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId) external;
 
     /**
      * @notice Called by AccountTokenModule to notify the system when the account token is transferred.

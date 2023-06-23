@@ -65,7 +65,7 @@ contract AccountModule is IAccountModule {
         address accessPassOwnerAddress = IAccessPassNFT(accessPassNFTAddress).ownerOf(accessPassTokenId);
 
         if (accessPassOwnerAddress != msg.sender) {
-            OnlyAccessPassOwner(requestedAccountId, accessPassTokenId);
+            revert OnlyAccessPassOwner(requestedAccountId, accessPassTokenId);
         }
 
         IAccountTokenModule accountTokenModule = IAccountTokenModule(getAccountTokenAddress());
