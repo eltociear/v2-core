@@ -26,9 +26,9 @@ library V2Core {
         Payments.pay(collateralType, msg.sender, tokenAmount);
     }
 
-    function createAccount(uint128 requestedId) internal {
+    function createAccount(uint128 requestedId, uint256 accessPassTokenId) internal {
         Config.Data memory config = Config.load();
-        IAccountModule(config.VOLTZ_V2_CORE_PROXY).createAccount(requestedId);
+        IAccountModule(config.VOLTZ_V2_CORE_PROXY).createAccount(requestedId, accessPassTokenId);
         IERC721(config.VOLTZ_V2_ACCOUNT_NFT_PROXY).safeTransferFrom(address(this), msg.sender, requestedId);
     }
 }
