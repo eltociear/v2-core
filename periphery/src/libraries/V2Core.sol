@@ -13,11 +13,6 @@ import "./Payments.sol";
  */
 library V2Core {
 
-    /**
-    * @notice Thrown when the msg.sender is not the account owner when creating an account
-     */
-    error OnlyAccountOwner(address origin);
-
     function deposit(uint128 accountId, address collateralType, uint256 tokenAmount) internal {
         address coreProxyAddress = Config.load().VOLTZ_V2_CORE_PROXY;
         uint256 liquidationBooster = ICollateralConfigurationModule(
@@ -34,7 +29,7 @@ library V2Core {
 
     function createAccount(uint128 requestedId, uint256 accessPassTokenId) internal {
         Config.Data memory config = Config.load();
-        IAccountModule(config.VOLTZ_V2_CORE_PROXY).createAccount(requestedId, accessPassTokenId);
-        IERC721(config.VOLTZ_V2_ACCOUNT_NFT_PROXY).safeTransferFrom(address(this), msg.sender, requestedId);
+        IAccountModule(config.VOLTZ_V2_CORE_PROXY).createAccount(requestedId, accessPassTokenId, msg.sender);
+        // todo: note, transfer is no longer necessary, consider removing VOLTZ_V2_ACCOUNT_NFT_PROXY from the config
     }
 }
