@@ -29,6 +29,7 @@ contract AccountModule is IAccountModule {
     bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
     bytes32 private constant _ACCOUNT_SYSTEM = "accountNFT";
     bytes32 private constant _CREATE_ACCOUNT_FEATURE_FLAG = "createAccount";
+    bytes32 private constant _NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG = "notifyAccountTransfer";
 
     /**
      * @inheritdoc IAccountModule
@@ -86,7 +87,11 @@ contract AccountModule is IAccountModule {
      * @inheritdoc IAccountModule
      */
     function notifyAccountTransfer(address to, uint128 accountId) external override {
-        // todo: check if need a global feature flag check in here and its implications on account nft transfers
+        /*
+            Note, denying account transfers also blocks Margin Account token transfers.
+        */
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
+        FeatureFlag.ensureAccessToFeature(_NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG);
         _onlyAccountToken();
 
         Account.Data storage account = Account.load(accountId);
