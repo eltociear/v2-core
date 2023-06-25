@@ -26,6 +26,8 @@ contract BaseScenario is Test {
   address constant accessPassAddress = address(1111);
 
   bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+  bytes32 private constant _CREATE_ACCOUNT_FEATURE_FLAG = "createAccount";
+  bytes32 private constant _NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG = "notifyAccountTransfer";
 
   address owner;
 
@@ -38,6 +40,9 @@ contract BaseScenario is Test {
     CoreRouter coreRouter = new CoreRouter();
     coreProxy = new CoreProxy(address(coreRouter), owner);
     coreProxy.setFeatureFlagAllowAll(_GLOBAL_FEATURE_FLAG, true);
+    coreProxy.setFeatureFlagAllowAll(_CREATE_ACCOUNT_FEATURE_FLAG, true);
+    coreProxy.setFeatureFlagAllowAll(_NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG, true);
+
 
     AccountNftRouter accountNftRouter = new AccountNftRouter();
     coreProxy.initOrUpgradeNft(
@@ -71,10 +76,10 @@ contract BaseScenario is Test {
     vm.mockCall(
       accessPassAddress,
       abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, accessPassTokenId),
-      abi.encode(owner)
+      abi.encode(msg.sender)
     );
 
-    coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId, owner);
+    coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId, msg.sender);
     coreProxy.addToFeatureFlagAllowlist(bytes32("registerProduct"), owner);
 
     coreProxy.setPeriphery(address(peripheryProxy));
