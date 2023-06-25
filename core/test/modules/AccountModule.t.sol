@@ -450,7 +450,7 @@ contract AccountModuleTest is Test {
             abi.encode(randomAddress)
         );
 
-        accountModule.createAccount(100, 1, address(this));
+        accountModule.createAccount(100, 1, randomAddress);
 
         assertEq(accountModule.getAccountOwner(100), randomAddress);
     }
@@ -471,7 +471,7 @@ contract AccountModuleTest is Test {
         );
 
         vm.prank(randomAddress);
-        accountModule.createAccount(100, 1, address(this));
+        accountModule.createAccount(100, 1, randomAddress);
 
         assertEq(accountModule.isAuthorized(100, AccountRBAC._ADMIN_PERMISSION, randomAddress), true);
     }
@@ -493,7 +493,7 @@ contract AccountModuleTest is Test {
         );
 
         vm.prank(randomAddress);
-        accountModule.createAccount(100, 1, address(this));
+        accountModule.createAccount(100, 1, randomAddress);
 
         assertEq(accountModule.isAuthorized(100, AccountRBAC._ADMIN_PERMISSION, otherAddress), false);
     }
@@ -516,7 +516,7 @@ contract AccountModuleTest is Test {
             abi.encode(randomAddress)
         );
 
-        accountModule.createAccount(100, 1, address(this));
+        accountModule.createAccount(100, 1, randomAddress);
         vm.prank(randomAddress);
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, otherAddress);
 
@@ -538,7 +538,7 @@ contract AccountModuleTest is Test {
             abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
             abi.encode(randomAddress)
         );
-        accountModule.createAccount(100, 1, address(this));
+        accountModule.createAccount(100, 1, randomAddress);
 
         assertEq(accountModule.hasPermission(100, AccountRBAC._ADMIN_PERMISSION, randomAddress), false);
     }
