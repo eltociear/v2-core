@@ -141,6 +141,10 @@ contract CoreState is MockCoreStorage, Ownable {
         FeatureFlag.Data storage globalFeatureFlagConfig = FeatureFlag.load("global");
         globalFeatureFlagConfig.allowAll = true;
 
+        // Allow Allow _CREATE_ACCOUNT_FEATURE_FLAG to PRODUCT_CREATOR
+        FeatureFlag.Data storage createAccountFeatureFlagConfig = FeatureFlag.load("createAccount");
+        createAccountFeatureFlagConfig.allowAll = true;
+
         // Set protocol risk configuration
         ProtocolRiskConfiguration.set(
             ProtocolRiskConfiguration.Data({
