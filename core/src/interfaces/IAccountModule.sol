@@ -32,9 +32,10 @@ interface IAccountModule {
      * @notice Emitted when an account token with id `accountId` is minted to `owner`.
      * @param accountId The id of the account.
      * @param owner The address that owns the created account.
+     * @param trigger The address that triggered account creation.
      * @param blockTimestamp The current block timestamp.
      */
-    event AccountCreated(uint128 indexed accountId, address indexed owner, uint256 blockTimestamp);
+    event AccountCreated(uint128 indexed accountId, address indexed owner, address indexed trigger, uint256 blockTimestamp);
 
 
 
@@ -117,7 +118,7 @@ interface IAccountModule {
      *
      * Emits a {AccountCreated} event.
      */
-    function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId) external;
+    function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId, address accountOwner) external;
 
     /**
      * @notice Called by AccountTokenModule to notify the system when the account token is transferred.

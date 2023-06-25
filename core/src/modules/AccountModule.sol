@@ -61,20 +61,25 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId) external override {
+    function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId, address accountOwner) external override {
+        /*
+            Note, anyone can create an account for any accountOwner as long as the accountOwner owns the account pass nft.
+            During the alpha phase of the protocol, the create account feature will only be available to the Periphery
+            which will need to be separately set and the periphery will need to make sure accountOwner == msg.sender
+        */
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         FeatureFlag.ensureAccessToFeature(_CREATE_ACCOUNT_FEATURE_FLAG);
         address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
         address accessPassOwnerAddress = IAccessPassNFT(accessPassNFTAddress).ownerOf(accessPassTokenId);
 
-        if (accessPassOwnerAddress != msg.sender) {
+        if (accessPassOwnerAddress != accountOwner) {
             revert OnlyAccessPassOwner(requestedAccountId, accessPassTokenId);
         }
 
         IAccountTokenModule accountTokenModule = IAccountTokenModule(getAccountTokenAddress());
-        accountTokenModule.safeMint(msg.sender, requestedAccountId, "");
-        Account.create(requestedAccountId, msg.sender);
-        emit AccountCreated(requestedAccountId, msg.sender, block.timestamp);
+        accountTokenModule.safeMint(accountOwner, requestedAccountId, "");
+        Account.create(requestedAccountId, accountOwner);
+        emit AccountCreated(requestedAccountId, accountOwner, msg.sender, block.timestamp);
     }
 
     /**
