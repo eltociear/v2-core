@@ -12,6 +12,12 @@ import "./Payments.sol";
  * @title Perform withdrawals and deposits to and from the v2 collateral module
  */
 library V2Core {
+
+    /**
+    * @notice Thrown when the msg.sender is not the account owner when creating an account
+     */
+    error OnlyAccountOwner(address origin);
+
     function deposit(uint128 accountId, address collateralType, uint256 tokenAmount) internal {
         address coreProxyAddress = Config.load().VOLTZ_V2_CORE_PROXY;
         uint256 liquidationBooster = ICollateralConfigurationModule(
