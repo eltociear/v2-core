@@ -137,8 +137,6 @@ contract Scenario1 is BaseScenario {
 
     vm.clearMockedCalls();
 
-    console2.log("user1", user1);
-
     vm.mockCall(
       accessPassAddress,
       abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, accessPassTokenId),
