@@ -28,6 +28,7 @@ contract AccountModule is IAccountModule {
 
     bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
     bytes32 private constant _ACCOUNT_SYSTEM = "accountNFT";
+    bytes32 private constant _CREATE_ACCOUNT_FEATURE_FLAG = "createAccount";
 
     /**
      * @inheritdoc IAccountModule
@@ -62,11 +63,12 @@ contract AccountModule is IAccountModule {
      */
     function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId) external override {
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
+        FeatureFlag.ensureAccessToFeature(_CREATE_ACCOUNT_FEATURE_FLAG);
         address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
         address accessPassOwnerAddress = IAccessPassNFT(accessPassNFTAddress).ownerOf(accessPassTokenId);
 
         if (accessPassOwnerAddress != msg.sender) {
-        revert OnlyAccessPassOwner(requestedAccountId, accessPassTokenId);
+            revert OnlyAccessPassOwner(requestedAccountId, accessPassTokenId);
         }
 
         IAccountTokenModule accountTokenModule = IAccountTokenModule(getAccountTokenAddress());
