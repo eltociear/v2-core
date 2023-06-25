@@ -91,6 +91,7 @@ library Dispatcher {
                 requestedId := calldataload(inputs.offset)
                 accessPassTokenId := calldataload(add(inputs.offset, 0x20))
             }
+            // todo: missing tests for this flow, no tests failed after changing the implementation
             V2Core.createAccount(requestedId, accessPassTokenId);
         } else if (command == Commands.V2_CORE_DEPOSIT) {
             // equivalent: abi.decode(inputs, (uint128, address, uint256))

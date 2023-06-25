@@ -2,7 +2,7 @@ pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 
-import {CoreRouter, CoreProxy, AccountNftRouter, AccountNftProxy} from "../../src/Core.sol";
+import {CoreRouter, CoreProxy, AccountNftRouter, AccountNftProxy, AccessPassConfiguration, IAccessPassNFT} from "../../src/Core.sol";
 import {DatedIrsRouter, DatedIrsProxy, AaveRateOracle, MockAaveLendingPool} from "../../src/DatedIrs.sol";
 import {PeripheryRouter, PeripheryProxy} from "../../src/Periphery.sol";
 import {VammRouter, VammProxy} from "../../src/Vamm.sol";
@@ -23,6 +23,7 @@ contract BaseScenario is Test {
 
   uint128 constant feeCollectorAccountId = 999;
   uint256 constant accessPassTokenId = 1;
+  address constant accessPassAddress = address(1111);
 
   bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
 
@@ -58,6 +59,20 @@ contract BaseScenario is Test {
 
     aaveLendingPool = new MockAaveLendingPool();
     aaveRateOracle = new AaveRateOracle(aaveLendingPool, address(token));
+
+    coreProxy.configureAccessPass(
+      AccessPassConfiguration.Data(
+        {
+          accessPassNFTAddress: accessPassAddress
+        }
+      )
+    );
+
+    vm.mockCall(
+      accessPassAddress,
+      abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, accessPassTokenId),
+      abi.encode(owner)
+    );
 
     coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId);
     coreProxy.addToFeatureFlagAllowlist(bytes32("registerProduct"), owner);
