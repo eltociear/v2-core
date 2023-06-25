@@ -123,7 +123,7 @@ contract Testnet is Script {
       address(aaveRateOracle)
     );
 
-    coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId);
+    coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId, msg.sender);
 
     coreProxy.configureMarketFee(
       MarketFeeConfiguration.Data({

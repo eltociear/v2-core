@@ -74,7 +74,7 @@ contract BaseScenario is Test {
       abi.encode(owner)
     );
 
-    coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId);
+    coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId, owner);
     coreProxy.addToFeatureFlagAllowlist(bytes32("registerProduct"), owner);
 
     coreProxy.setPeriphery(address(peripheryProxy));
