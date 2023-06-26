@@ -17,6 +17,9 @@ import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
 contract AaveV3RateOracleTest is Test {
+
+    // todo: consider abstracting duplicate tests once rate oracle functions are stateless libraries
+
     using { unwrap } for UD60x18;
 
     address constant TEST_UNDERLYING_ADDRESS = 0x1122334455667788990011223344556677889900;
@@ -26,19 +29,19 @@ contract AaveV3RateOracleTest is Test {
     UD60x18 initValue = ud(1e18);
 
     MockAaveLendingPool mockLendingPool;
-    AaveRateOracle rateOracle;
+    AaveV3BorrowRateOracle rateOracle;
 
     function setUp() public virtual {
         mockLendingPool = new MockAaveLendingPool();
-        mockLendingPool.setReserveNormalizedIncome(TEST_UNDERLYING, initValue);
-        rateOracle = new AaveRateOracle(
+        mockLendingPool.setReserveNormalizedVariableDebt(TEST_UNDERLYING, initValue);
+        rateOracle = new AaveV3BorrowRateOracle(
             mockLendingPool,
             TEST_UNDERLYING_ADDRESS
         );
     }
 
     function test_SetIndexInMock() public {
-        assertEq(mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS), initValue.unwrap() * 1e9);
+        assertEq(mockLendingPool.getReserveNormalizedVariableDebt(TEST_UNDERLYING_ADDRESS), initValue.unwrap() * 1e9);
     }
 
     function test_InitCurrentIndex() public {
@@ -99,7 +102,7 @@ contract AaveV3RateOracleTest is Test {
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
         vm.warp(Time.blockTimestampTruncated() + 10000);
         assertApproxEqRel(
-            mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
+            mockLendingPool.getReserveNormalizedVariableDebt(TEST_UNDERLYING_ADDRESS),
             INDEX_AFTER_SET_TIME * 1e9,
             1e7 // 0.000000001% error
         );
@@ -166,7 +169,7 @@ contract AaveV3RateOracleTest is Test {
         vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
         vm.warp(Time.blockTimestampTruncated() + timePassed);
-        assertTrue(mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS) >= initValue.unwrap());
+        assertTrue(mockLendingPool.getReserveNormalizedVariableDebt(TEST_UNDERLYING_ADDRESS) >= initValue.unwrap());
     }
 
     function testFuzz_NonZeroCurrentIndexAfterTimePasses(uint256 factorPerSecond, uint16 timePassed) public {
