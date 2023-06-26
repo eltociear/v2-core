@@ -29,7 +29,7 @@ contract MockAaveLendingPool is IAaveV3LendingPool {
         UD60x18 currentIndex = reserveNormalizedVariableDebt[_underlyingAsset];
         if (factor.unwrap() > 0) {
             uint256 secondsSinceNormalizedVariableDebtSet = Time.blockTimestampTruncated() - startTime[_underlyingAsset];
-            currentIndex = reserveNormalizedVariableDebt[_underlyingAsset].mul(factor.powu(secondsSinceNormalizedVariableDebtSetSet));
+            currentIndex = reserveNormalizedVariableDebt[_underlyingAsset].mul(factor.powu(secondsSinceNormalizedVariableDebtSet));
         }
 
         // Convert from UD60x18 to Aave's "Ray" (decmimal scaled by 10^27) to confrom to Aave interface
