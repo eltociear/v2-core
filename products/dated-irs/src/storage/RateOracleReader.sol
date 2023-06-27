@@ -63,10 +63,11 @@ library RateOracleReader {
             return;
         }
 
+        // todo: check settlement window in here
+
         if (self.rateIndexAtMaturity[maturityTimestamp].unwrap() != 0) {
             return;
         }
-
 
         self.rateIndexAtMaturity[maturityTimestamp] = IRateOracle(self.oracleAddress).getCurrentIndex();
 
@@ -80,34 +81,26 @@ library RateOracleReader {
 
     }
 
-    // note: need thoughts here for protocols where current index does not correspond to the current timestamp (block.timestamp)
-    // ref. Lido and Rocket
+
     function getRateIndexCurrent(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexCurrent) {
-        if (Time.blockTimestampTruncated() >= maturityTimestamp) {
-            // maturity timestamp has passed
-            UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
 
-            if (rateIndexMaturity.unwrap() == 0) {
-                UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
+        /*
+            Note, need thoughts here for protocols where current index does not correspond to the current timestamp (block.timestamp)
+            ref. Lido and Rocket
+        */
 
-                PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];
+        if (Time.blockTimestampTruncated() < maturityTimestamp) {
+            return IRateOracle(self.oracleAddress).getCurrentIndex();
+        }
 
-                if (cache.lastKnownTimestamp == 0) {
-                    revert MissingRateIndexAtMaturity();
-                }
-                rateIndexMaturity = IRateOracle(self.oracleAddress).interpolateIndexValue({
-                    beforeIndex: cache.lastKnownIndex,
-                    beforeTimestamp: cache.lastKnownTimestamp,
-                    atOrAfterIndex: currentIndex,
-                    atOrAfterTimestamp: Time.blockTimestampTruncated(),
-                    queryTimestamp: maturityTimestamp
-                });
-            }
+        UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
+
+        if (rateIndexMaturity.unwrap() != 0) {
             return rateIndexMaturity;
         } else {
-            UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
-            return currentIndex;
+            return IRateOracle(self.oracleAddress).getCurrentIndex();
         }
+
     }
 
     function getRateIndexMaturity(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexMaturity) {
