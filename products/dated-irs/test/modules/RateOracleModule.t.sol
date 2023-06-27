@@ -101,8 +101,8 @@ contract RateOracleModuleTest is Test {
         assertEq(rateIndexCurrent.unwrap(), 1.001e18);
     }
 
-    function test_RevertWhen_NoCacheAfterMaturity() public {
-        vm.warp(maturityTimestamp + 1);
+    function test_RevertWhen_NoCacheAfterCachingWindow() public {
+        vm.warp(maturityTimestamp + 3601);
         vm.expectRevert();
         UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId, maturityTimestamp);
         // fails because of no cache update

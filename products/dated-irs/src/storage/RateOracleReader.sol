@@ -112,18 +112,7 @@ library RateOracleReader {
             ref. Lido and Rocket
         */
 
-        if (Time.blockTimestampTruncated() < maturityTimestamp) {
-            return IRateOracle(self.oracleAddress).getCurrentIndex();
-        }
-
-        UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
-
-        if (rateIndexMaturity.unwrap() != 0) {
-            return rateIndexMaturity;
-        } else {
-            return IRateOracle(self.oracleAddress).getCurrentIndex();
-        }
-
+        return IRateOracle(self.oracleAddress).getCurrentIndex();
     }
 
     function getRateIndexMaturity(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexMaturity) {
