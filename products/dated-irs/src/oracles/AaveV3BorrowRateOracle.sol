@@ -9,6 +9,7 @@ pragma solidity >=0.8.19;
 
 import "../interfaces/IRateOracle.sol";
 import "../interfaces/external/IAaveV3LendingPool.sol";
+import "./libraries/IndexInterpolation.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
@@ -33,7 +34,6 @@ contract AaveV3BorrowRateOracle is IRateOracle {
     /// @inheritdoc IRateOracle
     function getCurrentIndex() external view override returns (UD60x18 liquidityIndex) {
         uint256 liquidityIndexInRay = aaveLendingPool.getReserveNormalizedVariableDebt(underlying);
-        // Convert index from Aave's "ray" (decimal scaled by 10^27) to UD60x18 (decimal scaled by 10^18)
         return ud(liquidityIndexInRay / 1e9);
     }
 
@@ -49,21 +49,7 @@ contract AaveV3BorrowRateOracle is IRateOracle {
     pure
     returns (UD60x18 interpolatedIndex)
     {
-        // todo: consider pushing this function into a shared stateless library (AB)
-        require(queryTimestampWad > beforeTimestampWad, "Unordered timestamps");
-
-        if (atOrAfterTimestampWad == queryTimestampWad) {
-            return atOrAfterIndex;
-        }
-
-        require(queryTimestampWad < atOrAfterTimestampWad, "Unordered timestamps");
-
-        // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?) (AB)
-        UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex); // this does not allow negative rates
-
-        UD60x18 proportionOfPeriodElapsed =
-        ud(queryTimestampWad - beforeTimestampWad).div(ud(atOrAfterTimestampWad - beforeTimestampWad));
-        return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
+        return IndexInterpolation.interpolateIndexValue(beforeIndex, beforeTimestampWad, atOrAfterIndex, atOrAfterTimestampWad, queryTimestampWad);
     }
 
     /**

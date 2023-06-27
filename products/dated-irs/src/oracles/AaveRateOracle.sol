@@ -9,6 +9,7 @@ pragma solidity >=0.8.19;
 
 import "../interfaces/IRateOracle.sol";
 import "../interfaces/external/IAaveV3LendingPool.sol";
+import "./libraries/IndexInterpolation.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
@@ -58,26 +59,12 @@ contract AaveRateOracle is IRateOracle {
         uint256 atOrAfterTimestampWad,
         uint256 queryTimestampWad
     )
-        public
-        pure
-        returns (UD60x18 interpolatedIndex)
+    public
+    pure
+    returns (UD60x18 interpolatedIndex)
     {
-        require(queryTimestampWad > beforeTimestampWad, "Unordered timestamps");
-
-        if (atOrAfterTimestampWad == queryTimestampWad) {
-            return atOrAfterIndex;
-        }
-
-        require(queryTimestampWad < atOrAfterTimestampWad, "Unordered timestamps");
-
-        // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?) (AB)
-        UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex); // this does not allow negative rates
-
-        UD60x18 proportionOfPeriodElapsed =
-            ud(queryTimestampWad - beforeTimestampWad).div(ud(atOrAfterTimestampWad - beforeTimestampWad));
-        return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
+        return IndexInterpolation.interpolateIndexValue(beforeIndex, beforeTimestampWad, atOrAfterIndex, atOrAfterTimestampWad, queryTimestampWad);
     }
-
     /**
      * @inheritdoc IERC165
      */
