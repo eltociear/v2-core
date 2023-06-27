@@ -9,11 +9,11 @@ pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
-import "../src/storage/Portfolio.sol";
-import "../src/storage/MarketConfiguration.sol";
-import "../src/storage/RateOracleReader.sol";
-import "./mocks/MockRateOracle.sol";
-import "./mocks/MockPool.sol";
+import "../../src/storage/Portfolio.sol";
+import "../../src/storage/MarketConfiguration.sol";
+import "../../src/storage/RateOracleReader.sol";
+import "../mocks/MockRateOracle.sol";
+import "../mocks/MockPool.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
 import "@voltz-protocol/core/src/storage/MarketRiskConfiguration.sol";
 import "@voltz-protocol/core/src/interfaces/IRiskConfigurationModule.sol";

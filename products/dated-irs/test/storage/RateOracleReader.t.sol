@@ -9,8 +9,8 @@ pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
-import "../src/storage/RateOracleReader.sol";
-import "./mocks/MockRateOracle.sol";
+import "../../src/storage/RateOracleReader.sol";
+import "../mocks/MockRateOracle.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
 contract ExposeRateOracleReader {
