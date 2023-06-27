@@ -18,10 +18,9 @@ library RateOracleReader {
      */
 
     error MaturityNotReached();
-    error MissingRateIndexAtMaturity();
 
     /**
-     * @notice Emitted when new rate is cached in the rate oracle or when maturity rate is calculated.
+     * @notice Emitted when new maturity rate is cached
      * @param marketId The id of the market.
      * @param oracleAddress The address of the oracle.
      * @param timestamp The timestamp of the rate.
@@ -32,15 +31,9 @@ library RateOracleReader {
         uint128 indexed marketId, address oracleAddress, uint32 timestamp, uint256 rate, uint256 blockTimestamp
     );
 
-    struct PreMaturityData {
-        uint32 lastKnownTimestamp;
-        UD60x18 lastKnownIndex;
-    }
-
     struct Data {
         uint128 marketId;
         address oracleAddress;
-        mapping(uint256 => PreMaturityData) rateIndexPreMaturity;
         mapping(uint256 => UD60x18) rateIndexAtMaturity;
     }
 
