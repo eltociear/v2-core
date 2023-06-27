@@ -58,63 +58,26 @@ library RateOracleReader {
     }
 
     function updateCache(Data storage self, uint32 maturityTimestamp) internal {
-        if (Time.blockTimestampTruncated() >= maturityTimestamp) {
-            // maturity timestamp has passed
-            UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
-            if (rateIndexMaturity.unwrap() == 0) {
-                // cache not yet populated - populate it now
-                UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
-                PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];
 
-                if (cache.lastKnownTimestamp == 0) {
-                    self.rateIndexAtMaturity[maturityTimestamp] = currentIndex;
-                } else {
-                    // We know a rate before settlment and now at/after settlement => interpolate between them
-                    rateIndexMaturity = IRateOracle(self.oracleAddress).interpolateIndexValue({
-                        beforeIndex: cache.lastKnownIndex,
-                        beforeTimestamp: cache.lastKnownTimestamp,
-                        atOrAfterIndex: currentIndex,
-                        atOrAfterTimestamp: Time.blockTimestampTruncated(),
-                        queryTimestamp: maturityTimestamp
-                    });
-                    self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
-                }
-
-                emit RateOracleCacheUpdated(
-                    self.marketId,
-                    self.oracleAddress,
-                    maturityTimestamp,
-                    self.rateIndexAtMaturity[maturityTimestamp].unwrap(),
-                    block.timestamp
-                    );
-            }
-        } else {
-            // timestamp has not yet passed
-
-            UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
-            bool shouldUpdateCache = true;
-            PreMaturityData storage cache = self.rateIndexPreMaturity[maturityTimestamp];
-            if (cache.lastKnownTimestamp > 0) {
-                // We have saved a pre-maturity value already; check whether we need to update it
-                uint256 timeTillMaturity = maturityTimestamp - Time.blockTimestampTruncated();
-                uint256 timeSinceLastWrite = Time.blockTimestampTruncated() - cache.lastKnownTimestamp;
-                if (timeSinceLastWrite < timeTillMaturity) {
-                    // We only update the cache if we are at least halfway to maturity since the last cache update
-                    // This heuristic should give us a timestamp very close to the maturity timestamp, but should save unnecessary
-                    // writes early in the life of a given IRS
-                    shouldUpdateCache = false;
-                }
-            }
-
-            if (shouldUpdateCache) {
-                cache.lastKnownTimestamp = Time.blockTimestampTruncated();
-                cache.lastKnownIndex = currentIndex;
-
-                emit RateOracleCacheUpdated(
-                    self.marketId, self.oracleAddress, cache.lastKnownTimestamp, cache.lastKnownIndex.unwrap(), block.timestamp
-                    );
-            }
+        if (Time.blockTimestampTruncated() < maturityTimestamp) {
+            return;
         }
+
+        if (self.rateIndexAtMaturity[maturityTimestamp].unwrap() != 0) {
+            return;
+        }
+
+
+        self.rateIndexAtMaturity[maturityTimestamp] = IRateOracle(self.oracleAddress).getCurrentIndex();
+
+        emit RateOracleCacheUpdated(
+            self.marketId,
+            self.oracleAddress,
+            maturityTimestamp,
+            self.rateIndexAtMaturity[maturityTimestamp].unwrap(),
+            block.timestamp
+        );
+
     }
 
     // note: need thoughts here for protocols where current index does not correspond to the current timestamp (block.timestamp)
