@@ -135,12 +135,12 @@ contract ExposePortfolio {
         unwindQuote = Portfolio.computeUnwindQuote(marketId, maturityTimestamp, poolAddress, baseAmount);
     }
 
-    function updateCache(uint128 marketId, uint32 maturityTimestamp) external {
-        RateOracleReader.load(marketId).updateCache(maturityTimestamp);
+    function updateRateIndexAtMaturityCache(uint128 id, uint32 maturityTimestamp) external {
+        RateOracleReader.load(id).updateRateIndexAtMaturityCache(maturityTimestamp);
     }
 
-    function createRateOracle(uint128 marketId, address rateOracleAddress) external {
-        RateOracleReader.set(marketId, rateOracleAddress);
+    function createRateOracle(uint128 marketId, address rateOracleAddress, uint256 maturityIndexCachingWindowInSeconds) external {
+        RateOracleReader.set(marketId, rateOracleAddress, maturityIndexCachingWindowInSeconds);
     }
 
     function setMarket(uint128 marketId, address quoteToken) external {
@@ -202,7 +202,7 @@ contract PortfolioTest is Test {
 
         portfolio = new ExposePortfolio();
         portfolio.loadOrCreate(accountId);
-        portfolio.createRateOracle(marketId, address(mockRateOracle));
+        portfolio.createRateOracle(marketId, address(mockRateOracle), 3600);
 
         portfolio.setMarket(marketId, MOCK_COLLATERAL_TYPE);
     }
@@ -420,7 +420,7 @@ contract PortfolioTest is Test {
         vm.warp(maturityTimestamp + 1);
 
         mockRateOracle.setLastUpdatedIndex(1e27);
-        portfolio.updateCache(marketId, maturityTimestamp);
+        portfolio.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
 
         int256 settlementCashflow = portfolio.settle(accountId, marketId, maturityTimestamp, address(mockPool));
         assertEq(settlementCashflow, 30);
@@ -474,7 +474,7 @@ contract PortfolioTest is Test {
         mockRateOracle.setLastUpdatedIndex(1e27);
 
         vm.warp(maturityTimestamp + 1);
-        portfolio.updateCache(marketId, maturityTimestamp);
+        portfolio.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
 
         int256 settlementCashflow = portfolio.settle(accountId, marketId, maturityTimestamp, address(mockPool));
 
@@ -497,7 +497,7 @@ contract PortfolioTest is Test {
     function test_AnnualizedExposureFactorAfterMaturity() public {
         uint32 maturityTimestamp = currentTimestamp - 1;
         mockRateOracle.setLastUpdatedIndex(1e27);
-        portfolio.updateCache(marketId, maturityTimestamp);
+        portfolio.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
 
         UD60x18 factor = portfolio.annualizedExposureFactor(marketId, maturityTimestamp);
 
@@ -521,7 +521,7 @@ contract PortfolioTest is Test {
     function test_BaseAnnualizedExposureAfterMaturity() public {
         uint32 maturityTimestamp = currentTimestamp - 1;
         mockRateOracle.setLastUpdatedIndex(1e27);
-        portfolio.updateCache(marketId, maturityTimestamp);
+        portfolio.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
 
         int256[] memory baseAmounts = new int[](2);
         baseAmounts[0] = 1000;

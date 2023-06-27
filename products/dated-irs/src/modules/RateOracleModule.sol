@@ -72,7 +72,7 @@ contract RateOracleModule is IRateOracleModule {
     /**
      * @inheritdoc IRateOracleModule
      */
-    function updateRateIndexAtMaturityCache(uint128 marketId, uint256 maturityTimestamp) external override {
+    function updateRateIndexAtMaturityCache(uint128 marketId, uint32 maturityTimestamp) external override {
 
         RateOracleReader.load(marketId).updateRateIndexAtMaturityCache(maturityTimestamp);
 

@@ -63,7 +63,7 @@ interface IRateOracleModule {
      * @param marketId market id
      * @param maturityTimestamp maturity timestap for which we want to update cached variable liquidity index
      */
-    function updateRateIndexAtMaturityCache(uint128 marketId, uint256 maturityTimestamp) external;
+    function updateRateIndexAtMaturityCache(uint128 marketId, uint32 maturityTimestamp) external;
 
     /**
      * @notice Backfill the rate index at maturity cache for a given marketId & maturity timestamp

@@ -35,8 +35,8 @@ contract ProductIRSModuleExtended is ProductIRSModule {
         return ProductConfiguration.load();
     }
 
-    function createRateOracle(uint128 marketId, address oracleAddress) external returns (bytes32 s) {
-        RateOracleReader.Data storage oracle = RateOracleReader.set(marketId, oracleAddress);
+    function createRateOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) external returns (bytes32 s) {
+        RateOracleReader.Data storage oracle = RateOracleReader.set(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
         assembly {
             s := oracle.slot
         }
@@ -80,7 +80,7 @@ contract ProductIRSModuleTest is Test {
         // create Rate Oracle
         mockRateOracle = new MockRateOracle();
         mockRateOracle.setLastUpdatedIndex(1e18 * 1e9);
-        productIrs.createRateOracle(MOCK_MARKET_ID, address(mockRateOracle));
+        productIrs.createRateOracle(MOCK_MARKET_ID, address(mockRateOracle), 3600);
 
         // create market
         productIrs.createMarket(MOCK_MARKET_ID, MOCK_QUOTE_TOKEN);

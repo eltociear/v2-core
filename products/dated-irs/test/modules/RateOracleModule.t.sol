@@ -65,7 +65,7 @@ contract RateOracleModuleTest is Test {
         maturityTimestamp = Time.blockTimestampTruncated() + 31536000;
         marketId = 100;
 
-        RateOracleModule.setVariableOracle(marketId, address(mockRateOracle));
+        RateOracleModule.setVariableOracle(marketId, address(mockRateOracle), 3600);
     }
 
     function test_InitSetVariableOracle() public {
@@ -73,12 +73,12 @@ contract RateOracleModuleTest is Test {
         vm.expectEmit(true, true, false, true);
         emit RateOracleConfigured(200, address(mockRateOracle), block.timestamp);
 
-        RateOracleModule.setVariableOracle(200, address(mockRateOracle));
+        RateOracleModule.setVariableOracle(200, address(mockRateOracle), 3600);
     }
 
     function test_ResetExistingOracle() public {
         address newRateOracle = address(new MockRateOracle());
-        RateOracleModule.setVariableOracle(marketId, address(newRateOracle));
+        RateOracleModule.setVariableOracle(marketId, address(newRateOracle), 3600);
         // todo: check set variable oracle once we add getter function (AB)
     }
 
@@ -87,7 +87,7 @@ contract RateOracleModuleTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.InvalidVariableOracleAddress.selector, address(fakeOracle)));
 
-        RateOracleModule.setVariableOracle(200, address(fakeOracle));
+        RateOracleModule.setVariableOracle(200, address(fakeOracle), 3600);
     }
 
     function test_InitGetRateIndexCurrent() public {
