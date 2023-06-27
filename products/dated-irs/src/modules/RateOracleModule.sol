@@ -53,33 +53,33 @@ contract RateOracleModule is IRateOracleModule {
     }
 
     /**
-     * @inheritdoc IRateOracleModule
-     */
-    function setVariableOracle(uint128 marketId, address oracleAddress) external override {
-        OwnableStorage.onlyOwner();
-
-        validateAndConfigureOracleAddress(marketId, oracleAddress);
-    }
-
-    /**
-        * @inheritdoc IRateOracleModule
+    * @inheritdoc IRateOracleModule
      */
     function getVariableOracleAddress(uint128 marketId) external view override returns (address variableOracleAddress) {
         return RateOracleReader.load(marketId).oracleAddress;
     }
 
     /**
+     * @inheritdoc IRateOracleModule
+     */
+    function setVariableOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) external override {
+        OwnableStorage.onlyOwner();
+
+        validateAndConfigureOracleAddress(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
+    }
+
+    /**
      * @dev Validates the address interface and creates or configures a rate oracle
      */
-    function validateAndConfigureOracleAddress(uint128 marketId, address oracleAddress) internal {
+    function validateAndConfigureOracleAddress(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) internal {
         if (!_validateVariableOracleAddress(oracleAddress)) {
             revert InvalidVariableOracleAddress(oracleAddress);
         }
 
         // configure the variable rate oracle
-        RateOracleReader.set(marketId, oracleAddress);
+        RateOracleReader.set(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
 
-        emit RateOracleConfigured(marketId, oracleAddress, block.timestamp);
+        emit RateOracleConfigured(marketId, oracleAddress, maturityIndexCachingWindowInSeconds, block.timestamp);
     }
 
     function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {

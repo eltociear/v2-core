@@ -23,8 +23,9 @@ interface IRateOracleModule {
      * @param marketId The id of the market (e.g. aUSDC lend) associated with the rate oracle
      * @param oracleAddress Address of the variable rate oracle contract
      * @param blockTimestamp The current block timestamp.
+     * @param maturityIndexCachingWindowInSeconds The number of seconds that need to elapse post maturity to have to backfill the maturity rate index
      */
-    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp);
+    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp, uint256 maturityIndexCachingWindowInSeconds);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC lend)
@@ -53,6 +54,7 @@ interface IRateOracleModule {
      * @notice Register a variable rate oralce
      * @param marketId Market Id
      * @param oracleAddress Oracle Address
+     * @param maturityIndexCachingWindowInSeconds The number of seconds that need to elapse post maturity to have to backfill the maturity rate index
      */
-    function setVariableOracle(uint128 marketId, address oracleAddress) external;
+    function setVariableOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) external;
 }
