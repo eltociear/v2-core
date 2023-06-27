@@ -68,6 +68,16 @@ contract RateOracleModule is IRateOracleModule {
         validateAndConfigureOracleAddress(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
     }
 
+
+    /**
+     * @inheritdoc IRateOracleModule
+     */
+    function updateRateIndexAtMaturityCache(uint128 marketId, uint256 maturityTimestamp) external override {
+
+        RateOracleReader.load(marketId).updateRateIndexAtMaturityCache(maturityTimestamp);
+
+    }
+
     /**
      * @dev Validates the address interface and creates or configures a rate oracle
      */

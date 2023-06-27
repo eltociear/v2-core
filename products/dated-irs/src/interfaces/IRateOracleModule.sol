@@ -57,4 +57,11 @@ interface IRateOracleModule {
      * @param maturityIndexCachingWindowInSeconds The number of seconds that need to elapse post maturity to have to backfill the maturity rate index
      */
     function setVariableOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) external;
+
+    /**
+     * @notice Update the rate index at maturity cache for a given marketId & maturity timestamp
+     * @param marketId market id
+     * @param maturityTimestamp maturity timestap for which we want to update cached variable liquidity index
+     */
+    function updateRateIndexAtMaturityCache(uint128 marketId, uint256 maturityTimestamp) external;
 }

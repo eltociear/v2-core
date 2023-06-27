@@ -9,7 +9,6 @@ pragma solidity >=0.8.19;
 
 import "../interfaces/IRateOracle.sol";
 import "../interfaces/external/IAaveV3LendingPool.sol";
-import "./libraries/IndexInterpolation.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
