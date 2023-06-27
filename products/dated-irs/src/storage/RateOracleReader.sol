@@ -85,13 +85,12 @@ library RateOracleReader {
             revert MaturityNotReached();
         }
 
-        if (Time.blockTimestampTruncated() > maturityTimestamp + self.maturityIndexCachingWindowInSeconds) {
-            revert MaturityIndexCachingWindowElapsed();
-        }
+        if (self.rateIndexAtMaturity[maturityTimestamp].unwrap() == 0) {
 
-        if (self.rateIndexAtMaturity[maturityTimestamp].unwrap() != 0) {
-            return;
-        } else {
+            if (Time.blockTimestampTruncated() < maturityTimestamp + self.maturityIndexCachingWindowInSeconds) {
+                revert MaturityIndexCachingWindowOngoing();
+            }
+
             self.rateIndexAtMaturity[maturityTimestamp] = IRateOracle(self.oracleAddress).getCurrentIndex();
 
             emit RateOracleCacheUpdated(
