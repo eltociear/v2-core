@@ -34,8 +34,7 @@ library RateOracleReader {
 
     struct PreMaturityData {
         uint32 lastKnownTimestamp;
-        UD60x18 lastKnownIndex; // TODO - truncate indices to UD40x18 (nned to define this and faciliate checked casting) to save a
-            // storage slot here and elsewhere
+        UD60x18 lastKnownIndex;
     }
 
     struct Data {

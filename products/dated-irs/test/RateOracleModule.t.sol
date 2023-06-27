@@ -79,7 +79,7 @@ contract RateOracleModuleTest is Test {
     function test_ResetExistingOracle() public {
         address newRateOracle = address(new MockRateOracle());
         RateOracleModule.setVariableOracle(marketId, address(newRateOracle));
-        // todo: check set variable oracle once we add getter function
+        // todo: check set variable oracle once we add getter function (AB)
     }
 
     function test_RevertWhen_SetOracleWrongInterface() public {

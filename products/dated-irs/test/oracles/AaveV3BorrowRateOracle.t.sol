@@ -18,7 +18,7 @@ import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
 contract AaveV3RateOracleTest is Test {
 
-    // todo: consider abstracting duplicate tests once rate oracle functions are stateless libraries
+    // todo: consider abstracting duplicate tests once rate oracle functions are stateless libraries (AB)
 
     using { unwrap } for UD60x18;
 

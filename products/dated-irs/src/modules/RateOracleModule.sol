@@ -61,7 +61,7 @@ contract RateOracleModule is IRateOracleModule {
         validateAndConfigureOracleAddress(marketId, oracleAddress);
     }
 
-    // todo: add getVariableOracle function
+    // todo: add getVariableOracle function (AB)
 
     /**
      * @dev Validates the address interface and creates or configures a rate oracle

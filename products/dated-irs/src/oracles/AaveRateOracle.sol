@@ -69,7 +69,7 @@ contract AaveRateOracle is IRateOracle {
 
         require(queryTimestampWad < atOrAfterTimestampWad, "Unordered timestamps");
 
-        // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?)
+        // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?) (AB)
         UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex); // this does not allow negative rates
 
         UD60x18 proportionOfPeriodElapsed =
