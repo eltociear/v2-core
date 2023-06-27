@@ -37,21 +37,6 @@ contract AaveV3BorrowRateOracle is IRateOracle {
         return ud(liquidityIndexInRay / 1e9);
     }
 
-    /// @inheritdoc IRateOracle
-    function interpolateIndexValue(
-        UD60x18 beforeIndex,
-        uint256 beforeTimestampWad,
-        UD60x18 atOrAfterIndex,
-        uint256 atOrAfterTimestampWad,
-        uint256 queryTimestampWad
-    )
-    public
-    pure
-    returns (UD60x18 interpolatedIndex)
-    {
-        return IndexInterpolation.interpolateIndexValue(beforeIndex, beforeTimestampWad, atOrAfterIndex, atOrAfterTimestampWad, queryTimestampWad);
-    }
-
     /**
      * @inheritdoc IERC165
      */
