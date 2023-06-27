@@ -30,7 +30,7 @@ contract RateOracleModuleExtended is RateOracleModule {
 
     // mock function, this is not visible in production
     function updateCache(uint128 id, uint32 maturityTimestamp) external {
-        RateOracleReader.load(id).updateCache(maturityTimestamp);
+        RateOracleReader.load(id).updateRateIndexAtMaturityCache(maturityTimestamp);
     }
 }
 
@@ -118,7 +118,7 @@ contract RateOracleModuleTest is Test {
         uint256 indexToSet = 1.001e18;
 
         mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
-        RateOracleModule.updateCache(marketId, maturityTimestamp);
+        RateOracleModule.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
 
         UD60x18 rateIndexMaturity = RateOracleModule.getRateIndexMaturity(marketId, maturityTimestamp);
         assertEq(rateIndexMaturity.unwrap(), indexToSet);
