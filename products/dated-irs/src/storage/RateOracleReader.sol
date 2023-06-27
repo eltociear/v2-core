@@ -77,6 +77,14 @@ library RateOracleReader {
         }
 
         self.rateIndexAtMaturity[maturityTimestamp] = rateIndexAtMaturity;
+
+        emit RateOracleCacheUpdated(
+            self.marketId,
+            self.oracleAddress,
+            maturityTimestamp,
+            self.rateIndexAtMaturity[maturityTimestamp].unwrap(),
+            block.timestamp
+        );
     }
 
     function updateRateIndexAtMaturityCache(Data storage self, uint32 maturityTimestamp) internal {
