@@ -30,6 +30,6 @@ library V2Core {
     function createAccount(uint128 requestedId, uint256 accessPassTokenId) internal {
         Config.Data memory config = Config.load();
         IAccountModule(config.VOLTZ_V2_CORE_PROXY).createAccount(requestedId, accessPassTokenId, msg.sender);
-        // todo: note, transfer is no longer necessary, consider removing VOLTZ_V2_ACCOUNT_NFT_PROXY from the config
+        // todo: note, transfer is no longer necessary, consider removing VOLTZ_V2_ACCOUNT_NFT_PROXY from the config (IR)
     }
 }

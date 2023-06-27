@@ -66,7 +66,7 @@ contract Testnet is Script {
     (address accountNftProxyAddress, ) = coreProxy.getAssociatedSystem(bytes32("accountNFT"));
     peripheryProxy.configure(
       Config.Data({
-        WETH9: IWETH9(address(0)),  // todo: deploy weth9 mock
+        WETH9: IWETH9(address(0)),  // todo: deploy weth9 mock (AN)
         VOLTZ_V2_CORE_PROXY: address(coreProxy),
         VOLTZ_V2_DATED_IRS_PROXY: address(datedIrsProxy),
         VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy),
