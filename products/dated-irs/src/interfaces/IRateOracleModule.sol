@@ -8,7 +8,7 @@ https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
 pragma solidity >=0.8.19;
 
 import { UD60x18 } from "@prb/math/UD60x18.sol";
-import {Data} from "../storage/RateOracleReader.sol";
+import "../storage/RateOracleReader.sol";
 
 /// @title Interface for the module for managing rate oracles connected to the Dated IRS Product
 interface IRateOracleModule {
@@ -43,11 +43,11 @@ interface IRateOracleModule {
     function getRateIndexCurrent(uint128 marketId, uint32 maturityTimestamp) external returns (UD60x18 rateIndexCurrent);
 
     /**
-     * @notice Get a variable rate oracle for a given marketId
+     * @notice Get a variable rate oracle address for a given marketId
      * @param marketId Market Id
-     * @return variableOracle Variable rate oracle object
+     * @return variableOracleAddress Variable rate oracle address
      */
-    function getVariableOracle(uint128 marketId) external view returns (Data variableOracle);
+    function getVariableOracleAddress(uint128 marketId) external view returns (address variableOracleAddress);
 
     /**
      * @notice Register a variable rate oralce

@@ -61,7 +61,12 @@ contract RateOracleModule is IRateOracleModule {
         validateAndConfigureOracleAddress(marketId, oracleAddress);
     }
 
-    // todo: add getVariableOracle function (AB)
+    /**
+        * @inheritdoc IRateOracleModule
+     */
+    function getVariableOracleAddress(uint128 marketId) external view override returns (address variableOracleAddress) {
+        return RateOracleReader.load(marketId).oracleAddress;
+    }
 
     /**
      * @dev Validates the address interface and creates or configures a rate oracle
