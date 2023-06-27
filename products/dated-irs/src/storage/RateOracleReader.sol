@@ -19,6 +19,14 @@ library RateOracleReader {
 
     error MaturityNotReached();
 
+
+    /**
+     * @dev Thrown if more than maturityIndexCachingWindowInSeconds has elapsed since the maturity timestamp
+     */
+
+    error MaturityIndexCachingWindowElapsed();
+
+
     /**
      * @notice Emitted when new maturity rate is cached
      * @param marketId The id of the market.
@@ -34,7 +42,7 @@ library RateOracleReader {
     struct Data {
         uint128 marketId;
         address oracleAddress;
-        uint256 maturityIndexCachingWindow;
+        uint256 maturityIndexCachingWindowInSeconds;
         mapping(uint256 => UD60x18) rateIndexAtMaturity;
     }
 
@@ -45,36 +53,36 @@ library RateOracleReader {
         }
     }
 
-    function set(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindow) internal returns (Data storage oracle) {
+    function set(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) internal returns (Data storage oracle) {
         oracle = load(marketId);
         oracle.marketId = marketId;
         oracle.oracleAddress = oracleAddress;
-        oracle.maturityIndexCachingWindow = maturityIndexCachingWindow;
+        oracle.maturityIndexCachingWindowInSeconds = maturityIndexCachingWindowInSeconds;
     }
 
     function updateRateIndexAtMaturityCache(Data storage self, uint32 maturityTimestamp) internal {
 
         if (Time.blockTimestampTruncated() < maturityTimestamp) {
-            return;
+            revert MaturityNotReached();
         }
 
-        if (Time.blockTimestampTruncated() > maturityTimestamp + self.maturityIndexCachingWindow) {
-            return;
+        if (Time.blockTimestampTruncated() > maturityTimestamp + self.maturityIndexCachingWindowInSeconds) {
+            revert MaturityIndexCachingWindowElapsed();
         }
 
         if (self.rateIndexAtMaturity[maturityTimestamp].unwrap() != 0) {
             return;
+        } else {
+            self.rateIndexAtMaturity[maturityTimestamp] = IRateOracle(self.oracleAddress).getCurrentIndex();
+
+            emit RateOracleCacheUpdated(
+                self.marketId,
+                self.oracleAddress,
+                maturityTimestamp,
+                self.rateIndexAtMaturity[maturityTimestamp].unwrap(),
+                block.timestamp
+            );
         }
-
-        self.rateIndexAtMaturity[maturityTimestamp] = IRateOracle(self.oracleAddress).getCurrentIndex();
-
-        emit RateOracleCacheUpdated(
-            self.marketId,
-            self.oracleAddress,
-            maturityTimestamp,
-            self.rateIndexAtMaturity[maturityTimestamp].unwrap(),
-            block.timestamp
-        );
 
     }
 
