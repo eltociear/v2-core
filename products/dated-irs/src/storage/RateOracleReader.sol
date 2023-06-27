@@ -34,6 +34,7 @@ library RateOracleReader {
     struct Data {
         uint128 marketId;
         address oracleAddress;
+        uint256 maturityIndexCachingWindow;
         mapping(uint256 => UD60x18) rateIndexAtMaturity;
     }
 
@@ -44,19 +45,22 @@ library RateOracleReader {
         }
     }
 
-    function set(uint128 marketId, address oracleAddress) internal returns (Data storage oracle) {
+    function set(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindow) internal returns (Data storage oracle) {
         oracle = load(marketId);
         oracle.marketId = marketId;
         oracle.oracleAddress = oracleAddress;
+        oracle.maturityIndexCachingWindow = maturityIndexCachingWindow;
     }
 
-    function updateCache(Data storage self, uint32 maturityTimestamp) internal {
+    function updateRateIndexAtMaturityCache(Data storage self, uint32 maturityTimestamp) internal {
 
         if (Time.blockTimestampTruncated() < maturityTimestamp) {
             return;
         }
 
-        // todo: check settlement window in here
+        if (Time.blockTimestampTruncated() > maturityTimestamp + self.maturityIndexCachingWindow) {
+            return;
+        }
 
         if (self.rateIndexAtMaturity[maturityTimestamp].unwrap() != 0) {
             return;
@@ -103,4 +107,7 @@ library RateOracleReader {
 
         return getRateIndexCurrent(self, maturityTimestamp);
     }
+
+    // todo: add backfill
+    // todo: make sure cache can be either updated by someone externally or as part of a settlement transaction triggered by the product
 }
