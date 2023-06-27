@@ -85,8 +85,6 @@ contract RateOracleModule is IRateOracleModule {
 
         RateOracleReader.load(marketId).backfillRateIndexAtMaturityCache(maturityTimestamp, rateIndexAtMaturity);
 
-        // todo: emit event
-
     }
 
     /**
