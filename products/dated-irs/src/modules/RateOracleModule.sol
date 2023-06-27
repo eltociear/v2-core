@@ -17,7 +17,6 @@ import { UD60x18 } from "@prb/math/UD60x18.sol";
 /**
  * @title Module for managing rate oracles connected to the Dated IRS Product
  * @dev See IRateOracleModule
- *  // todo: register a new rate oracle
  */
 contract RateOracleModule is IRateOracleModule {
     using RateOracleReader for RateOracleReader.Data;
