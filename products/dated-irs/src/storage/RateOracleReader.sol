@@ -87,8 +87,8 @@ library RateOracleReader {
 
         if (self.rateIndexAtMaturity[maturityTimestamp].unwrap() == 0) {
 
-            if (Time.blockTimestampTruncated() < maturityTimestamp + self.maturityIndexCachingWindowInSeconds) {
-                revert MaturityIndexCachingWindowOngoing();
+            if (Time.blockTimestampTruncated() > maturityTimestamp + self.maturityIndexCachingWindowInSeconds) {
+                revert MaturityIndexCachingWindowElapsed();
             }
 
             self.rateIndexAtMaturity[maturityTimestamp] = IRateOracle(self.oracleAddress).getCurrentIndex();
