@@ -181,4 +181,15 @@ contract RateOracleReaderTest is Test {
         rateOracleReader.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
     }
 
+    function test_GetRateIndexMaturity() public {
+        vm.warp(maturityTimestamp + 1);
+
+        uint256 indexToSet = 1.001e18;
+        mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
+        rateOracleReader.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
+
+        UD60x18 index = rateOracleReader.getRateIndexMaturity(marketId, maturityTimestamp);
+        assertEq(index.unwrap(), indexToSet);
+    }
+
 }

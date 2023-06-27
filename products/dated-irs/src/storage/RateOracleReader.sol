@@ -114,6 +114,12 @@ library RateOracleReader {
     }
 
     function getRateIndexMaturity(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexMaturity) {
+
+        /*
+            Note, for some period of time (until cache is captured) post maturity, the rate index cached for the maturity
+            will be zero
+        */
+
         if (Time.blockTimestampTruncated() <= maturityTimestamp) {
             revert MaturityNotReached();
         }
