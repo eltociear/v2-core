@@ -137,4 +137,24 @@ contract RateOracleReaderTest is Test {
         UD60x18 index = rateOracleReader.getRateIndexMaturity(marketId, maturityTimestamp);
         assertEq(index.unwrap(), indexToSet);
     }
+
+    function test_BackfillRateIndexAtMaturityCache() public {
+        vm.warp(maturityTimestamp + 3601);
+
+        uint256 indexToSet = 1.001e18;
+        mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
+        rateOracleReader.backfillRateIndexAtMaturityCache(marketId, maturityTimestamp, ud(indexToSet));
+
+        UD60x18 index = rateOracleReader.loadRateIndexAtMaturity(marketId, maturityTimestamp);
+        assertEq(index.unwrap(), indexToSet);
+    }
+
+    function test_RevertWhen_BackfillRateIndexAtMaturityCacheDuringCachingWindow() public {
+        vm.warp(maturityTimestamp + 3599);
+
+        uint256 indexToSet = 1.001e18;
+        mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
+        vm.expectRevert(abi.encodeWithSelector(RateOracleReader.MaturityIndexCachingWindowOngoing.selector));
+        rateOracleReader.backfillRateIndexAtMaturityCache(marketId, maturityTimestamp, ud(indexToSet));
+    }
 }
