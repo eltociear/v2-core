@@ -28,6 +28,12 @@ library RateOracleReader {
 
 
     /**
+     * @dev Thrown if the maturity index caching window has not elapsed yet in context of maturity index backfill
+     */
+    error MaturityIndexCachingWindowOngoing();
+
+
+    /**
      * @notice Emitted when new maturity rate is cached
      * @param marketId The id of the market.
      * @param oracleAddress The address of the oracle.
@@ -58,6 +64,19 @@ library RateOracleReader {
         oracle.marketId = marketId;
         oracle.oracleAddress = oracleAddress;
         oracle.maturityIndexCachingWindowInSeconds = maturityIndexCachingWindowInSeconds;
+    }
+
+    function backfillRateIndexAtMaturityCache(Data storage self, uint32 maturityTimestamp, UD60x18 rateIndexAtMaturity) internal {
+
+        if (Time.blockTimestampTruncated() < maturityTimestamp) {
+            revert MaturityNotReached();
+        }
+
+        if (Time.blockTimestampTruncated() < maturityTimestamp + self.maturityIndexCachingWindowInSeconds) {
+            revert MaturityIndexCachingWindowOngoing();
+        }
+
+        self.rateIndexAtMaturity[maturityTimestamp] = rateIndexAtMaturity;
     }
 
     function updateRateIndexAtMaturityCache(Data storage self, uint32 maturityTimestamp) internal {
@@ -115,7 +134,4 @@ library RateOracleReader {
 
         return getRateIndexCurrent(self, maturityTimestamp);
     }
-
-    // todo: add backfill
-    // todo: make sure cache can be either updated by someone externally or as part of a settlement transaction triggered by the product
 }
