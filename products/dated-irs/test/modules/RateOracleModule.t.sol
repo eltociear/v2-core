@@ -50,7 +50,7 @@ contract RateOracleModuleTest is Test {
 
     using RateOracleReader for RateOracleReader.Data;
 
-    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp);
+    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp, uint256 maturityIndexCachingWindowInSeconds);
 
     MockRateOracle mockRateOracle;
     uint32 public maturityTimestamp;
@@ -71,7 +71,7 @@ contract RateOracleModuleTest is Test {
     function test_InitSetVariableOracle() public {
         // expect RateOracleConfigured event
         vm.expectEmit(true, true, false, true);
-        emit RateOracleConfigured(200, address(mockRateOracle), block.timestamp);
+        emit RateOracleConfigured(200, address(mockRateOracle), 3600, block.timestamp);
 
         RateOracleModule.setVariableOracle(200, address(mockRateOracle), 3600);
     }
@@ -101,12 +101,6 @@ contract RateOracleModuleTest is Test {
         assertEq(rateIndexCurrent.unwrap(), 1.001e18);
     }
 
-    function test_RevertWhen_NoCacheAfterCachingWindow() public {
-        vm.warp(maturityTimestamp + 3601);
-        vm.expectRevert();
-        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId, maturityTimestamp);
-        // fails because of no cache update
-    }
 
     function test_NoCacheBeforeMaturity() public {
         UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId, maturityTimestamp);

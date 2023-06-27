@@ -336,6 +336,7 @@ contract ProductIRSModuleTest is Test {
     }
 
     function test_RevertWhen_Settle_NotAllowed() public {
+        vm.warp(maturityTimestamp + 1);
         vm.expectRevert(abi.encodeWithSelector(
             IAccountModule.PermissionNotGranted.selector,
             MOCK_ACCOUNT_ID, AccountRBAC._ADMIN_PERMISSION, address(this)

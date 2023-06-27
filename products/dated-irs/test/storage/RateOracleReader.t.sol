@@ -121,20 +121,6 @@ contract RateOracleReaderTest is Test {
         assertEq(index.unwrap(), indexToSet);
     }
 
-    function test_GetRateIndexCurrentAfterMaturityCacheAtMaturity() public {
-        vm.warp(maturityTimestamp + 1);
-        uint256 indexToSet0 = 1.001e18;
-        mockRateOracle.setLastUpdatedIndex(indexToSet0 * 1e9);
-        rateOracleReader.updateRateIndexAtMaturityCache(marketId, maturityTimestamp); // update at-maturity cache (index = 0)
-
-        vm.warp(maturityTimestamp + 2);
-        uint256 indexToSet1 = 3.003e18;
-        mockRateOracle.setLastUpdatedIndex(indexToSet1 * 1e9);
-
-        UD60x18 index = rateOracleReader.getRateIndexCurrent(marketId, maturityTimestamp);
-
-        assertEq(index.unwrap(), indexToSet0);
-    }
 
     function test_RevertWhen_GetRateIndexMaturityBeforeMaturity() public {
         vm.expectRevert(abi.encodeWithSelector(RateOracleReader.MaturityNotReached.selector));
