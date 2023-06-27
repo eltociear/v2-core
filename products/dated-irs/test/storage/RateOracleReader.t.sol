@@ -157,4 +157,15 @@ contract RateOracleReaderTest is Test {
         vm.expectRevert(abi.encodeWithSelector(RateOracleReader.MaturityIndexCachingWindowOngoing.selector));
         rateOracleReader.backfillRateIndexAtMaturityCache(marketId, maturityTimestamp, ud(indexToSet));
     }
+
+    function test_RevertWhen_BackfillRateIndexAtMaturityCacheBeforeMaturity() public {
+        vm.warp(maturityTimestamp - 1);
+
+        uint256 indexToSet = 1.001e18;
+        mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
+        vm.expectRevert(abi.encodeWithSelector(RateOracleReader.MaturityNotReached.selector));
+        rateOracleReader.backfillRateIndexAtMaturityCache(marketId, maturityTimestamp, ud(indexToSet));
+    }
+
+
 }
