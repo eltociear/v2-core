@@ -76,6 +76,21 @@ contract RateOracleModule is IRateOracleModule {
 
         RateOracleReader.load(marketId).updateRateIndexAtMaturityCache(maturityTimestamp);
 
+        // todo: emit event
+
+    }
+
+    /**
+     * @inheritdoc IRateOracleModule
+     */
+    function backfillRateIndexAtMaturityCache(uint128 marketId, uint32 maturityTimestamp, UD60x18 rateIndexAtMaturity) external override {
+
+        OwnableStorage.onlyOwner();
+
+        RateOracleReader.load(marketId).backfillRateIndexAtMaturityCache(maturityTimestamp, rateIndexAtMaturity);
+
+        // todo: emit event
+
     }
 
     /**
