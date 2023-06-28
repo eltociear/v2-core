@@ -3,6 +3,7 @@ pragma solidity >=0.8.19;
 
 import "@voltz-protocol/core/src/interfaces/ICollateralModule.sol";
 import "@voltz-protocol/core/src/interfaces/IAccountModule.sol";
+import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
 import "@voltz-protocol/core/src/interfaces/ICollateralConfigurationModule.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC721.sol";
 import "../storage/Config.sol";
@@ -30,5 +31,10 @@ library V2Core {
         Config.Data memory config = Config.load();
         IAccountModule(config.VOLTZ_V2_CORE_PROXY).createAccount(requestedId);
         IERC721(config.VOLTZ_V2_ACCOUNT_NFT_PROXY).safeTransferFrom(address(this), msg.sender, requestedId);
+    }
+
+    function closeAccount(uint128 productId, uint128 accountId, address collateralType) internal {
+        Config.Data memory config = Config.load();
+        IProductModule(config.VOLTZ_V2_CORE_PROXY).closeAccount(productId, accountId, collateralType);
     }
 }

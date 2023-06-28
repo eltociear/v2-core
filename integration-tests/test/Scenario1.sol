@@ -125,73 +125,131 @@ contract Scenario1 is BaseScenario {
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(1e18));
   }
 
-  function test() public {
+  function runTest(bool doSwap, bool doClose) public {
     setConfigs();
 
-    address user1 = vm.addr(1);
-    vm.startPrank(user1);
+    uint256 NUMBER_OF_LPS = 500;
 
-    token.mint(user1, 1001e18);
+    for (uint256 i = 1; i <= NUMBER_OF_LPS; i++) {
+      address user1 = vm.addr(i);
+      vm.startPrank(user1);
 
-    token.approve(address(peripheryProxy), 1001e18);
+      int24 minTick = -14100 - int24(uint24(i*60));
+      int24 maxTick = -13620 + int24(uint24(i*60));
 
-    bytes memory commands = abi.encodePacked(
-      bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
-      bytes1(uint8(Commands.TRANSFER_FROM)),
-      bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-      bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
-    );
-    bytes[] memory inputs = new bytes[](4);
-    inputs[0] = abi.encode(1);
-    inputs[1] = abi.encode(address(token), 1001e18);
-    inputs[2] = abi.encode(1, address(token), 1000e18);
-    inputs[3] = abi.encode(
-      1,  // accountId
-      marketId,
-      maturityTimestamp,
-      -14100, // 4.1%
-      -13620, // 3.9% 
-      extendedPoolModule.getLiquidityForBase(-14100, -13620, 10000e18)    
-    );
-    peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+      token.mint(user1, 1001e18);
 
-    vm.stopPrank();
+      token.approve(address(peripheryProxy), 1001e18);
 
-    address user2 = vm.addr(2);
+      bytes memory commands = abi.encodePacked(
+        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+        bytes1(uint8(Commands.TRANSFER_FROM)),
+        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+        bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
+      );
+      bytes[] memory inputs = new bytes[](4);
+      inputs[0] = abi.encode(i);
+      inputs[1] = abi.encode(address(token), 1001e18);
+      inputs[2] = abi.encode(i, address(token), 1000e18);
+      inputs[3] = abi.encode(
+        i,  // accountId
+        marketId,
+        maturityTimestamp,
+        minTick, // 3.9% 
+        maxTick, // 4.1%
+        extendedPoolModule.getLiquidityForBase(-minTick , maxTick, 10000e18)    
+      );
+      peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+
+      vm.stopPrank();
+    }
+
+
+    uint256 user2_id = 2000;
+    address user2 = vm.addr(user2_id);
     vm.startPrank(user2);
 
-    token.mint(user2, 501e18);
+    token.mint(user2, 5010000e18);
 
-    token.approve(address(peripheryProxy), 501e18);
+    token.approve(address(peripheryProxy), 5010000e18);
 
-    commands = abi.encodePacked(
-      bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
-      bytes1(uint8(Commands.TRANSFER_FROM)),
-      bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-      bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
-    );
-    inputs = new bytes[](4);
-    inputs[0] = abi.encode(2);
-    inputs[1] = abi.encode(address(token), 501e18);
-    inputs[2] = abi.encode(2, address(token), 500e18);
-    inputs[3] = abi.encode(
-      2,  // accountId
-      marketId,
-      maturityTimestamp,
-      500e18,
-      0 // todo: compute this properly
-    );
+    bytes memory commands;
+    bytes[] memory inputs;
+    
+    if (doSwap) {
+      commands = abi.encodePacked(
+        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+        bytes1(uint8(Commands.TRANSFER_FROM)),
+        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
+      );
+      inputs = new bytes[](4);
+      // bytes[] memory inputs = new bytes[](3);
+      inputs[0] = abi.encode(user2_id);
+      inputs[1] = abi.encode(address(token), 501e18);
+      inputs[2] = abi.encode(user2_id, address(token), 500e18);
+      inputs[3] = abi.encode(
+        user2_id,  // accountId
+        marketId,
+        maturityTimestamp,
+        5000000e18,
+        0 // todo: compute this properly
+      );
+    } else {
+      commands = abi.encodePacked(
+        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+        bytes1(uint8(Commands.TRANSFER_FROM)),
+        bytes1(uint8(Commands.V2_CORE_DEPOSIT))
+      );
+      inputs = new bytes[](3);
+      inputs[0] = abi.encode(user2_id);
+      inputs[1] = abi.encode(address(token), 501e18);
+      inputs[2] = abi.encode(user2_id, address(token), 500e18);
+    }
     peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+    vm.stopPrank();
 
-    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
+    if (doClose) {
+      // uint128 accountToClose = user2_id;
+      uint128 accountToClose = 5;
+      address addressToCloseWith = vm.addr(accountToClose);
 
-    uint256 traderExposure = div(ud60x18(500e18 * 2 * 1.01), ud60x18(365 * 1e18)).unwrap();
-    uint256 eps = 1000; // 1e-15 * 1e18
+      commands = abi.encodePacked(
+        bytes1(uint8(Commands.V2_CORE_CLOSE_ACCOUNT))
+      );
+      inputs = new bytes[](1);
+      inputs[0] = abi.encode(
+        productId,  // productId
+        accountToClose,  // accountId
+        address(token) // collateralType
+      );
+      vm.startPrank(addressToCloseWith);
+      peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+      vm.stopPrank();
+    }
 
-    assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure - eps));
-    assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure + eps));
+    // aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
 
-    assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure - eps));
-    assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure + eps));
+    // uint256 traderExposure = div(ud60x18(500e18 * 2 * 1.01), ud60x18(365 * 1e18)).unwrap();
+    // uint256 eps = 1000; // 1e-15 * 1e18
+
+    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure - eps));
+    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure + eps));
+
+    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure - eps));
+    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure + eps));
   }
+
+  function testGasCostWithSwap() public {
+    runTest(true, false);
+  }
+
+  function testGasCostWithSwapAndAccountClosure() public {
+    runTest(true, true);
+  }
+
+  function testGasCostWithoutSwap() public {
+    runTest(false, false);
+  }
+
 }

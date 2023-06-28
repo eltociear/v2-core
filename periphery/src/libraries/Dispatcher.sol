@@ -90,6 +90,17 @@ library Dispatcher {
                 requestedId := calldataload(inputs.offset)
             }
             V2Core.createAccount(requestedId);
+        } else if (command == Commands.V2_CORE_CLOSE_ACCOUNT) {
+            // equivalent: abi.decode(inputs, (address, address, uint160))
+            uint128 productId;
+            uint128 accountId;
+            address collateralType;
+            assembly {
+                productId := calldataload(inputs.offset)
+                accountId := calldataload(add(inputs.offset, 0x20))
+                collateralType := calldataload(add(inputs.offset, 0x40))
+            }
+            V2Core.closeAccount(productId, accountId, collateralType);
         } else if (command == Commands.V2_CORE_DEPOSIT) {
             // equivalent: abi.decode(inputs, (uint128, address, uint256))
             uint128 accountId;

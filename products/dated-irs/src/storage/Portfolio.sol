@@ -22,11 +22,20 @@ import "@voltz-protocol/core/src/interfaces/IRiskConfigurationModule.sol";
 import { UD60x18, UNIT, unwrap } from "@prb/math/UD60x18.sol";
 import { SD59x18 } from "@prb/math/SD59x18.sol";
 import { mulUDxUint, mulUDxInt } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
+import "forge-std/console2.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
  */
 library Portfolio {
+
+    // TODO: import from TickMath
+    /// @dev The minimum value that can be returned from #getSqrtRatioAtTick. Equivalent to getSqrtRatioAtTick(MIN_TICK)
+    uint160 internal constant MIN_SQRT_RATIO = 4295128739;
+    /// @dev The maximum value that can be returned from #getSqrtRatioAtTick. Equivalent to getSqrtRatioAtTick(MAX_TICK)
+    uint160 internal constant MAX_SQRT_RATIO =
+        1461446703485210103287273052203988822378723970342;
+
     using Portfolio for Portfolio.Data;
     using Position for Position.Data;
     using SetUtil for SetUtil.UintSet;
@@ -249,8 +258,11 @@ library Portfolio {
             (int256 filledBasePool,) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
 
             int256 unwindBase = -(position.baseBalance + filledBasePool);
+            console2.log("unwindBase", unwindBase);
 
             (int256 executedBaseAmount, int256 executedQuoteAmount) =
+                // pool.executeDatedTakerOrder(marketId, maturityTimestamp, unwindBase, MIN_SQRT_RATIO + 1);
+                // pool.executeDatedTakerOrder(marketId, maturityTimestamp, unwindBase, MAX_SQRT_RATIO - 1);
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, unwindBase, 0);
 
             UD60x18 _annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
