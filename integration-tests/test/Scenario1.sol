@@ -1,19 +1,23 @@
 pragma solidity >=0.8.19;
 
-import "./utils/BaseScenario.sol";
+import {BaseScenario, IERC20} from "./utils/BaseScenario.sol";
 
-import "@voltz-protocol/core/src/storage/CollateralConfiguration.sol";
-import "@voltz-protocol/core/src/storage/ProtocolRiskConfiguration.sol";
-import "@voltz-protocol/core/src/storage/MarketFeeConfiguration.sol";
+import {CollateralConfiguration} from "@voltz-protocol/core/src/storage/CollateralConfiguration.sol";
+import {ProtocolRiskConfiguration} from "@voltz-protocol/core/src/storage/ProtocolRiskConfiguration.sol";
+import {Account} from "@voltz-protocol/core/src/storage/Account.sol";
+import {MarketFeeConfiguration} from "@voltz-protocol/core/src/storage/MarketFeeConfiguration.sol";
+import { MarketRiskConfiguration } from "@voltz-protocol/core/src/storage/MarketRiskConfiguration.sol";
 
-import "@voltz-protocol/products-dated-irs/src/storage/ProductConfiguration.sol";
-import "@voltz-protocol/products-dated-irs/src/storage/MarketConfiguration.sol";
+import {ProductConfiguration} from "@voltz-protocol/products-dated-irs/src/storage/ProductConfiguration.sol";
+import {MarketConfiguration} from "@voltz-protocol/products-dated-irs/src/storage/MarketConfiguration.sol";
 
 import "@voltz-protocol/v2-vamm/utils/vamm-math/TickMath.sol";
 import {ExtendedPoolModule} from "@voltz-protocol/v2-vamm/test/PoolModule.t.sol";
 import {VammConfiguration, IRateOracle} from "@voltz-protocol/v2-vamm/utils/vamm-math/VammConfiguration.sol";
 
-import { ud60x18, div } from "@prb/math/UD60x18.sol";
+import {SafeCastI256, SafeCastU256, SafeCastU128} from "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
+
+import { ud60x18, div, SD59x18, UD60x18 } from "@prb/math/UD60x18.sol";
 
 import "forge-std/console2.sol";
 
@@ -990,10 +994,288 @@ contract Scenario1 is BaseScenario {
   }
 
   function test_MINT_FT_Settlement() public {
+    setConfigs();
+
+    address user1 = vm.addr(1);
+    vm.startPrank(user1);
+    token.mint(user1, 1001e18);
+    token.approve(address(peripheryProxy), 1001e18);
+
+    // PERIPHERY LP COMMAND
+    int128 lpLiquidity = extendedPoolModule.getLiquidityForBase(-14100, -13620, 10000e18); // 833_203_486_935_127_427_677_715
+    {
+      bytes memory commands = abi.encodePacked(
+        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+        bytes1(uint8(Commands.TRANSFER_FROM)),
+        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+        bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
+      );
+      bytes[] memory inputs = new bytes[](4);
+      inputs[0] = abi.encode(1);
+      inputs[1] = abi.encode(address(token), 1001e18);
+      inputs[2] = abi.encode(1, address(token), 1000e18);
+      inputs[3] = abi.encode(
+        1,  // accountId
+        marketId,
+        maturityTimestamp,
+        -14100, // 4.1%
+        -13620, // 3.9% 
+        extendedPoolModule.getLiquidityForBase(-14100, -13620, 10000e18)    
+      );
+      peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+    }
+
+    vm.stopPrank();
+    uint256 lpUnfilledShortBeforeTrade = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort;
+
+    address user2 = vm.addr(2);
+    vm.startPrank(user2);
+    token.mint(user2, 10001e18);
+    token.approve(address(peripheryProxy), 501e18);
+
+    /// PERIPHERY VT SWAP COMMAND -> tick grows
+    bytes[] memory swapOutput;
+    {
+      bytes memory commands = abi.encodePacked(
+        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+        bytes1(uint8(Commands.TRANSFER_FROM)),
+        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
+      );
+      bytes[] memory inputs = new bytes[](4);
+      inputs[0] = abi.encode(2);
+      inputs[1] = abi.encode(address(token), 501e18);
+      inputs[2] = abi.encode(2, address(token), 500e18);
+      inputs[3] = abi.encode(
+        2,  // accountId
+        marketId,
+        maturityTimestamp,
+        500e18,
+        0 // todo: compute this properly
+      );
+      swapOutput = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+    }
+
+    (
+      int256 executedBaseAmount,
+      int256 executedQuoteAmount,,,
+    ) = abi.decode(swapOutput[3], (int256, int256, uint256, uint256, int24));
+
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
+    vm.warp(maturityTimestamp + 1);
+
+    /// SETTLE TRADER
+    {
+      uint256 user2BalanceBeforeSettle = token.balanceOf(user2);
+      // settlement CF = base * liqIndex + quote 
+      int256 settlementCashflow = executedBaseAmount * 101e16 / WAD.toInt() + executedQuoteAmount;
+      bytes memory commands = abi.encodePacked(
+        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
+        bytes1(uint8(Commands.V2_CORE_WITHDRAW))
+      );
+      bytes[] memory inputs = new bytes[](2);
+      inputs[0] = abi.encode(
+        2,  // accountId
+        marketId,
+        maturityTimestamp
+      );
+      inputs[1] = abi.encode(2, address(token), settlementCashflow + 500e18);
+      peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+
+      uint256 collateralBalance = coreProxy.getAccountCollateralBalance(2, address(token));
+
+      uint256 user2BalanceAfterSettle = token.balanceOf(user2);
+      assertEq(collateralBalance, 0);
+      assertEq(user2BalanceAfterSettle.toInt(), user2BalanceBeforeSettle.toInt() + settlementCashflow + 500e18);
+    }
+
+    /// SETTLE LP
+    {
+      vm.startPrank(user1);
+      uint256 user1BalanceBeforeSettle = token.balanceOf(user1);
+      // settlement CF = base * liqIndex + quote  (opposite of trader's)
+      int256 settlementCashflow = -executedBaseAmount * 101e16 / WAD.toInt() - executedQuoteAmount;
+
+      console2.log("CB BEFORE", coreProxy.getAccountCollateralBalance(1, address(token)));
+      bytes memory commands = abi.encodePacked(
+        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
+        bytes1(uint8(Commands.V2_CORE_WITHDRAW))
+      );
+      bytes[] memory inputs = new bytes[](2);
+      inputs[0] = abi.encode(
+        1,  // accountId
+        marketId,
+        maturityTimestamp
+      );
+      inputs[1] = abi.encode(1, address(token), settlementCashflow + 1000e18);
+      peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+
+      uint256 collateralBalance = coreProxy.getAccountCollateralBalance(1, address(token));
+
+      uint256 user1BalanceAfterSettle = token.balanceOf(user1);
+      assertEq(collateralBalance, 0);
+      assertEq(user1BalanceAfterSettle.toInt(), user1BalanceBeforeSettle.toInt() + settlementCashflow + 1000e18);
+    }
+  }
+
+  function test_MINT_VT_UNWIND() public {
+    // addr 1 mints between 4.1% 3.9% 10000e18 base
+    // addr 2 FT 500e18 base 
+    // liquidity index is now 1.01
+    test_MINT_FT();
+    int24 initialTickVamm = vammProxy.getVammTick(marketId, maturityTimestamp);
+
+    int256 initLpFilled = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled;
+    uint256 initLpUnfilledShort = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort;
+    uint256 initLpUnfilledLong = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong;
+
+    int256 initTraderExposure = datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled;
+
+    // execute Unwind -> flipping to VT
+    address user2 = vm.addr(2);
+    vm.startPrank(user2);
+
+    token.mint(user2, 301e18);
+    token.approve(address(peripheryProxy), 301e18);
+
+    /// PERIPHERY VT SWAP COMMAND
+    bytes[] memory swapOutput;
+    {
+      bytes memory commands = abi.encodePacked(
+        bytes1(uint8(Commands.TRANSFER_FROM)),
+        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
+      );
+      bytes[] memory inputs = new bytes[](3);
+      inputs[0] = abi.encode(address(token), 301e18);
+      inputs[1] = abi.encode(2, address(token), 300e18);
+      inputs[2] = abi.encode(
+        2,  // accountId
+        marketId,
+        maturityTimestamp,
+        300e18,
+        0 // todo: compute this properly
+      );
+      swapOutput = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+    }
+
+    int24 currentTickVamm = vammProxy.getVammTick(marketId, maturityTimestamp);
+    assertLe(currentTickVamm, initialTickVamm);
+
+    (
+      int256 executedBaseAmount,
+      int256 executedQuoteAmount,
+      uint256 fee,
+      uint256 im,
+      int24 currentTick
+    ) = abi.decode(swapOutput[2], (int256, int256, uint256, uint256, int24));
+
+    uint256 liquidityIndex = 1_010_000_000_000_000_000;
+
+    // traderExposure = base * liq index * daysTillMaturity / daysInYear
+    uint256 traderExposure = div(ud60x18(200e18 * 2 * 1.01), ud60x18(365 * 1e18)).unwrap();
+
+    uint256 eps = 1000; // 1e-15 * 1e18
+
+    // LP
+    assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, int256(traderExposure - eps));
+    assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, int256(traderExposure + eps));
+    assertEq(
+      datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort,
+      initLpUnfilledShort
+    );
+    assertEq(
+      datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong,
+      initLpUnfilledLong
+    );
+
+    // TRADER
+    assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, -int256(traderExposure - eps));
+    assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, -int256(traderExposure + eps));
+    assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, initTraderExposure);
+
+    assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledShort, 0);
+    assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledLong, 0);
 
   }
 
-  function test_MINT_VT_UNWIND() public {}
+  function test_MINT_FT_UNWIND() public {
+    // addr 1 mints between 4.1% 3.9% 10000e18 base
+    // addr 2 VT 500e18 base 
+    // liquidity index is now 1.01
+    test_MINT_F=VT();
+    int24 initialTickVamm = vammProxy.getVammTick(marketId, maturityTimestamp);
 
-  function test_MINT_FT_UNWIND() public {}
+    int256 initLpFilled = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled;
+    uint256 initLpUnfilledShort = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort;
+    uint256 initLpUnfilledLong = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong;
+
+    int256 initTraderExposure = datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled;
+
+    // execute Unwind -> flipping to VT
+    address user2 = vm.addr(2);
+    vm.startPrank(user2);
+
+    token.mint(user2, 301e18);
+    token.approve(address(peripheryProxy), 301e18);
+
+    /// PERIPHERY VT SWAP COMMAND
+    bytes[] memory swapOutput;
+    {
+      bytes memory commands = abi.encodePacked(
+        bytes1(uint8(Commands.TRANSFER_FROM)),
+        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
+      );
+      bytes[] memory inputs = new bytes[](3);
+      inputs[0] = abi.encode(address(token), 301e18);
+      inputs[1] = abi.encode(2, address(token), 300e18);
+      inputs[2] = abi.encode(
+        2,  // accountId
+        marketId,
+        maturityTimestamp,
+        -300e18,
+        0 // todo: compute this properly
+      );
+      swapOutput = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+    }
+
+    int24 currentTickVamm = vammProxy.getVammTick(marketId, maturityTimestamp);
+    assertLe(currentTickVamm, initialTickVamm);
+
+    (
+      int256 executedBaseAmount,
+      int256 executedQuoteAmount,
+      uint256 fee,
+      uint256 im,
+      int24 currentTick
+    ) = abi.decode(swapOutput[2], (int256, int256, uint256, uint256, int24));
+
+    uint256 liquidityIndex = 1_010_000_000_000_000_000;
+
+    // traderExposure = base * liq index * daysTillMaturity / daysInYear
+    uint256 traderExposure = div(ud60x18(200e18 * 2 * 1.01), ud60x18(365 * 1e18)).unwrap();
+
+    uint256 eps = 1000; // 1e-15 * 1e18
+
+    // LP
+    assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure + eps));
+    assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure - eps));
+    assertEq(
+      datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort,
+      initLpUnfilledShort
+    );
+    assertEq(
+      datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong,
+      initLpUnfilledLong
+    );
+
+    // TRADER
+    assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure - eps));
+    assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure + eps));
+    assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, initTraderExposure);
+
+    assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledShort, 0);
+    assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledLong, 0);
+  }
 }
