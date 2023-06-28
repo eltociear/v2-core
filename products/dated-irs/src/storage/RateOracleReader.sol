@@ -90,11 +90,11 @@ library RateOracleReader {
 
     function updateRateIndexAtMaturityCache(Data storage self, uint32 maturityTimestamp) internal {
 
-        if (Time.blockTimestampTruncated() < maturityTimestamp) {
-            revert MaturityNotReached();
-        }
-
         if (self.rateIndexAtMaturity[maturityTimestamp].unwrap() == 0) {
+
+            if (Time.blockTimestampTruncated() < maturityTimestamp) {
+                revert MaturityNotReached();
+            }
 
             if (Time.blockTimestampTruncated() > maturityTimestamp + self.maturityIndexCachingWindowInSeconds) {
                 revert MaturityIndexCachingWindowElapsed();
