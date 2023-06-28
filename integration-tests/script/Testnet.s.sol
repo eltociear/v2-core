@@ -150,7 +150,8 @@ contract Testnet is Script {
 
     datedIrsProxy.setVariableOracle(
       marketId,
-      address(aaveRateOracle)
+      address(aaveRateOracle),
+      3600 // todo: push this into some config
     );
 
     accessPassNft.redeem(

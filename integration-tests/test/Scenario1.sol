@@ -58,7 +58,8 @@ contract Scenario1 is BaseScenario {
     );
     datedIrsProxy.setVariableOracle(
       1,
-      address(aaveRateOracle)
+      address(aaveRateOracle),
+      3600
     );
     datedIrsProxy.configureProduct(
       ProductConfiguration.Data({
