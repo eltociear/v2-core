@@ -30,8 +30,10 @@ contract ExposeRateOracleReader {
         index = oracleData.rateIndexAtMaturity[maturityTimestamp];
     }
 
-    function create(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) external returns (bytes32 s) {
-        RateOracleReader.Data storage oracle = RateOracleReader.set(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
+    function create(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) external
+    returns (bytes32 s) {
+        RateOracleReader.Data storage oracle = RateOracleReader.set(marketId, oracleAddress,
+            maturityIndexCachingWindowInSeconds);
         assembly {
             s := oracle.slot
         }

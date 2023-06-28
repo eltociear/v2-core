@@ -28,7 +28,7 @@ library RateOracleReader {
 
 
     /**
-     * @dev Thrown if the maturity index caching window has not elapsed yet in context of maturity index backfill
+     * @dev Thrown if the maturity index caching window is ongoing in context of maturity index backfill
      */
     error MaturityIndexCachingWindowOngoing();
 
@@ -59,7 +59,8 @@ library RateOracleReader {
         }
     }
 
-    function set(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) internal returns (Data storage oracle) {
+    function set(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds)
+        internal returns (Data storage oracle) {
         oracle = load(marketId);
         oracle.marketId = marketId;
         oracle.oracleAddress = oracleAddress;

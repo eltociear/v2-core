@@ -62,7 +62,8 @@ contract RateOracleModule is IRateOracleModule {
     /**
      * @inheritdoc IRateOracleModule
      */
-    function setVariableOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) external override {
+    function setVariableOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds)
+    external override {
         OwnableStorage.onlyOwner();
 
         validateAndConfigureOracleAddress(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
@@ -79,7 +80,8 @@ contract RateOracleModule is IRateOracleModule {
     /**
      * @inheritdoc IRateOracleModule
      */
-    function backfillRateIndexAtMaturityCache(uint128 marketId, uint32 maturityTimestamp, UD60x18 rateIndexAtMaturity) external override {
+    function backfillRateIndexAtMaturityCache(uint128 marketId, uint32 maturityTimestamp,
+        UD60x18 rateIndexAtMaturity) external override {
 
         OwnableStorage.onlyOwner();
 
@@ -90,7 +92,8 @@ contract RateOracleModule is IRateOracleModule {
     /**
      * @dev Validates the address interface and creates or configures a rate oracle
      */
-    function validateAndConfigureOracleAddress(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) internal {
+    function validateAndConfigureOracleAddress(uint128 marketId, address oracleAddress,
+        uint256 maturityIndexCachingWindowInSeconds) internal {
         if (!_validateVariableOracleAddress(oracleAddress)) {
             revert InvalidVariableOracleAddress(oracleAddress);
         }

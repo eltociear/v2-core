@@ -23,9 +23,11 @@ interface IRateOracleModule {
      * @param marketId The id of the market (e.g. aUSDC lend) associated with the rate oracle
      * @param oracleAddress Address of the variable rate oracle contract
      * @param blockTimestamp The current block timestamp.
-     * @param maturityIndexCachingWindowInSeconds The number of seconds that need to elapse post maturity to have to backfill the maturity rate index
+     * @param maturityIndexCachingWindowInSeconds The number of seconds that need to
+        elapse post maturity to have to backfill the maturity rate index
      */
-    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp, uint256 maturityIndexCachingWindowInSeconds);
+    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp,
+        uint256 maturityIndexCachingWindowInSeconds);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC lend)
@@ -54,9 +56,11 @@ interface IRateOracleModule {
      * @notice Register a variable rate oralce
      * @param marketId Market Id
      * @param oracleAddress Oracle Address
-     * @param maturityIndexCachingWindowInSeconds The number of seconds that need to elapse post maturity to have to backfill the maturity rate index
+     * @param maturityIndexCachingWindowInSeconds The number of seconds that need to elapse post maturity to
+      have to backfill the maturity rate index
      */
-    function setVariableOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) external;
+    function setVariableOracle(uint128 marketId, address oracleAddress,
+        uint256 maturityIndexCachingWindowInSeconds) external;
 
     /**
      * @notice Update the rate index at maturity cache for a given marketId & maturity timestamp
@@ -71,5 +75,6 @@ interface IRateOracleModule {
      * @param maturityTimestamp maturity timestamp for which we want to backfill cached variable liquidity index
      * @param rateIndexAtMaturity rate index at maturity that is being backfilled for a given marketId & maturity timestamp
      */
-    function backfillRateIndexAtMaturityCache(uint128 marketId, uint32 maturityTimestamp, UD60x18 rateIndexAtMaturity) external;
+    function backfillRateIndexAtMaturityCache(uint128 marketId, uint32 maturityTimestamp,
+        UD60x18 rateIndexAtMaturity) external;
 }

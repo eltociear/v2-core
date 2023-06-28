@@ -50,7 +50,8 @@ contract RateOracleModuleTest is Test {
 
     using RateOracleReader for RateOracleReader.Data;
 
-    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp, uint256 maturityIndexCachingWindowInSeconds);
+    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp,
+        uint256 maturityIndexCachingWindowInSeconds);
 
     MockRateOracle mockRateOracle;
     uint32 public maturityTimestamp;

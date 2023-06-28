@@ -35,8 +35,10 @@ contract ProductIRSModuleExtended is ProductIRSModule {
         return ProductConfiguration.load();
     }
 
-    function createRateOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) external returns (bytes32 s) {
-        RateOracleReader.Data storage oracle = RateOracleReader.set(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
+    function createRateOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds)
+    external returns (bytes32 s) {
+        RateOracleReader.Data storage oracle = RateOracleReader.set(marketId, oracleAddress,
+            maturityIndexCachingWindowInSeconds);
         assembly {
             s := oracle.slot
         }
