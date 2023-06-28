@@ -83,8 +83,7 @@ contract Testnet is Script {
         WETH9: IWETH9(address(0)),  // todo: deploy weth9 mock (AN)
         VOLTZ_V2_CORE_PROXY: address(coreProxy),
         VOLTZ_V2_DATED_IRS_PROXY: address(datedIrsProxy),
-        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy),
-        VOLTZ_V2_ACCOUNT_NFT_PROXY: accountNftProxyAddress
+        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy)
       })
     );
 
