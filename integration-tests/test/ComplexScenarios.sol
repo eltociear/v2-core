@@ -22,7 +22,7 @@ import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import { ud60x18, div, SD59x18, UD60x18 } from "@prb/math/UD60x18.sol";
 import { sd59x18, abs } from "@prb/math/SD59x18.sol";
 
-import "forge-std/console2.sol";
+// import "forge-std/console2.sol";
 
 contract ComplexScenarios is BaseScenario, TestUtils {
   using SafeCastI256 for int256;
@@ -771,7 +771,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp); // 4.0165% -13905
-    console2.log("tick", currentTick); // -13905
+    // console2.log("tick", currentTick); // -13905
     // apy = 33.9% => VTs have to profit at the end
 
     // LPs
@@ -960,7 +960,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp); // 4.0165% -13905
-    console2.log("tick", currentTick); // -13905
+    // console2.log("tick", currentTick); // -13905
     // average apy = 24.94%
     // 33.9 1st 0.5 day, 7.3 for 0.5 day, 107.43 for 0.5 , 0.244 for the last 1.5 days
 
