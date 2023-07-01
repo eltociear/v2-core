@@ -950,6 +950,7 @@ contract Scenario1 is BaseScenario, TestUtils {
 
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
     vm.warp(maturityTimestamp + 1);
+    datedIrsProxy.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
     int256 maturityIndex = int256(UD60x18.unwrap(datedIrsProxy.getRateIndexMaturity(marketId, maturityTimestamp)));
 
     /// SETTLE TRADER
@@ -1082,6 +1083,7 @@ contract Scenario1 is BaseScenario, TestUtils {
 
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
     vm.warp(maturityTimestamp + 1);
+    datedIrsProxy.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
     int256 maturityIndex = int256(UD60x18.unwrap(datedIrsProxy.getRateIndexMaturity(marketId, maturityTimestamp)));
 
     /// SETTLE TRADER
