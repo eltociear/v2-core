@@ -365,7 +365,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     );
     bytes[] memory inputs = new bytes[](2);
     inputs[0] = abi.encode(
-        accountId,  // accountId
+        accountId,
         marketId,
         maturityTimestamp
     );
@@ -386,7 +386,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     );
     bytes[] memory inputs = new bytes[](1);
     inputs[0] = abi.encode(
-        accountId,  // accountId
+        accountId,
         marketId,
         maturityTimestamp
     );
@@ -401,9 +401,6 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     inputs2[0] = abi.encode(accountId, address(token), collateralBalance + liquidationBooster);
     peripheryProxy.execute(commands2, inputs2, block.timestamp + 1);
     vm.stopPrank();
-
-    console2.log("obtained collateralBalance after",collateralBalance);
-    console2.log("obtained existingBalance",existingBalance);
 
     return int256(collateralBalance + liquidationBooster) - existingBalance;
   }
@@ -433,7 +430,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     uint256 collateralBalance = coreProxy.getAccountCollateralBalance(accountId, address(token));
 
     uint256 userBalanceAfterSettle = token.balanceOf(user);
-    console2.log(accountId);
+    // console2.log(accountId);
     assertEq(collateralBalance, 0);
     assertEq(userBalanceAfterSettle.toInt(), userBalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
   }
@@ -447,11 +444,11 @@ contract ComplexScenarios is BaseScenario, TestUtils {
   ) public  returns (int256 settlementCashflow){
     uint256 userBalanceBeforeSettle = token.balanceOf(user);
 
-    int256 existingCollateral = initialDeposit - fee.toInt() - 1; // -1 becausefee is rounded down
+    int256 existingCollateral = initialDeposit - fee.toInt() - 1; // -1 because fee is rounded down
 
     settlementCashflow = settleWithUnknownCashflow(
-        accountId, // accountId
-        user, // user
+        accountId,
+        user,
         liquidationBooster,
         existingCollateral
     );
@@ -459,7 +456,6 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     uint256 collateralBalance = coreProxy.getAccountCollateralBalance(accountId, address(token));
 
     uint256 userBalanceAfterSettle = token.balanceOf(user);
-    console2.log("checking settlement for account", accountId);
     assertEq(collateralBalance, 0);
     assertEq(userBalanceAfterSettle.toInt(), userBalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
   }
@@ -481,7 +477,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         );
   }
 
-  function test_3M_3T_differentTime() public {
+  function test_entry_at_different_time() public {
     /// note same positions taken by different users at 0.5 days interval
     /// no change in the liquidity index
     setConfigs();
@@ -617,7 +613,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
 
   }
 
-  function test_3M_3T_changingIndex() public {
+  function test_changing_index() public {
     /// note same positions taken by different users at 0.5 days interval
     /// change in the liquidity index, almost constant apy 33.9% 
     setConfigs();
@@ -647,8 +643,6 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         101e18, // toDeposit
         500e18 // baseAmount
     );
-    console2.log("am 1 base", amounts[0].executedBaseAmount);
-    console2.log("am 1 base", amounts[0].executedQuoteAmount);
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
 
@@ -677,12 +671,9 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         101e18, // toDeposit
         500e18 // baseAmount
     );
-    console2.log("am 4 base", amounts[1].executedBaseAmount);
-    console2.log("am 4 base", amounts[1].executedQuoteAmount);
-    //500.21 quote
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
-    console2.log("tick", currentTick); // -13897
+    // console2.log("tick", currentTick); // -13897
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(10004e14 * 1.0004 * 1.0004)); // 1.5 days
 
     // LP
@@ -781,7 +772,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp); // 4.0165% -13905
     console2.log("tick", currentTick); // -13905
-    // apy = 15.716% => VTs have to profit at the end
+    // apy = 33.9% => VTs have to profit at the end
 
     // LPs
     assertLt(cashflows[0], 0, "0");
@@ -804,10 +795,10 @@ contract ComplexScenarios is BaseScenario, TestUtils {
   }
 
   // todo, needs new setup
-  function test_3M_3T_3months_pool() public {
+  function test_3months_pool() public {
   }
 
-  function test_3M_3T_high_variable_rate_volatility() public {
+  function test_high_variable_rate_volatility() public {
     /// note same positions taken by different users at 0.5 days interval
     /// change in the liquidity index
     setConfigs();
@@ -838,8 +829,6 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         101e18, // toDeposit
         500e18 // baseAmount
     );
-    console2.log("am 1 base", amounts[0].executedBaseAmount);
-    console2.log("am 1 base", amounts[0].executedQuoteAmount);
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
 
@@ -870,14 +859,11 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         101e18, // toDeposit
         500e18 // baseAmount
     );
-    console2.log("am 4 base", amounts[1].executedBaseAmount);
-    console2.log("am 4 base", amounts[1].executedQuoteAmount);
-    //500.21 quote
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
     // apy to 107.43%
-    // 1.0001 * 1.0004 * 1.001
+    // index = 1.0001 * 1.0004 * 1.001
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(100150054004e7)); // 1.5 days
 
     // LP
@@ -906,7 +892,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     // apy to 0.244%
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(
         1001510555045400400
-    )); // 1.0001 * 1.0004 * 1.001 * 1.00001
+    )); // index =  1.0001 * 1.0004 * 1.001 * 1.00001
     datedIrsProxy.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
 
     int256 maturityIndex = int256(UD60x18.unwrap(datedIrsProxy.getRateIndexMaturity(marketId, maturityTimestamp)));
@@ -1007,9 +993,9 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     assertAlmostEq(-(cashflows[0] + cashflows[2] + cashflows[4]), cashflows[1] + cashflows[3] + cashflows[5], 1000);
   }
 
-  function test_3M_3T_high_fixed_rate_volatility() public {
+  function test_high_fixed_rate_volatility() public {
     /// note same positions taken by different users at 0.5 days interval
-    /// change in the liquidity index, almost constant apy 33.9% 
+    /// big changes in the variable, almost constant apy 33.9% 
     setConfigs();
 
     ExecutedAmounts[] memory amounts = new ExecutedAmounts[](3);
@@ -1045,12 +1031,12 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         int256(25e17) / 365
     );
 
-    console2.log("avg rate", avgRates[0]);
+    // console2.log("avg rate", avgRates[0]);
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
 
     int24 currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
-    console2.log("Tick", currentTick); // -20461 = 7.7368%
+    // console2.log("Tick", currentTick); // -20461 = 7.7368%
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(10004e14 * 1.0004)); // 2 days till end
 
     // LP
@@ -1081,10 +1067,10 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10004e14 * 1.0004,
         int256(20e17) / 365
     );
-    console2.log("avg rate", avgRates[1]);
+    // console2.log("avg rate", avgRates[1]);
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
-    console2.log("tick", currentTick); // 37669 = 0.02312%
+    // console2.log("tick", currentTick); // 37669 = 0.02312%
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(10004e14 * 1.0004 * 1.0004)); // 1.5 days
 
     // LP
@@ -1114,10 +1100,10 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10004e14 * 1.0004 * 1.0004,
         int256(15e17) / 365
     );
-    console2.log("avg rate", avgRates[2]);
+    // console2.log("avg rate", avgRates[2]);
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp); // 4.0165% -13905
-    console2.log("tick", currentTick); // -13382 = 3.8119%
+    // console2.log("tick", currentTick); // -13382 = 3.8119%
 
     vm.warp(maturityTimestamp + 1);
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(
@@ -1186,27 +1172,22 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     );
 
     // LPs
-    // 4% initial rate
-    // 1. 8% - 0.00102% for 10_000 base
-        // used 1st trader with 45 base, FT
+    // 4% initial fixed rate
+    // 1st LP: 8% - 0.00102% for 10_000 base
+        // liquidity used 1st trader with 45 base, FT
         // then used by 2nd trader with 2000 in VT, 
         // then almost fully recovered by 3rd one but still in VT
-    // 2. 4.3 - 4.1 for 10 base
+    // 2nd LP: 4.3 - 4.1 for 10 base
         // used by 2nd trader -> VT position
-    // 3. 3.9 - 3.8 for 10_000 base
+    // 3rd LP:  3.9 - 3.8 for 10_000 base
         // used by 3rd trader -> FT position
-    // avg rate 5.5578%, 7.7368% current rate
-    // avg rate 0.04405%, current rate 0.02312%
-    // avg rate 0.55812 %, current rate 3.8119%
+    // RATE CHANGE:
+        // avg rate 5.5578%, 7.7368% current rate
+        // avg rate 0.04405%, current rate 0.02312%
+        // avg rate 0.55812 %, current rate 3.8119%
     assertGt(cashflows[0], 0, "0");
     assertGt(cashflows[2], 0, "2");
     assertLt(cashflows[4], 0, "4");
-
-    // cashflow ~= + 500 * ((1.0004^(365/0.5))^(2.5/365) - 1) - 500 * (1.04^(2.5/365) - 1)
-    // 4% initial rate
-    // avg rate 5.5578%, 7.7368% current rate
-    // avg rate 0.04405%, current rate 0.02312%
-    // avg rate 0.55812 %, current rate 3.8119%
 
     // VT
     /* cashflow ~=
@@ -1237,9 +1218,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     assertAlmostEq(-(cashflows[0] + cashflows[2] + cashflows[4]), cashflows[1] + cashflows[3] + cashflows[5], 1000);
   }
 
-  function test_3M_3T_positions_editing() public {
-    /// note same positions taken by different users at 0.5 days interval
-    /// change in the liquidity index, almost constant apy 33.9% 
+  function test_positions_editing() public {
     setConfigs();
 
     ExecutedAmounts[] memory amounts = new ExecutedAmounts[](3);
@@ -1297,11 +1276,9 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
-    console2.log("tick", currentTick); // -13897
+    // console2.log("tick", currentTick);
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(10004e14 * 1.0004 * 1.0004)); // 1.5 days
 
-
-    console2.log("here");
     // LP BURN
     uint256 fee5 = editMaker(
         1, // accountId
@@ -1372,9 +1349,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         maturityIndex
     );
 
-    currentTick = vammProxy.getVammTick(marketId, maturityTimestamp); // 4.0165% -13905
-    console2.log("tick", currentTick); // -13905
-    // apy = 15.716% => VTs have to profit at the end
+    currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
+    // console2.log("tick", currentTick); 
 
     // LPs
     assertLt(cashflows[0], 0, "0");
@@ -1384,12 +1360,6 @@ contract ComplexScenarios is BaseScenario, TestUtils {
                 + 300 * ((1.0004^(365/0.5))^(1.5/365) - 1) 
                 - 500 * (1.04^(1/365) - 1) 
                 - 300 * (1.04^(1.5/365) - 1)
-    311785200000000000 // 300 bit
-    400080000000000000
-    53729800000000000
-    (1.00080016 - 1)* 500 = 0.40008
-    (1.0001074597 -1)* 500 = 0.0537298
-    346350200000000000
     */
     assertGt(cashflows[1], 0, "1");
     assertAlmostEq(cashflows[1], int256(658135400000000000), 5e16); //5% error
@@ -1397,18 +1367,12 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     // cashflow ~= + 500 * ((1.0004^(365/0.5))^(2/365) - 1) - 500 * (1.04^(2/365) - 1)
     assertGt(cashflows[3], 0, "3");
     assertAlmostEq(cashflows[3], int(693015000000000000), 5e16);
-    console2.log(cashflows[0]);
-    console2.log(cashflows[2]);
-    console2.log(cashflows[1]);
-    console2.log(cashflows[3]);
 
     assertAlmostEq(-(cashflows[0] + cashflows[2]), cashflows[1] + cashflows[3], 1000);
 
   }
 
-  function test_3M_3T_full_unwinds() public {
-    /// note same positions taken by different users at 0.5 days interval
-    /// change in the liquidity index, almost constant apy 33.9% 
+  function test_full_unwinds_trader() public {
     setConfigs();
 
     ExecutedAmounts[] memory amounts = new ExecutedAmounts[](3);
@@ -1466,11 +1430,9 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
-    console2.log("tick", currentTick); // -13897
+    // console2.log("tick", currentTick); 
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(10004e14 * 1.0004 * 1.0004)); // 1.5 days
 
-
-    console2.log("here");
     // LP BURN
     uint256 fee5 = editMaker(
         1, // accountId
@@ -1541,9 +1503,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         maturityIndex
     );
 
-    currentTick = vammProxy.getVammTick(marketId, maturityTimestamp); // 4.0165% -13905
-    console2.log("tick", currentTick); // -13905
-    // apy = 15.716% => VTs have to profit at the end
+    currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
+    // console2.log("tick", currentTick); 
 
     // LPs
     assertLt(cashflows[0], 0, "0");
@@ -1553,12 +1514,6 @@ contract ComplexScenarios is BaseScenario, TestUtils {
                 - 100 * ((1.0004^(365/0.5))^(1.5/365) - 1) 
                 - 500 * (1.04^(1/365) - 1) 
                 + 100 * (1.04^(1.5/365) - 1)
-    103928400000000000 // 100 bit
-    400080000000000000
-    53729800000000000
-    (1.00080016 - 1)* 500 = 0.40008
-    (1.0001074597 -1)* 500 = 0.0537298
-    346350200000000000
     */
     assertGt(cashflows[1], 0, "1");
     assertAlmostEq(cashflows[1], int256(242421800000000000), 5e16); //5% error
@@ -1566,10 +1521,159 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     // cashflow ~= + 500 * ((1.0004^(365/0.5))^(2/365) - 1) - 500 * (1.04^(2/365) - 1)
     assertGt(cashflows[3], 0, "3");
     assertAlmostEq(cashflows[3], int(693015000000000000), 5e16);
-    console2.log(cashflows[0]);
-    console2.log(cashflows[2]);
-    console2.log(cashflows[1]);
-    console2.log(cashflows[3]);
+
+    assertAlmostEq(-(cashflows[0] + cashflows[2]), cashflows[1] + cashflows[3], 1000);
+  }
+
+  function test_full_unwinds_lp() public {
+    setConfigs();
+
+    ExecutedAmounts[] memory amounts = new ExecutedAmounts[](3);
+
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(10004e14)); // 2.5 days till end
+
+    // LP
+    uint256 fee1 = newMaker(
+        1, // accountId
+        vm.addr(1), // user
+        1, // count,
+        2, // merkleIndex
+        1001e18, // toDeposit
+        10000e18, // baseAmount
+        -14100, // 4.1%
+        -13620 // 3.9% 
+    );
+
+    // VT
+    amounts[0] = newTaker(
+        2, // accountId
+        vm.addr(2), // user
+        1, // count,
+        3, // merkleIndex
+        101e18, // toDeposit
+        500e18 // baseAmount
+    );
+
+    vm.warp(block.timestamp + 43200); // advance by 0.5 days 
+
+    int24 currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(10004e14 * 1.0004)); // 2 days till end
+
+    // LP
+    uint256 fee3 = newMaker(
+        3, // accountId
+        vm.addr(3), // user
+        1, // count,
+        4, // merkleIndex
+        1001e18, // toDeposit
+        10000e18, // baseAmount
+        -14100, // 4.1%
+        -13620 // 3.9% 
+    );
+
+    // VT
+    amounts[1] = 
+    newTaker(
+        4, // accountId
+        vm.addr(4), // user
+        1, // count,
+        5, // merkleIndex
+        101e18, // toDeposit
+        500e18 // baseAmount
+    );
+
+    currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
+    // console2.log("tick", currentTick); 
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(10004e14 * 1.0004 * 1.0004)); // 1.5 days
+
+    // LP BURN
+    uint256 fee5 = editMaker(
+        1, // accountId
+        vm.addr(1), // user
+        0, // toDeposit
+        -10000e18, // baseAmount
+        -14100, // 4.1%
+        -13620 // 3.9% 
+    );
+
+    // UNWIND -> switch to FT
+    amounts[2] = editTaker(
+        2, // accountId
+        vm.addr(2), // user
+        0, // toDeposit
+        -600e18 // baseAmount
+    );
+
+    vm.warp(maturityTimestamp + 1);
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(
+        10004e14 * 1.002
+    )); // 1.002 = 1.0004^5
+    datedIrsProxy.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
+
+    int256 maturityIndex = int256(UD60x18.unwrap(datedIrsProxy.getRateIndexMaturity(marketId, maturityTimestamp)));
+    assertLe(maturityIndex, 10025e14);
+    assertGe(maturityIndex, 10024e14);
+
+    int256[] memory cashflows = new int256[](4);
+
+    cashflows[0] = checkSettle(
+        1, // accountId,
+        vm.addr(1), // user
+        1001e18, // deposited margin
+        -(amounts[0].executedBaseAmount + amounts[1].executedBaseAmount / 2),
+        -(amounts[0].executedQuoteAmount + amounts[1].executedQuoteAmount / 2),
+        fee1 + fee5,
+        maturityIndex
+    );
+    
+    cashflows[1] = checkSettle(
+        2, // accountId,
+        vm.addr(2), // user
+        101e18, // deposited margin
+        amounts[0].executedBaseAmount + amounts[2].executedBaseAmount,
+        amounts[0].executedQuoteAmount + amounts[2].executedQuoteAmount,
+        amounts[0].fee + amounts[2].fee,
+        maturityIndex
+    );
+
+    cashflows[2] = checkSettle(
+        3, // accountId,
+        vm.addr(3), // user
+        1001e18, // deposited margin
+        -(amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount),
+        -(amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount),
+        fee3 + 1,
+        maturityIndex
+    );
+
+    cashflows[3] = checkSettle(
+        4, // accountId,
+        vm.addr(4), // user
+        101e18, // deposited margin
+        amounts[1].executedBaseAmount,
+        amounts[1].executedQuoteAmount,
+        amounts[1].fee,
+        maturityIndex
+    );
+
+    currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
+    // console2.log("tick", currentTick); 
+
+    // LPs
+    assertLt(cashflows[0], 0, "0");
+    assertGt(cashflows[2], 0, "2");
+
+    /* cashflow ~= + 500 * ((1.0004^(365/0.5))^(1/365) - 1) 
+                - 100 * ((1.0004^(365/0.5))^(1.5/365) - 1) 
+                - 500 * (1.04^(1/365) - 1) 
+                + 100 * (1.04^(1.5/365) - 1)
+    */
+    assertGt(cashflows[1], 0, "1");
+    assertAlmostEq(cashflows[1], int256(242421800000000000), 5e16); //5% error
+
+    // cashflow ~= + 500 * ((1.0004^(365/0.5))^(2/365) - 1) - 500 * (1.04^(2/365) - 1)
+    assertGt(cashflows[3], 0, "3");
+    assertAlmostEq(cashflows[3], int(693015000000000000), 5e16);
 
     assertAlmostEq(-(cashflows[0] + cashflows[2]), cashflows[1] + cashflows[3], 1000);
   }
