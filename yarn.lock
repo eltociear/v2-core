@@ -1647,9 +1647,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/integration-tests@workspace:integration-tests":
+"@voltz-protocol/integration@workspace:integration":
   version: 0.0.0-use.local
-  resolution: "@voltz-protocol/integration-tests@workspace:integration-tests"
+  resolution: "@voltz-protocol/integration@workspace:integration"
   dependencies:
     "@openzeppelin/contracts": 4.9.2
     "@semantic-release/git": ^10.0.1
