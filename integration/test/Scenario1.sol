@@ -231,8 +231,6 @@ contract Scenario1 is BaseScenario, TestUtils {
         TickMath.getSqrtRatioAtTick(TickMath.MIN_TICK + 1)
       );
       peripheryProxy.execute(commands, inputs, block.timestamp + 1);
-
-      vm.stopPrank();
     }
 
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
