@@ -44,7 +44,7 @@ contract ProductModule is IProductModule {
     /**
      * @inheritdoc IProductModule
      */
-    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId, address collateralType)
+    function getAccountTakerAndMakerExposures(uint128 productId, uint128 accountId, address collateralType)
         external
         override
         view

@@ -65,23 +65,14 @@ contract ExposedAccounts is CoreState {
         }
     }
 
-    function getAnnualizedProductExposures(uint128 id, uint128 productId, address collateralType)
+    function getProductTakerAndMakerExposures(uint128 id, uint128 productId, address collateralType)
         external
-        returns (Account.Exposure[] memory)
+        returns (Account.Exposure[] memory productTakerExposures, Account.Exposure[] memory productMakerExposuresLower, Account.Exposure[] memory productMakerExposuresUpper)
     {
         Account.Data storage account = Account.load(id);
-        return account.getAnnualizedProductExposures(productId, collateralType);
+        return account.getProductTakerAndMakerExposures(productId, collateralType);
     }
 
-    function getUnrealizedPnL(uint128 id, address collateralType) external view returns (int256) {
-        Account.Data storage account = Account.load(id);
-        return account.getUnrealizedPnL(collateralType);
-    }
-
-    function getTotalAccountValue(uint128 id, address collateralType) external view returns (int256) {
-        Account.Data storage account = Account.load(id);
-        return account.getTotalAccountValue(collateralType);
-    }
 
     function getRiskParameter(uint128 productId, uint128 marketId) external view returns (SD59x18) {
         return Account.getRiskParameter(productId, marketId);
@@ -106,9 +97,9 @@ contract ExposedAccounts is CoreState {
         return account.isLiquidatable(collateralType);
     }
 
-    function getMarginRequirements(uint128 id, address collateralType) external returns (uint256, uint256) {
+    function getMarginRequirementsAndHighestUnrealizedLoss(uint128 id, address collateralType) external returns (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) {
         Account.Data storage account = Account.load(id);
-        return account.getMarginRequirements(collateralType);
+        return account.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
     }
 }
 

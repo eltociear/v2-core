@@ -68,24 +68,8 @@ contract ProductModuleTest is Test {
 
     }
 
-    function test_GetAccountUnrealizedPnL() public {
-        assertEq(productModule.getAccountUnrealizedPnL(1, 100, Constants.TOKEN_0), 100e18);
-    }
-
-    function test_GetAccountAnnualizedExposures() public {
-        Account.Exposure[] memory exposures = productModule.getAccountAnnualizedExposures(1, 100, Constants.TOKEN_0);
-
-        assertEq(exposures.length, 2);
-
-        assertEq(exposures[0].marketId, 10);
-        assertEq(exposures[0].filled, 100e18);
-        assertEq(exposures[0].unfilledLong, 200e18);
-        assertEq(exposures[0].unfilledShort, 200e18);
-
-        assertEq(exposures[1].marketId, 11);
-        assertEq(exposures[1].filled, 200e18);
-        assertEq(exposures[1].unfilledLong, 300e18);
-        assertEq(exposures[1].unfilledShort, 400e18);
+    function test_GetAccountTakerAndMakerExposures() public {
+        // todo: implement
     }
 
     function test_RegisterProduct() public {
@@ -226,11 +210,6 @@ contract ProductModuleTest is Test {
         //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
 
-         vm.expectCall(
-            address(newProduct), 
-            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100, Constants.TOKEN_0)
-        );
-
         Account.Exposure[] memory emptyExposures;
         newProduct.mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
         newProduct.mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
@@ -323,11 +302,6 @@ contract ProductModuleTest is Test {
 
         //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
-
-         vm.expectCall(
-            address(newProduct), 
-            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100, Constants.TOKEN_0)
-        );
 
         Account.Exposure[] memory emptyExposures;
         newProduct.mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
