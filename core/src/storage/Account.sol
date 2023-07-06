@@ -18,7 +18,7 @@ import "./Product.sol";
 import "oz/utils/math/Math.sol";
 import "oz/utils/math/SignedMath.sol";
 
-import {mulUDxUint, mulSDxInt} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
+import {mulUDxUint, mulSDxInt, sd59x18} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Object for tracking accounts with access control and collateral tracking.
@@ -222,19 +222,6 @@ library Account {
         productExposures = _product.getAccountAnnualizedExposures(self.id, collateralType);
     }
 
-    /**
-     * @dev Returns the aggregate unrealized pnl of the account in all products in which the account has positions with unrealized
-     * pnl
-     * note, the unrealized pnl is expected to be in terms of the settlement token of this account
-     */
-    function getUnrealizedPnL(Data storage self, address collateralType) internal view returns (int256 unrealizedPnL) {
-        SetUtil.UintSet storage _activeProducts = self.activeProducts;
-        for (uint256 i = 1; i <= _activeProducts.length(); i++) {
-            uint128 productIndex = _activeProducts.valueAt(i).to128();
-            Product.Data storage _product = Product.load(productIndex);
-            unrealizedPnL += _product.getAccountUnrealizedPnL(self.id, collateralType);
-        }
-    }
 
     /**
      * @dev Returns the total account value in terms of the quote token of the (single token) account
@@ -312,7 +299,7 @@ library Account {
         pure
         returns (uint256 initialMarginRequirement)
     {
-        initialMarginRequirement = mulUDxUD(imMultiplier, liquidationMarginRequirement);
+        initialMarginRequirement = mulUDxUint(imMultiplier, liquidationMarginRequirement);
     }
 
     /**
@@ -323,7 +310,8 @@ library Account {
         pure
         returns (int256 unrealizedLoss)
     {
-        unrealizedLoss = mulSDxUD(annualizedExposure, subUD(marketTwap, lockedPrice));
+        SD59x18 priceDelta = sd59x18(marketTwap) - sd59x18(lockedPrice);
+        unrealizedLoss = mulSDxInt(priceDelta, annualizedExposure);
     }
 
     /**
