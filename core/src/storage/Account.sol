@@ -250,7 +250,7 @@ library Account {
         totalAccountValue = unrealizedPnL + collateralBalance;
     }
 
-    function getRiskParameter(uint128 productId, uint128 marketId) internal view returns (SD59x18 riskParameter) {
+    function getRiskParameter(uint128 productId, uint128 marketId) internal view returns (UD60x18 riskParameter) {
         return MarketRiskConfiguration.load(productId, marketId).riskParameter;
     }
 
@@ -304,7 +304,7 @@ library Account {
         }
     }
 
-    function computeInitialMarginRequiremen(uint256 liquidationMarginRequiremement, UD60x18 imMultiplier)
+    function computeInitialMarginRequiremen(uint256 liquidationMarginRequirement, UD60x18 imMultiplier)
         internal
         pure
         returns (uint256 initialMarginRequirement)
@@ -319,7 +319,7 @@ library Account {
     function getMarginRequirementsAndHighestUnrealizedLoss(Data storage self, address collateralType)
         internal
         view
-        returns (uint256 im, uint256 lm, uint256 highestUnrealizedLoss)
+        returns (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
     {
         // todo: consider using uint256 for the risk parameters instead of SD59x18
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
