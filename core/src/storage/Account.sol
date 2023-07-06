@@ -343,13 +343,12 @@ library Account {
                 productId,
                 collateralType
             );
-
-
-
-
-
+            liquidationMarginRequirement += lmTakerPositions + lmMakerPositions;
+            highestUnrealizedLoss += unrealizedLossTakerPositions + highestUnrealizedLossMakerPositions;
         }
 
-
+        UD60x18 imMultiplier = self.getIMMultiplier();
+        initialMarginRequirement = computeInitialMarginRequirement(liquidationMarginRequirement, imMultiplier);
+        return (initialMarginRequirement, liquidationMarginRequirement, highestUnrealizedLoss);
     }
 }
