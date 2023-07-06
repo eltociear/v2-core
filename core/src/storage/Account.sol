@@ -345,6 +345,32 @@ library Account {
         return (liquidationMarginRequirement, unrealizedLoss);
     }
 
+    function computeLMAndHighestUnrealizedLossFromExposures(Exposure[] memory exposuresLower, Exposure[] memory exposuresUpper) internal view
+        returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
+    {
+
+        // todo: assert or revert if exposuresLower.length != exposuresUpper.length
+        for (uint256 i=0; i <= exposuresLower.length; i++) {
+            // todo: assert or revert if exposuresLower[i].productId != exposuresUpper[i].productId
+            // todo: assert or revert if exposuresLower[i].marketId != exposuresUpper[i].marketId
+            Exposure memory exposureLower = exposuresLower[i];
+            Exposure memory exposureUpper = exposuresUpper[i];
+            SD59x18 riskParameter = getRiskParameter(exposureLower.productId, exposureLower.marketId);
+            uint256 liquidationMarginRequirementExposureLower = computeLiquidationMarginRequirement(exposureLower.annualizedNotional, riskParameter);
+            uint256 liquidationMarginRequirementExposureUpper = computeLiquidationMarginRequirement(exposureUpper.annualizedNotional, riskParameter);
+            uint256 unrealizedLossExposureLower = computeUnrealizedLoss(exposureLower.annualizedExposure, exposureLower.lockedPrice, exposureLower.marketTwap);
+            uint256 unrealizedLossExposureUpper = computeUnrealizedLoss(exposureUpper.annualizedExposure, exposureUpper.lockedPrice, exposureUpper.marketTwap);
+
+            if (liquidationMarginRequirementExposureLower + unrealizedLossExposureLower > liquidationMarginRequirementExposureUpper + unrealizedLossExposureUpper) {
+                liquidationMarginRequirement += liquidationMarginRequirementExposureLower;
+                highestUnrealizedLoss += unrealizedLossExposureLower;
+            } else {
+                liquidationMarginRequirement += liquidationMarginRequirementExposureUpper;
+                highestUnrealizedLoss += unrealizedLossExposureUpper;
+            }
+        }
+        return (liquidationMarginRequirement, highestUnrealizedLoss);
+    }
 
     function getLMAndHighestUnrealizedLossProductMaker(Data storage self, uint128 productId, address collateralType)
         internal
@@ -352,15 +378,11 @@ library Account {
     returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
     {
         (Exposure[] memory productMakerExposuresLower, Exposure[] memory productMakerExposuresUpper) = self.getAnnualizedLowerAndUpperProductMakerExposures(productId, collateralType);
-        (liquidationMarginRequirementLower, unrealizedLossLower) = computeLMAndUnrealizedLossFromExposures(productMakerExposuresLower);
-        (liquidationMarginRequirementUpper, unrealizedLossUpper) = computeLMAndUnrealizedLossFromExposures(productMakerExposuresUpper);
-        if (liquidationMarginRequirementLower + unrealizedLossLower > liquidationMarginRequirementUpper + unrealizedLossUpper) {
-            liquidationMarginRequirement = liquidationMarginRequirementLower;
-            highestUnrealizedLoss = unrealizedLossLower;
-        } else {
-            liquidationMarginRequirement = liquidationMarginRequirementUpper;
-            highestUnrealizedLoss = unrealizedLossUpper;
-        }
+
+        (liquidationMarginRequirement, highestUnrealizedLoss) = computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(productMakerExposuresLower, productMakerExposuresUpper);
+
+        return (liquidationMarginRequirement, highestUnrealizedLoss);
+
     }
 
 
