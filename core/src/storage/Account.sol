@@ -362,17 +362,7 @@ library Account {
     {
         (Exposure[] memory productTakerExposures) = self.getAnnualizedProductTakeExposures(productId, collateralType);
 
-        for (uint256 i=0; i <= productTakerExposures.length; i++) {
-            Exposure memory productTakerExposure = productTakerExposures[i];
-            SD59x18 marketTwap = productTakerExposure.marketTwap;
-            SD59x18 lockedPrice = productTakerExposure.lockedPrice;
-            int256 annualizedExposure = productTakerExposure.annualizedExposure;
-            SD59x18 riskParameter = getRiskParameter(productId, productTakerExposure.marketId);
-            uint256 productTakerLiquidationMarginRequirement = computeLiquidationMarginRequirement(annualizedExposure, riskParameter);
-            uint256 productTakerUnrealizedLoss = computeUnrealizedLoss(annualizedExposure, lockedPrice, marketTwap);
-            liquidationMarginRequirement += productTakerLiquidationMarginRequirement;
-            unrealizedLoss += productTakerUnrealizedLoss;
-        }
+        (liquidationMarginRequirement, unrealizedLoss) = computeLMAndUnrealizedLossFromExposures(productTakerExposures);
 
         return (liquidationMarginRequirement, unrealizedLoss);
     }
