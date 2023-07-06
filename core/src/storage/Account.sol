@@ -289,19 +289,34 @@ library Account {
         (im, lm) = self.getMarginRequirements(collateralType);
         liquidatable = self.getTotalAccountValue(collateralType) < lm.toInt();
     }
+
+    /**
+     * @dev Returns the initial (im) and liqudiation (lm) margin requirements given the annualized exposure and risk parameters
+     */
+    function computeLiquidationAndInitialMarginRequirement(int256 annualizedExposure, SD59x18 riskParameter, UD60x18 imMultiplier)
+        internal
+        pure
+        returns (uint256 im, uint256 lm)
+    {
+        lm = mulSDxInt(riskParameter, annualizedExposure);
+        if (lm < 0) {
+            lm = -lm;
+        }
+        im = mulUDxSD(imMultiplier, lm);
+    }
+
     /**
      * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
      */
 
-    function getMarginRequirements(Data storage self, address collateralType)
+    function getMarginRequirementsAndHighestUnrealizedLoss(Data storage self, address collateralType)
         internal
         view
-        returns (uint256 im, uint256 lm)
+        returns (uint256 im, uint256 lm, uint256 highestUnrealizedLoss)
     {
+        // todo: consider using uint256 for the risk parameters instead of SD59x18
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
 
-        int256 worstCashflowUp;
-        int256 worstCashflowDown;
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
             Exposure[] memory annualizedProductMarketExposures =
@@ -313,20 +328,11 @@ library Account {
                 SD59x18 riskParameter = getRiskParameter(productId, marketId);
                 int256 maxLong = exposure.filled + int256(exposure.unfilledLong);
                 int256 maxShort = exposure.filled - int256(exposure.unfilledShort);
-                // note: this conditional logic is redundunt if no correlations, should just be maxLong
-                // hence, why we need to use int256 for risk parameter + minimises need for casting
-                int256 worstFilledUp = SD59x18.unwrap(riskParameter) > 0 ? maxLong : maxShort;
-                int256 worstFilledDown = SD59x18.unwrap(riskParameter) > 0 ? maxShort : maxLong;
 
-                worstCashflowUp += mulSDxInt(riskParameter, worstFilledUp);
-                worstCashflowDown += mulSDxInt(riskParameter, worstFilledDown);
+
             }
         }
 
-        (uint256 worstCashflowUpAbs, uint256 worstCashflowDownAbs) =
-            (SignedMath.abs(worstCashflowUp), SignedMath.abs(worstCashflowDown));
 
-        lm = Math.max(worstCashflowUpAbs, worstCashflowDownAbs);
-        im = mulUDxUint(getIMMultiplier(), lm);
     }
 }
