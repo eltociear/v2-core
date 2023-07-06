@@ -76,8 +76,11 @@ library Account {
      * @dev productId (Perp) -> marketID (ETH)
      * @dev Note, for dated instruments we don't need to keep track of the maturity
      because the risk parameter is shared across maturities for a given productId marketId pair
+     * @dev we need reference to productId & marketId to be able to derive the risk parameters for lm calculation
      */
     struct Exposure {
+        uint128 productId;
+        uint128 marketId;
         int256 annualizedNotional;
         uint256 lockedPrice;
         uint256 marketTwap;
@@ -321,6 +324,37 @@ library Account {
         return unrealizedLoss;
     }
 
+
+    function getLMAndHighestUnrealizedLossProductMaker(Data storage self, uint128 productId, address collateralType)
+        internal
+        view
+        returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
+    {
+    }
+
+
+    function computeLMAndUnrealizedLossFromExposures(Exposure[] memory exposures)
+        internal
+        pure
+        returns (uint256 liquidationMarginRequirement, uint256 unrealizedLoss)
+    {
+        for (uint256 i=0; i <= exposures.length; i++) {
+            Exposure memory exposure = exposures[i];
+            SD59x18 riskParameter = getRiskParameter(exposure.productId, exposure.marketId);
+            uint256 liquidationMarginRequirementExposure = computeLiquidationMarginRequirement(exposure.annualizedNotional, riskParameter);
+            uint256 unrealizedLossExposure = computeUnrealizedLoss(exposure.annualizedExposure, exposure.lockedPrice, exposure.marketTwap);
+            liquidationMarginRequirement += liquidationMarginRequirementExposure;
+            unrealizedLoss += unrealizedLossExposure;
+        }
+
+        return (liquidationMarginRequirement, unrealizedLoss);
+    }
+
+
+
+    /**
+     * @dev Returns the taker liquidation margin requirement and unrealized loss given the annualized exposure, the market twap and the locked price
+     */
     function getLMAndUnrealizedLossProductTaker(Data storage self, uint128 productId, address collateralType)
         internal
         view
@@ -360,7 +394,7 @@ library Account {
                 productId,
                 collateralType
             );
-            (uint256 lmMakerPositions, uint256 highestUnrealizedLossMakerPositions) = self.getLMAndUnrealizedLossProductMaker(
+            (uint256 lmMakerPositions, uint256 highestUnrealizedLossMakerPositions) = self.getLMAndHighestUnrealizedLossProductMaker(
                 productId,
                 collateralType
             );
