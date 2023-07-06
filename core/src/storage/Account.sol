@@ -325,12 +325,7 @@ library Account {
     }
 
 
-    function getLMAndHighestUnrealizedLossProductMaker(Data storage self, uint128 productId, address collateralType)
-        internal
-        view
-        returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
-    {
-    }
+
 
 
     function computeLMAndUnrealizedLossFromExposures(Exposure[] memory exposures)
@@ -351,6 +346,23 @@ library Account {
     }
 
 
+    function getLMAndHighestUnrealizedLossProductMaker(Data storage self, uint128 productId, address collateralType)
+        internal
+        view
+    returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
+    {
+        (Exposure[] memory productMakerExposuresLower, Exposure[] memory productMakerExposuresUpper) = self.getAnnualizedLowerAndUpperProductMakerExposures(productId, collateralType);
+        (liquidationMarginRequirementLower, unrealizedLossLower) = computeLMAndUnrealizedLossFromExposures(productMakerExposuresLower);
+        (liquidationMarginRequirementUpper, unrealizedLossUpper) = computeLMAndUnrealizedLossFromExposures(productMakerExposuresUpper);
+        if (liquidationMarginRequirementLower + unrealizedLossLower > liquidationMarginRequirementUpper + unrealizedLossUpper) {
+            liquidationMarginRequirement = liquidationMarginRequirementLower;
+            highestUnrealizedLoss = unrealizedLossLower;
+        } else {
+            liquidationMarginRequirement = liquidationMarginRequirementUpper;
+            highestUnrealizedLoss = unrealizedLossUpper;
+        }
+    }
+
 
     /**
      * @dev Returns the taker liquidation margin requirement and unrealized loss given the annualized exposure, the market twap and the locked price
@@ -360,7 +372,7 @@ library Account {
         view
         returns (uint256 liquidationMarginRequirement, uint256 unrealizedLoss)
     {
-        (Exposure[] memory productTakerExposures) = self.getAnnualizedProductTakeExposures(productId, collateralType);
+        (Exposure[] memory productTakerExposures) = self.getAnnualizedProductTakerExposures(productId, collateralType);
 
         (liquidationMarginRequirement, unrealizedLoss) = computeLMAndUnrealizedLossFromExposures(productTakerExposures);
 
