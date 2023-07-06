@@ -77,5 +77,6 @@ interface IProductModule {
     ) external returns (uint256 fee, uint256 im);
 
 
-    function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external;
+    // todo: consider naming propagateCashflow to be more generic to work with e.g. perps that may have funding cashflows
+    function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external;
 }
