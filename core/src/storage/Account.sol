@@ -310,12 +310,12 @@ library Account {
     function computeUnrealizedLoss(int256 annualizedExposure, UD60x18 marketTwap, UD60x18 lockedPrice)
         internal
         pure
-        returns (int256 unrealizedLoss)
+        returns (uint256 unrealizedLoss)
     {
         SD59x18 priceDelta = sd59x18(marketTwap) - sd59x18(lockedPrice);
         int256 unrealizedPnL = mulSDxInt(priceDelta, annualizedExposure);
         if (unrealizedPnL < 0) {
-            unrealizedLoss = -unrealizedPnL;
+            unrealizedLoss = (-unrealizedPnL).toUint();
         }
         return unrealizedLoss;
     }
