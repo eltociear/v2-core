@@ -304,7 +304,10 @@ library Account {
         }
     }
 
-    function computeInitialMarginRequiremen(uint256 liquidationMarginRequirement, UD60x18 imMultiplier)
+    /**
+     * @dev Returns the initial margin requirement given the liquidation margin requirement and the im multiplier
+     */
+    function computeInitialMarginRequirement(uint256 liquidationMarginRequirement, UD60x18 imMultiplier)
         internal
         pure
         returns (uint256 initialMarginRequirement)
@@ -313,7 +316,18 @@ library Account {
     }
 
     /**
-     * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
+     * @dev Returns the unrealized loss given the annualized exposure, the market twap and the locked price
+     */
+    function computeUnrealizedLoss(int256 annualizedExposure, UD60x18 marketTwap, UD60x18 lockedPrice)
+        internal
+        pure
+        returns (int256 unrealizedLoss)
+    {
+        unrealizedLoss = mulSDxUD(annualizedExposure, subUD(marketTwap, lockedPrice));
+    }
+
+    /**
+     * @dev Returns the initial (im) and liquidataion (lm) margin requirements of the account
      */
 
     function getMarginRequirementsAndHighestUnrealizedLoss(Data storage self, address collateralType)
@@ -333,8 +347,17 @@ library Account {
                 Exposure memory exposure = annualizedProductMarketExposures[j];
                 uint128 marketId = exposure.marketId;
                 SD59x18 riskParameter = getRiskParameter(productId, marketId);
-                int256 maxLong = exposure.filled + int256(exposure.unfilledLong);
-                int256 maxShort = exposure.filled - int256(exposure.unfilledShort);
+                int256 annualizedNotionalUpperBound = exposure.filled + int256(exposure.unfilledLong);
+                int256 annualizedNotionalLowerBound = exposure.filled - int256(exposure.unfilledShort);
+                uint256 liquidationMarginRequirementUpperBound = computeLiquidationMarginRequirement(
+                    annualizedNotionalUpperBound,
+                    riskParameter
+                );
+                uint256 liquidationMarginRequirementLowerBound = computeLiquidationMarginRequirement(
+                    annualizedNotionalLowerBound,
+                    riskParameter
+                );
+                uint256 unrealizedLossUpperBound =
 
 
             }
