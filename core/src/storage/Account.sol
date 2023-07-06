@@ -327,7 +327,7 @@ library Account {
     view
     returns (uint256 liquidationMarginRequirement, uint256 unrealizedLoss)
     {
-        for (uint256 i=0; i <= exposures.length; i++) {
+        for (uint256 i=0; i < exposures.length; i++) {
             Exposure memory exposure = exposures[i];
             UD60x18 riskParameter = getRiskParameter(exposure.productId, exposure.marketId);
             uint256 liquidationMarginRequirementExposure = computeLiquidationMarginRequirement(exposure.annualizedNotional, riskParameter);
@@ -386,7 +386,7 @@ library Account {
     {
 
         // todo: assert or revert if exposuresLower.length != exposuresUpper.length
-        for (uint256 i=0; i <= exposuresLower.length; i++) {
+        for (uint256 i=0; i < exposuresLower.length; i++) {
             // todo: assert or revert if exposuresLower[i].productId != exposuresUpper[i].productId
             // todo: assert or revert if exposuresLower[i].marketId != exposuresUpper[i].marketId
             Exposure memory exposureLower = exposuresLower[i];
