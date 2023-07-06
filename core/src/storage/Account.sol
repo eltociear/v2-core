@@ -316,6 +316,7 @@ library Account {
         assembly {
             account.slot := s
         }
+        return account;
     }
 
     /**
@@ -323,7 +324,7 @@ library Account {
      */
     function computeLMAndUnrealizedLossFromExposures(Exposure[] memory exposures)
     internal
-    pure
+    view
     returns (uint256 liquidationMarginRequirement, uint256 unrealizedLoss)
     {
         for (uint256 i=0; i <= exposures.length; i++) {
@@ -380,7 +381,7 @@ library Account {
         return unrealizedLoss;
     }
 
-    function computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(Exposure[] memory exposuresLower, Exposure[] memory exposuresUpper) internal pure
+    function computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(Exposure[] memory exposuresLower, Exposure[] memory exposuresUpper) internal view
     returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
     {
 
