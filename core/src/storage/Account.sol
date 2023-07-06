@@ -286,9 +286,10 @@ library Account {
         returns (uint256 liquidationMarginRequirement)
     {
         liquidationMarginRequirement = mulSDxInt(riskParameter, annualizedExposure);
-        if (lm < 0) {
+        if (liquidationMarginRequirement < 0) {
             liquidationMarginRequirement = -liquidationMarginRequirement;
         }
+        return liquidationMarginRequirement;
     }
 
     /**
@@ -300,6 +301,7 @@ library Account {
         returns (uint256 initialMarginRequirement)
     {
         initialMarginRequirement = mulUDxUint(imMultiplier, liquidationMarginRequirement);
+        return initialMarginRequirement;
     }
 
     /**
@@ -311,7 +313,11 @@ library Account {
         returns (int256 unrealizedLoss)
     {
         SD59x18 priceDelta = sd59x18(marketTwap) - sd59x18(lockedPrice);
-        unrealizedLoss = mulSDxInt(priceDelta, annualizedExposure);
+        int256 unrealizedPnL = mulSDxInt(priceDelta, annualizedExposure);
+        if (unrealizedPnL < 0) {
+            unrealizedLoss = -unrealizedPnL;
+        }
+        return unrealizedLoss;
     }
 
     /**
