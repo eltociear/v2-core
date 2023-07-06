@@ -70,18 +70,19 @@ contract LiquidationModule is ILiquidationModule {
         external
         returns (uint256 liquidatorRewardAmount)
     {
+        // todo: needs review alongside Artur A + IR flagged a potential issue with the liquidation flow
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Account.Data storage account = Account.exists(liquidatedAccountId);
-        (bool liquidatable, uint256 imPreClose,) = account.isLiquidatable(collateralType);
+        (bool liquidatable, uint256 imPreClose,,uint256 highestUnrealizedLossPreClose) = account.isLiquidatable(collateralType);
 
         if (!liquidatable) {
             revert AccountNotLiquidatable(liquidatedAccountId);
         }
 
         account.closeAccount(collateralType);
-        (uint256 imPostClose,) = account.getMarginRequirements(collateralType);
+        (uint256 imPostClose,,uint256 highestUnrealizedLossPostClose) = account.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
 
-        if (imPreClose <= imPostClose) {
+        if (imPreClose + highestUnrealizedLossPreClose <= imPostClose + highestUnrealizedLossPostClose) {
             revert AccountExposureNotReduced(liquidatedAccountId, imPreClose, imPostClose);
         }
 
