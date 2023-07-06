@@ -291,18 +291,25 @@ library Account {
     }
 
     /**
-     * @dev Returns the initial (im) and liqudiation (lm) margin requirements given the annualized exposure and risk parameters
+     * @dev Returns the liquidation margin requirement given the annualized exposure and the risk parameter
      */
-    function computeLiquidationAndInitialMarginRequirement(int256 annualizedExposure, SD59x18 riskParameter, UD60x18 imMultiplier)
+    function computeLiquidationMarginRequirement(int256 annualizedExposure, SD59x18 riskParameter)
         internal
         pure
-        returns (uint256 im, uint256 lm)
+        returns (uint256 liquidationMarginRequirement)
     {
-        lm = mulSDxInt(riskParameter, annualizedExposure);
+        liquidationMarginRequirement = mulSDxInt(riskParameter, annualizedExposure);
         if (lm < 0) {
-            lm = -lm;
+            liquidationMarginRequirement = -liquidationMarginRequirement;
         }
-        im = mulUDxSD(imMultiplier, lm);
+    }
+
+    function computeInitialMarginRequiremen(uint256 liquidationMarginRequiremement, UD60x18 imMultiplier)
+        internal
+        pure
+        returns (uint256 initialMarginRequirement)
+    {
+        initialMarginRequirement = mulUDxUD(imMultiplier, liquidationMarginRequirement);
     }
 
     /**
