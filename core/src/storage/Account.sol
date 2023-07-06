@@ -371,35 +371,6 @@ library Account {
         return (liquidationMarginRequirement, highestUnrealizedLoss);
     }
 
-    function getLMAndHighestUnrealizedLossProductMaker(Data storage self, uint128 productId, address collateralType)
-        internal
-        view
-    returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
-    {
-        (Exposure[] memory productMakerExposuresLower, Exposure[] memory productMakerExposuresUpper) = self.getAnnualizedLowerAndUpperProductMakerExposures(productId, collateralType);
-
-        (liquidationMarginRequirement, highestUnrealizedLoss) = computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(productMakerExposuresLower, productMakerExposuresUpper);
-
-        return (liquidationMarginRequirement, highestUnrealizedLoss);
-
-    }
-
-
-    /**
-     * @dev Returns the taker liquidation margin requirement and unrealized loss given the annualized exposure, the market twap and the locked price
-     */
-    function getLMAndUnrealizedLossProductTaker(Data storage self, uint128 productId, address collateralType)
-        internal
-        view
-        returns (uint256 liquidationMarginRequirement, uint256 unrealizedLoss)
-    {
-        (Exposure[] memory productTakerExposures) = self.getAnnualizedProductTakerExposures(productId, collateralType);
-
-        (liquidationMarginRequirement, unrealizedLoss) = computeLMAndUnrealizedLossFromExposures(productTakerExposures);
-
-        return (liquidationMarginRequirement, unrealizedLoss);
-    }
-
     /**
      * @dev Returns the initial (im) and liquidataion (lm) margin requirements of the account
      */
@@ -413,14 +384,13 @@ library Account {
 
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
-            (uint256 lmTakerPositions, uint256 unrealizedLossTakerPositions) = self.getLMAndUnrealizedLossProductTaker(
-                productId,
-                collateralType
+
+            (Exposure[] memory productTakerExposures, Exposure[] memory productMakerExposuresLower, Exposure[] memory productMakerExposuresUpper) = self.getProductTakerAndMakerExposures(productId, collateralType);
+
+            (uint256 lmTakerPositions, uint256 unrealizedLossTakerPositions) = computeLMAndUnrealizedLossFromExposures(
+                productTakerExposures
             );
-            (uint256 lmMakerPositions, uint256 highestUnrealizedLossMakerPositions) = self.getLMAndHighestUnrealizedLossProductMaker(
-                productId,
-                collateralType
-            );
+            (uint256 lmMakerPositions, uint256 highestUnrealizedLossMakerPositions) = computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(productMakerExposuresLower, productMakerExposuresUpper);
             liquidationMarginRequirement += lmTakerPositions + lmMakerPositions;
             highestUnrealizedLoss += unrealizedLossTakerPositions + highestUnrealizedLossMakerPositions;
         }
