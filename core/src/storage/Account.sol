@@ -69,17 +69,19 @@ library Account {
         SetUtil.UintSet activeProducts;
     }
 
+
+    /**
+     * @dev productId (IRS) -> marketID (aUSDC lend) -> maturity (30th December)
+     * @dev productId (Dated Future) -> marketID (BTC) -> maturity (30th December)
+     * @dev productId (Perp) -> marketID (ETH)
+     * @dev Note, for dated instruments we don't need to keep track of the maturity
+     because the risk parameter is shared across maturities for a given productId marketId pair
+     */
     struct Exposure {
-        // productId (IRS) -> marketID (aUSDC lend) -> maturity (30th December)
-        // productId (Dated Future) -> marketID (BTC) -> maturity (30th December)
-        // productId (Perp) -> marketID (ETH)
-        // note, we don't need to keep track of the maturity for the purposes of IM, LM calc
-        // because the risk parameter is shared across maturities for a given productId marketId pair
-        // uint128 productId; -> since already have it in the exposures mapping
         uint128 marketId;
-        int256 filled;
-        uint256 unfilledLong;
-        uint256 unfilledShort;
+        int256 annualizedNotional;
+        uint256 lockedPrice;
+        uint256 marketTwap;
     }
 
     /**
@@ -307,7 +309,7 @@ library Account {
     /**
      * @dev Returns the unrealized loss given the annualized exposure, the market twap and the locked price
      */
-    function computeUnrealizedLoss(int256 annualizedExposure, UD60x18 marketTwap, UD60x18 lockedPrice)
+    function computeUnrealizedLoss(int256 annualizedNotional, UD60x18 lockedPrice, UD60x18 marketTwap)
         internal
         pure
         returns (uint256 unrealizedLoss)
