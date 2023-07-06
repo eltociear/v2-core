@@ -118,19 +118,19 @@ contract ProductModuleTest is Test {
 
     function test_CloseAccount() public {
         Account.Exposure[] memory emptyExposures;
-        productModule.getProducts()[0].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
+        productModule.getProducts()[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, emptyExposures, emptyExposures, emptyExposures);
 
-        Account.Exposure[] memory exposuresBefore =
-            productModule.getProducts()[0].getAccountAnnualizedExposures(100, Constants.TOKEN_0);
-        assertEq(exposuresBefore.length, 2);
+        (Account.Exposure[] memory takerExposuresBefore, Account.Exposure[] memory makerLowerExposuresBefore, Account.Exposure[] memory makerUpperExposuresBefore) =
+            productModule.getProducts()[0].getAccountTakerAndMakerExposures(100, Constants.TOKEN_0);
+        assertEq(takerExposuresBefore.length, 2);
 
         vm.prank(Constants.ALICE);
         //todo: check event was emitted (AN)
         productModule.closeAccount(1, 100, Constants.TOKEN_0);
 
-        Account.Exposure[] memory exposuresAfter =
-            productModule.getProducts()[0].getAccountAnnualizedExposures(100, Constants.TOKEN_0);
-        assertEq(exposuresAfter.length, 0);
+        (Account.Exposure[] memory takerExposuresAfter, Account.Exposure[] memory makerLowerExposuresAfter, Account.Exposure[] memory makerUpperExposuresAfter) =
+            productModule.getProducts()[0].getAccountTakerAndMakerExposures(100, Constants.TOKEN_0);
+        assertEq(takerExposuresAfter.length, 0);
     }
 
     function test_RevertWhen_CloseAccount_Global_Deny_All() public {
@@ -211,8 +211,7 @@ contract ProductModuleTest is Test {
         assertEq(productModule.getActiveProductsLength(100), 2);
 
         Account.Exposure[] memory emptyExposures;
-        newProduct.mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
-        newProduct.mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
+        newProduct.mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, emptyExposures, emptyExposures, emptyExposures);
 
         vm.prank(address(newProduct));
         productModule.propagateTakerOrder(100, productId, marketId, Constants.TOKEN_0, 100e18);
@@ -304,8 +303,7 @@ contract ProductModuleTest is Test {
         assertEq(productModule.getActiveProductsLength(100), 2);
 
         Account.Exposure[] memory emptyExposures;
-        newProduct.mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
-        newProduct.mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
+        newProduct.mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, emptyExposures, emptyExposures, emptyExposures);
 
         vm.prank(address(newProduct));
         productModule.propagateMakerOrder(100, productId, marketId, Constants.TOKEN_0, 100e18);
