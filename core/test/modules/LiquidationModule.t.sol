@@ -100,10 +100,10 @@ contract LiquidationModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
 
-                mockExposures[0] = Account.Exposure({marketId: 10, filled: 0, unfilledLong: 0, unfilledShort: -0});
-                mockExposures[1] = Account.Exposure({marketId: 11, filled: 0, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({productId: 1, marketId: 10, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
+                mockExposures[1] = Account.Exposure({productId: 1, marketId: 11, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
 
-                products[0].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
+                products[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposures);
             }
 
             // Mock account (id: 100) unrealized PnL in product (id: 1)
@@ -113,12 +113,10 @@ contract LiquidationModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-                mockExposures[0] = Account.Exposure({marketId: 20, filled: 0, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({productId: 1, marketId: 20, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
 
-                products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
+                products[1].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposures);
             }
-            // Mock account (id: 100) unrealized PnL in product (id: 2)
-            products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, -200e18);
 
             // todo: test single account single-token mode (AN)
             // Mock account (id:100) exposures to product (id:2) and markets (ids: 21)
@@ -144,25 +142,21 @@ contract LiquidationModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
 
-                mockExposures[0] = Account.Exposure({marketId: 10, filled: 20e18, unfilledLong: 0, unfilledShort: 0});
-                mockExposures[1] = Account.Exposure({marketId: 11, filled: 2e18, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({productId: 1, marketId: 10, annualizedNotional: 20e18, lockedPrice: 1e18, marketTwap: 1e18});
+                mockExposures[1] = Account.Exposure({productId: 1, marketId: 11, annualizedNotional: 2e18, lockedPrice: 1e18, marketTwap: 1e18});
 
-                products[0].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
+                products[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposures);
             }
 
-            // Mock account (id: 100) unrealized PnL in product (id: 1)
-            products[0].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 100e18);
 
             // Mock account (id:100) exposures to product (id:2) and markets (ids: 20)
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-                mockExposures[0] = Account.Exposure({marketId: 20, filled: -5e18, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({productId: 1, marketId: 20, annualizedNotional: -5e18, lockedPrice: 1e18, marketTwap: 1e18});
 
-                products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
+                products[1].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposures);
             }
-            // Mock account (id: 100) unrealized PnL in product (id: 2)
-            products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, -200e18);
 
             // todo: test single account single-token mode (AN)
             // Mock account (id:100) exposures to product (id:2) and markets (ids: 21)
