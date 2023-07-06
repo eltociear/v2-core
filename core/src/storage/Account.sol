@@ -246,8 +246,7 @@ library Account {
     }
 
     /**
-     * @dev Comes out as true if a given account initial margin requirement is satisfied
-     * i.e. account value (collateral + unrealized pnl) >= initial margin requirement
+     * @dev Returns a boolean imSatisfied (true if the account is above initial margin requirement) and the initial margin requirement
      */
     function isIMSatisfied(Data storage self, address collateralType) internal view returns (bool imSatisfied, uint256 initialMarginRequirement) {
         (uint256 initialMarginRequirement,,uint256 highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
@@ -257,16 +256,17 @@ library Account {
     }
 
     /**
-     * @dev Comes out as true if a given account is liquidatable, i.e. account value (collateral + unrealized pnl) < lm
+     * @dev Returns a booleans liquidatable (true if the account is below liquidation margin requirement) and the initial and liquidation margin requirements
      */
-
     function isLiquidatable(Data storage self, address collateralType)
         internal
         view
-        returns (bool liquidatable, uint256 im, uint256 lm)
+        returns (bool liquidatable, uint256 initialMarginRequirement, uint256 liquidationMarginRequirement)
     {
-        (im, lm) = self.getMarginRequirements(collateralType);
-        liquidatable = self.getTotalAccountValue(collateralType) < lm.toInt();
+        (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+        uint256 collateralBalance = self.getCollateralBalance(collateralType);
+        liquidatable = collateralBalance < liquidationMarginRequirement + highestUnrealizedLoss;
+        return (liquidatable, initialMarginRequirement, liquidationMarginRequirement);
     }
 
 
