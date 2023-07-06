@@ -389,11 +389,11 @@ library Account {
             // todo: assert or revert if exposuresLower[i].marketId != exposuresUpper[i].marketId
             Exposure memory exposureLower = exposuresLower[i];
             Exposure memory exposureUpper = exposuresUpper[i];
-            SD59x18 riskParameter = getRiskParameter(exposureLower.productId, exposureLower.marketId);
+            UD60x18 riskParameter = getRiskParameter(exposureLower.productId, exposureLower.marketId);
             uint256 liquidationMarginRequirementExposureLower = computeLiquidationMarginRequirement(exposureLower.annualizedNotional, riskParameter);
             uint256 liquidationMarginRequirementExposureUpper = computeLiquidationMarginRequirement(exposureUpper.annualizedNotional, riskParameter);
-            uint256 unrealizedLossExposureLower = computeUnrealizedLoss(exposureLower.annualizedNotional, exposureLower.lockedPrice, exposureLower.marketTwap);
-            uint256 unrealizedLossExposureUpper = computeUnrealizedLoss(exposureUpper.annualizedNotional, exposureUpper.lockedPrice, exposureUpper.marketTwap);
+            uint256 unrealizedLossExposureLower = computeUnrealizedLoss(exposureLower.annualizedNotional, UD60x18.wrap(exposureLower.lockedPrice), UD60x18.wrap(exposureLower.marketTwap));
+            uint256 unrealizedLossExposureUpper = computeUnrealizedLoss(exposureUpper.annualizedNotional, UD60x18.wrap(exposureUpper.lockedPrice), UD60x18.wrap(exposureUpper.marketTwap));
 
             if (liquidationMarginRequirementExposureLower + unrealizedLossExposureLower > liquidationMarginRequirementExposureUpper + unrealizedLossExposureUpper) {
                 liquidationMarginRequirement += liquidationMarginRequirementExposureLower;
