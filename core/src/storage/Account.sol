@@ -18,7 +18,9 @@ import "./Product.sol";
 import "oz/utils/math/Math.sol";
 import "oz/utils/math/SignedMath.sol";
 
-import {mulUDxUint, mulSDxInt, sd59x18, SD59x18, UD60x18} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
+// todo: consider moving into ProbMathHelper.sol
+import {UD60x18, sub as subSD59x18} from "@prb/math/SD59x18.sol";
+import {mulUDxUint, mulUDxInt, mulSDxInt, sd59x18, SD59x18, UD60x18} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Object for tracking accounts with access control and collateral tracking.
@@ -326,9 +328,9 @@ library Account {
     {
         for (uint256 i=0; i <= exposures.length; i++) {
             Exposure memory exposure = exposures[i];
-            SD59x18 riskParameter = getRiskParameter(exposure.productId, exposure.marketId);
+            UD60x18 riskParameter = getRiskParameter(exposure.productId, exposure.marketId);
             uint256 liquidationMarginRequirementExposure = computeLiquidationMarginRequirement(exposure.annualizedNotional, riskParameter);
-            uint256 unrealizedLossExposure = computeUnrealizedLoss(exposure.annualizedNotional, exposure.lockedPrice, exposure.marketTwap);
+            uint256 unrealizedLossExposure = computeUnrealizedLoss(exposure.annualizedNotional, UD60x18.wrap(exposure.lockedPrice), UD60x18.wrap(exposure.marketTwap));
             liquidationMarginRequirement += liquidationMarginRequirementExposure;
             unrealizedLoss += unrealizedLossExposure;
         }
@@ -339,15 +341,14 @@ library Account {
     /**
  * @dev Returns the liquidation margin requirement given the annualized exposure and the risk parameter
      */
-    function computeLiquidationMarginRequirement(int256 annualizedNotional, SD59x18 riskParameter)
+    function computeLiquidationMarginRequirement(int256 annualizedNotional, UD60x18 riskParameter)
     internal
     pure
     returns (uint256 liquidationMarginRequirement)
     {
-        liquidationMarginRequirement = mulSDxInt(riskParameter, annualizedNotional);
-        if (liquidationMarginRequirement < 0) {
-            liquidationMarginRequirement = -liquidationMarginRequirement;
-        }
+
+        uint256 absAnnualizedNotional = annualizedNotional < 0 ? uint256(-annualizedNotional) : uint256(annualizedNotional);
+        liquidationMarginRequirement = mulUDxUint(riskParameter, absAnnualizedNotional);
         return liquidationMarginRequirement;
     }
 
@@ -371,7 +372,7 @@ library Account {
     pure
     returns (uint256 unrealizedLoss)
     {
-        SD59x18 priceDelta = sd59x18(marketTwap) - sd59x18(lockedPrice);
+        SD59x18 priceDelta = subSD59x18(sd59x18(marketTwap), sd59x18(lockedPrice));
         int256 unrealizedPnL = mulSDxInt(priceDelta, annualizedNotional);
         if (unrealizedPnL < 0) {
             unrealizedLoss = (-unrealizedPnL).toUint();
