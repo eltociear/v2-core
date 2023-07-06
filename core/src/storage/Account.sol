@@ -211,19 +211,18 @@ library Account {
     }
 
     /**
-     * @dev Returns the aggregate annualized exposures of the account in all products in which the account is active (annualized
+     * @dev Returns the aggregate exposures of the account in all products in which the account is active (
      * exposures are per product)
-     * note, the annualized exposures are expected to be in notional terms and in terms of the settlement token of this account
-     * what if we do margin calculations per product for now, that'd help with bringing down the gas costs (since atm we're doing no
-     * correlations)
+     * note, the exposures are expected to be in notional terms and in terms of the settlement token of this account
      */
-    function getAnnualizedProductExposures(Data storage self, uint128 productId, address collateralType)
+    function getProductTakerAndMakerExposures(Data storage self, uint128 productId, address collateralType)
         internal
         view
-        returns (Exposure[] memory productExposures)
+        returns (Exposure[] memory productTakerExposures, Exposure[] memory productMakerExposuresLower, Exposure[] memory productMakerExposuresUpper)
     {
         Product.Data storage _product = Product.load(productId);
-        productExposures = _product.getAccountAnnualizedExposures(self.id, collateralType);
+        (productTakerExposures, productMakerExposuresLower, productMakerExposuresUpper) = _product.getPeroductTakerAndMakerExposures(self.id, collateralType);
+        return (productTakerExposures, productMakerExposuresLower, productMakerExposuresUpper);
     }
 
 
@@ -409,7 +408,7 @@ library Account {
         internal
         view
         returns (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
-    {
+    {x
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
 
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
