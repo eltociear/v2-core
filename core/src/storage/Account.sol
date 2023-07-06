@@ -44,7 +44,7 @@ library Account {
     /**
      * @dev Thrown when a given account's total value is below the initial margin requirement
      */
-    error AccountBelowIM(uint128 accountId, address collateralType, uint256 im);
+    error AccountBelowIM(uint128 accountId, address collateralType, uint256 initialMarginRequirement);
 
     /**
      * @dev Thrown when an account cannot be found.
@@ -241,11 +241,11 @@ library Account {
      * @dev Checks if the account is below initial margin requirement and reverts if so, other returns the initial margin requirement
      */
     function imCheck(Data storage self, address collateralType) internal view returns (uint256) {
-        (bool isSatisfied, uint256 im) = self.isIMSatisfied(collateralType);
+        (bool isSatisfied, uint256 initialMarginRequirement) = self.isIMSatisfied(collateralType);
         if (!isSatisfied) {
-            revert AccountBelowIM(self.id, collateralType, im);
+            revert AccountBelowIM(self.id, collateralType, initialMarginRequirement);
         }
-        return im;
+        return initialMarginRequirement;
     }
 
     /**
@@ -293,8 +293,8 @@ library Account {
                 productTakerExposures
             );
             (uint256 lmMakerPositions, uint256 highestUnrealizedLossMakerPositions) = computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(productMakerExposuresLower, productMakerExposuresUpper);
-            liquidationMarginRequirement += lmTakerPositions + lmMakerPositions;
-            highestUnrealizedLoss += unrealizedLossTakerPositions + highestUnrealizedLossMakerPositions;
+            liquidationMarginRequirement += (lmTakerPositions + lmMakerPositions);
+            highestUnrealizedLoss += (unrealizedLossTakerPositions + highestUnrealizedLossMakerPositions);
         }
 
         UD60x18 imMultiplier = getIMMultiplier();
