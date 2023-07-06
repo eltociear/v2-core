@@ -40,17 +40,6 @@ contract ProductModule is IProductModule {
         return ProductCreator.getProductStore().lastCreatedProductId;
     }
 
-    /**
-     * @inheritdoc IProductModule
-     */
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType)
-        external
-        view
-        override
-        returns (int256 accountUnrealizedPnL)
-    {
-        accountUnrealizedPnL = Product.load(productId).getAccountUnrealizedPnL(accountId, collateralType);
-    }
 
     /**
      * @inheritdoc IProductModule
@@ -61,7 +50,7 @@ contract ProductModule is IProductModule {
         view
         returns (Account.Exposure[] memory exposures)
     {
-        exposures = Product.load(productId).getAccountAnnualizedExposures(accountId, collateralType);
+        exposures = Product.load(productId).getAccountTakerAndMakerExposures(accountId, collateralType);
     }
 
     /**
