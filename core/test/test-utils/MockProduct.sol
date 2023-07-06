@@ -58,8 +58,12 @@ contract MockProduct is IProduct {
         Account.Exposure[] memory makerUpperExposuresReturnValues
     ) public {
         MockAccountMakerAndTakerExposures storage tmp = mockAccountTakerAndMakerExposures[accountId][collateralType];
-        for (uint256 i = 0; i < returnValue.length; i++) {
+        for (uint256 i = 0; i < takerExposuresReturnValues.length; i++) {
             tmp.takerExposuresReturnValues[tmp.end].push(takerExposuresReturnValues[i]);
+        }
+
+        // todo: assert makerLowerExposuresReturnValues.length == makerUpperExposuresReturnValues.length
+        for (uint256 i = 0; i < makerLowerExposuresReturnValues.length; i++) {
             tmp.makerLowerExposuresReturnValues[tmp.end].push(makerLowerExposuresReturnValues[i]);
             tmp.makerUpperExposuresReturnValues[tmp.end].push(makerUpperExposuresReturnValues[i]);
         }
