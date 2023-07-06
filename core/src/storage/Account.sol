@@ -152,11 +152,14 @@ library Account {
         view
         returns (uint256 collateralBalanceAvailable)
     {
-        (uint256 im,) = self.getMarginRequirements(collateralType);
-        int256 totalAccountValue = self.getTotalAccountValue(collateralType);
-        if (totalAccountValue > im.toInt()) {
-            collateralBalanceAvailable = totalAccountValue.toUint() - im;
+        (uint256 initialMarginRequirement,,uint256 highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+        uint256 collateralBalance = self.getCollateralBalance(collateralType);
+
+        if (collateralBalance > initialMarginRequirement + highestUnrealizedLoss) {
+            collateralBalanceAvailable = collateralBalance - initialMarginRequirement - highestUnrealizedLoss;
         }
+
+        return collateralBalanceAvailable;
     }
 
     /**
