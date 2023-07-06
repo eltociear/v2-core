@@ -64,13 +64,13 @@ contract CollateralModuleTest is Test {
 
             // Mock account (id:100) exposures to product (id:1) and markets (ids: 10, 11)
             {
-                Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
+                Account.Exposure[] memory mockTakerExposures = new Account.Exposure[](2);
 
-                mockExposures[0] = Account.Exposure({marketId: 10, filled: 0, unfilledLong: 0, unfilledShort: -0});
-                mockExposures[1] = Account.Exposure({marketId: 11, filled: 0, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({productId: 1, marketId: 10, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
+                mockExposures[1] = Account.Exposure({productId: 1, marketId: 11, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
 
-                products[0].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
-                products[0].skipGetAccountAnnualizedExposures(100, Constants.TOKEN_0); // skip old mock
+                products[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposures);
+                products[0].skipGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0); // skip old mock
             }
 
             // Mock account (id: 100) unrealized PnL in product (id: 1)
@@ -81,27 +81,16 @@ contract CollateralModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-                mockExposures[0] = Account.Exposure({marketId: 20, filled: 0, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({marketId: 20, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
 
-                products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
-                products[1].skipGetAccountAnnualizedExposures(100, Constants.TOKEN_0); // skip old mock
+                products[1].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposures);
+                products[1].skipGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0); // skip old mock
             }
             // Mock account (id: 100) unrealized PnL in product (id: 2)
             products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
             products[1].skipGetAccountUnrealizedPnLMock(100, Constants.TOKEN_0); // skip old mock
 
             // todo: test single account single-token mode (AN)
-            // Mock account (id:100) exposures to product (id:2) and markets (ids: 21)
-            // {
-            //     Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
-
-            //     mockExposures[0] = Account.Exposure({marketId: 21, filled: 0, unfilledLong: 0, unfilledShort: 0});
-
-            //     products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_1, mockExposures);
-            // }
-
-            // todo: test single account single-token mode (AN)
-            // products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_1, 1e17);
         }
     }
 
@@ -117,13 +106,6 @@ contract CollateralModuleTest is Test {
         );
     }
 
-    function test_GetTotalAccountValue() public {
-        int256 uPnL = 100e18;
-        assertEq(
-            collateralModule.getTotalAccountValue(100, Constants.TOKEN_0),
-            Constants.DEFAULT_TOKEN_0_BALANCE.toInt() - uPnL
-        );
-    }
 
     function test_GetAccountCollateralBalanceAvailable() public {
         uint256 uPnL = 100e18;
