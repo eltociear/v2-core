@@ -331,32 +331,23 @@ library Account {
         view
         returns (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
     {
-        // todo: consider using uint256 for the risk parameters instead of SD59x18
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
 
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
-            Exposure[] memory annualizedProductMarketExposures =
-                self.getAnnualizedProductExposures(productId, collateralType);
-
-            for (uint256 j = 0; j < annualizedProductMarketExposures.length; j++) {
-                Exposure memory exposure = annualizedProductMarketExposures[j];
-                uint128 marketId = exposure.marketId;
-                SD59x18 riskParameter = getRiskParameter(productId, marketId);
-                int256 annualizedNotionalUpperBound = exposure.filled + int256(exposure.unfilledLong);
-                int256 annualizedNotionalLowerBound = exposure.filled - int256(exposure.unfilledShort);
-                uint256 liquidationMarginRequirementUpperBound = computeLiquidationMarginRequirement(
-                    annualizedNotionalUpperBound,
-                    riskParameter
-                );
-                uint256 liquidationMarginRequirementLowerBound = computeLiquidationMarginRequirement(
-                    annualizedNotionalLowerBound,
-                    riskParameter
-                );
-                uint256 unrealizedLossUpperBound =
+            (uint256 lmTakerPositions, uint256 unrealizedLossTakerPositions) = self.getLMAndUnrealizedLossProductTaker(
+                productId,
+                collateralType
+            );
+            (uint256 lmMakerPositions, uint256 highestUnrealizedLossMakerPositions) = self.getLMAndUnrealizedLossProductMaker(
+                productId,
+                collateralType
+            );
 
 
-            }
+
+
+
         }
 
 
