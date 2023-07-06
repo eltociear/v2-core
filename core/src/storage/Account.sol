@@ -78,7 +78,6 @@ library Account {
      because the risk parameter is shared across maturities for a given productId marketId pair
      */
     struct Exposure {
-        uint128 marketId;
         int256 annualizedNotional;
         uint256 lockedPrice;
         uint256 marketTwap;
@@ -322,6 +321,28 @@ library Account {
         return unrealizedLoss;
     }
 
+    function getLMAndUnrealizedLossProductTaker(Data storage self, uint128 productId, address collateralType)
+        internal
+        view
+        returns (uint256 liquidationMarginRequirement, uint256 unrealizedLoss)
+    {
+        (Exposure[] memory productTakerExposures) = self.getAnnualizedProductTakeExposures(productId, collateralType);
+
+        for (uint256 i=0; i <= productTakerExposures.length; i++) {
+            Exposure memory productTakerExposure = productTakerExposures[i];
+            SD59x18 marketTwap = productTakerExposure.marketTwap;
+            SD59x18 lockedPrice = productTakerExposure.lockedPrice;
+            int256 annualizedExposure = productTakerExposure.annualizedExposure;
+            SD59x18 riskParameter = getRiskParameter(productId, productTakerExposure.marketId);
+            uint256 productTakerLiquidationMarginRequirement = computeLiquidationMarginRequirement(annualizedExposure, riskParameter);
+            uint256 productTakerUnrealizedLoss = computeUnrealizedLoss(annualizedExposure, lockedPrice, marketTwap);
+            liquidationMarginRequirement += productTakerLiquidationMarginRequirement;
+            unrealizedLoss += productTakerUnrealizedLoss;
+        }
+
+        return (liquidationMarginRequirement, unrealizedLoss);
+    }
+
     /**
      * @dev Returns the initial (im) and liquidataion (lm) margin requirements of the account
      */
@@ -347,7 +368,7 @@ library Account {
             highestUnrealizedLoss += unrealizedLossTakerPositions + highestUnrealizedLossMakerPositions;
         }
 
-        UD60x18 imMultiplier = self.getIMMultiplier();
+        UD60x18 imMultiplier = getIMMultiplier();
         initialMarginRequirement = computeInitialMarginRequirement(liquidationMarginRequirement, imMultiplier);
         return (initialMarginRequirement, liquidationMarginRequirement, highestUnrealizedLoss);
     }
