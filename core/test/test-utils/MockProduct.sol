@@ -53,11 +53,15 @@ contract MockProduct is IProduct {
     function mockGetAccountTakerAndMakerExposures(
         uint128 accountId,
         address collateralType,
-        Account.Exposure[] memory returnValue
+        Account.Exposure[] memory takerExposuresReturnValues,
+        Account.Exposure[] memory makerLowerExposuresReturnValues,
+        Account.Exposure[] memory makerUpperExposuresReturnValues
     ) public {
         MockAccountMakerAndTakerExposures storage tmp = mockAccountTakerAndMakerExposures[accountId][collateralType];
         for (uint256 i = 0; i < returnValue.length; i++) {
-            tmp.returnValues[tmp.end].push(returnValue[i]);
+            tmp.takerExposuresReturnValues[tmp.end].push(takerExposuresReturnValues[i]);
+            tmp.makerLowerExposuresReturnValues[tmp.end].push(makerLowerExposuresReturnValues[i]);
+            tmp.makerUpperExposuresReturnValues[tmp.end].push(makerUpperExposuresReturnValues[i]);
         }
 
         tmp.end += 1;
@@ -74,7 +78,7 @@ contract MockProduct is IProduct {
     function getAccountTakerAndMakerExposures(uint128 accountId, address collateralType)
         public
         view
-        returns (Account.Exposure[] memory exposures)
+        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerLowerExposures, Account.Exposure[] memory makerUpperExposures)
     {
         MockAccountMakerAndTakerExposures storage tmp = mockAccountTakerAndMakerExposures[accountId][collateralType];
 
@@ -82,7 +86,7 @@ contract MockProduct is IProduct {
             revert("Unmocked call");
         }
 
-        return tmp.returnValues[tmp.start];
+        return (tmp.takerExposuresReturnValues[tmp.start], tmp.makerLowerExposuresReturnValues[tmp.start], tmp.makerUpperExposuresReturnValues[tmp.start]);
     }
 
     // supportsInterface mock support
