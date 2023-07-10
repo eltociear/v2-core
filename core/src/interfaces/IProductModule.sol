@@ -66,7 +66,7 @@ interface IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external returns (uint256 fee, uint256 im);
+    ) external returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss);
 
     function propagateMakerOrder(
         uint128 accountId,
@@ -74,7 +74,7 @@ interface IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external returns (uint256 fee, uint256 im);
+    ) external returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss);
 
 
     // todo: consider naming propagateCashflow to be more generic to work with e.g. perps that may have funding cashflows

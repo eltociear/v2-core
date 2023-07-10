@@ -113,7 +113,7 @@ contract ProductModule is IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external override returns (uint256 fee, uint256 im) {
+    ) external override returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss) {
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Product.onlyProductAddress(productId, msg.sender);
 
@@ -128,7 +128,8 @@ contract ProductModule is IProductModule {
             account.activeProducts.add(productId);
         }
 
-        im = account.imCheck(collateralType);
+        (im, highestUnrealizedLoss) = account.imCheck(collateralType);
+        return (fee, im, highestUnrealizedLoss);
     }
 
     function propagateMakerOrder(
@@ -137,7 +138,7 @@ contract ProductModule is IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external override returns (uint256 fee, uint256 im) {
+    ) external override returns (uint256 fee, uint256 im, uint256 highestUnrealizedPnL) {
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Product.onlyProductAddress(productId, msg.sender);
 
@@ -152,7 +153,8 @@ contract ProductModule is IProductModule {
             account.activeProducts.add(productId);
         }
 
-        im = account.imCheck(collateralType);
+        (im, highestUnrealizedPnL) = account.imCheck(collateralType);
+        return (fee, im, highestUnrealizedPnL);
     }
 
     function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)

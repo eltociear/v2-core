@@ -87,7 +87,7 @@ contract ExposedAccounts is CoreState {
         account.imCheck(collateralType);
     }
 
-    function isIMSatisfied(uint128 id, address collateralType) external returns (bool, uint256) {
+    function isIMSatisfied(uint128 id, address collateralType) external returns (bool, uint256, uint256) {
         Account.Data storage account = Account.load(id);
         return account.isIMSatisfied(collateralType);
     }
@@ -270,19 +270,21 @@ contract AccountTest is Test {
     function test_IsIMSatisfied_False() public {
         setCollateralProfile("medium");
 
-        (bool imSatisfied, uint256 im) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
+        (bool imSatisfied, uint256 im, uint256 highestUnrealizedLoss) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
 
         assertEq(imSatisfied, false);
         assertEq(im, 1800e18);
+        // todo: assert highestUnrealizedLoss
     }
 
     function test_IsIMSatisfied_True() public {
         setCollateralProfile("high");
 
-        (bool imSatisfied, uint256 im) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
+        (bool imSatisfied, uint256 im, uint256 highestUnrealizedLoss) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
 
         assertEq(imSatisfied, true);
         assertEq(im, 1800e18);
+        // todo: assert highestUnrealizedLoss
     }
 
     function test_RevertWhen_ImCheck_False() public {

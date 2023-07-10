@@ -276,7 +276,7 @@ library Account {
 
 
     /**
-     * @dev Returns the initial (im) and liquidataion (lm) margin requirements of the account
+     * @dev Returns the initial (im) and liquidataion (lm) margin requirements of the account alongside highest unrealized loss
      */
 
     function getMarginRequirementsAndHighestUnrealizedLoss(Data storage self, address collateralType)
