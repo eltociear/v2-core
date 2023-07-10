@@ -235,7 +235,9 @@ contract ProtocolConfig is ProtocolBase {
         priceImpactPhi: priceImpactPhi,
         priceImpactBeta: priceImpactBeta,
         spread: spread,
-        rateOracle: IRateOracle(address(rateOracleAddress))
+        rateOracle: IRateOracle(address(rateOracleAddress)),
+        minTick: TickMath.DEFAULT_MIN_TICK,
+        maxTick: TickMath.DEFAULT_MAX_TICK
     });
 
     createVamm({
@@ -250,6 +252,9 @@ contract ProtocolConfig is ProtocolBase {
       maturityTimestamp: maturityTimestamp,
       observationCardinalityNext: observationCardinalityNext
     });
+
+    setLpPositionsPerAccountLimit(1);
+    setTakerPositionsPerAccountLimit(1);
   }
 
   /// @notice this should only be used for testnet (for mainnet
