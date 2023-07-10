@@ -35,7 +35,7 @@ contract ExposePortfolio {
     }
 
     function setProductConfig(address pool) external {
-        ProductConfiguration.set(ProductConfiguration.Data({ productId: 1, coreProxy: address(12), poolAddress: pool }));
+        ProductConfiguration.set(ProductConfiguration.Data({ productId: 1, coreProxy: address(12), poolAddress: pool, positionsPerAccountLimit: 2 }));
     }
 
     function loadOrCreate(uint128 id) external returns (bytes32 s) {
@@ -205,6 +205,8 @@ contract PortfolioTest is Test {
         portfolio.createRateOracle(marketId, address(mockRateOracle), 3600);
 
         portfolio.setMarket(marketId, MOCK_COLLATERAL_TYPE);
+
+        portfolio.setProductConfig(address(mockPool));
     }
 
     function test_LoadAtCorrectSlot() public {
@@ -375,7 +377,6 @@ contract PortfolioTest is Test {
     function test_CloseAccountWithoutClosingInMarket() public {
         test_CreateNewPosition();
         uint32 maturityTimestamp = currentTimestamp + 2;
-        portfolio.setProductConfig(address(mockPool));
 
         vm.mockCall(
             address(12),
@@ -397,7 +398,6 @@ contract PortfolioTest is Test {
 
         portfolio.updatePosition(accountId, marketId, maturityTimestamp, 10, 10);
 
-        portfolio.setProductConfig(address(mockPool));
         vm.mockCall(
             address(12),
             abi.encodeWithSelector(IProductModule.propagateTakerOrder.selector, accountId, 1, marketId, MOCK_COLLATERAL_TYPE, 0),
@@ -440,6 +440,18 @@ contract PortfolioTest is Test {
     function test_ActivateMarket() public {
         portfolio.activateMarketMaturity(accountId, marketId, 21988);
         assertTrue(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21988, MOCK_COLLATERAL_TYPE));
+    }
+
+    function test_RevertWhen_ActivateTooManyMarkets() public {
+        portfolio.activateMarketMaturity(accountId, marketId, 21988);
+        portfolio.activateMarketMaturity(accountId, marketId, 21989);
+
+        expectRevert(abi.encodeWithSelector(Portfolio.TooManyTakerPositions.selector, accountId));
+        portfolio.activateMarketMaturity(accountId, marketId, 21990);
+
+        assertFalse(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21990, MOCK_COLLATERAL_TYPE));
+        assertTrue(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21988, MOCK_COLLATERAL_TYPE));
+        assertTrue(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21989, MOCK_COLLATERAL_TYPE));
     }
 
     function test_RevertWhen_ActivateUnknownMarket() public {

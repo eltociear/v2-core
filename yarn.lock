@@ -1659,7 +1659,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.12.1
+    "@voltz-protocol/v2-vamm": 1.13.0
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1734,6 +1734,20 @@ __metadata:
     "@voltz-protocol/util-contracts": 1.2.0
     "@voltz-protocol/util-modules": 1.1.0
   checksum: 4648a5a8ac4e536b22c7dd85db59cdd16b83c8209570ec422f884c16e172bdcd55f5316bc96697a71a24d95d0f10a041b88017017ab6fcfd76b1ea3275269ac2
+  languageName: node
+  linkType: hard
+
+"@voltz-protocol/v2-vamm@npm:1.13.0":
+  version: 1.13.0
+  resolution: "@voltz-protocol/v2-vamm@npm:1.13.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.13.0%2F3943f19944045a0d76a4cdfb9474a16aecac4e55"
+  dependencies:
+    "@openzeppelin/contracts": 4.9.2
+    "@prb/math": 3.3.0
+    "@voltz-protocol/core": 2.1.1
+    "@voltz-protocol/products-dated-irs": 2.2.1
+    "@voltz-protocol/util-contracts": 1.2.0
+    "@voltz-protocol/util-modules": 1.1.0
+  checksum: 0750e758732ed84627436cd06d861423a5bedc69f84947c816fc18274f92055e1592d8b013d799fb1427568a9fa27a39d41b80d50d5d546787ed43288e423ed1
   languageName: node
   linkType: hard
 
