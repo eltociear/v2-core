@@ -158,7 +158,11 @@ library Account {
         returns (uint256 collateralBalanceAvailable)
     {
         (uint256 initialMarginRequirement,,uint256 highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+        console.log("initialMarginRequirement", initialMarginRequirement);
+        console.log("highestUnrealizedLoss", highestUnrealizedLoss);
+
         uint256 collateralBalance = self.getCollateralBalance(collateralType);
+        console.log("collateralBalance", collateralBalance);
 
         if (collateralBalance > initialMarginRequirement + highestUnrealizedLoss) {
             collateralBalanceAvailable = collateralBalance - initialMarginRequirement - highestUnrealizedLoss;

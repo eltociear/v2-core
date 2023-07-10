@@ -253,8 +253,8 @@ contract AccountTest is Test {
         (bool liquidatable, uint256 im, uint256 lm, uint256 highestUnrealizedLoss) = accounts.isLiquidatable(accountId, Constants.TOKEN_0);
 
         assertEq(liquidatable, true);
-        assertEq(lm, 900e18);
-        assertEq(im, 1800e18);
+        assertEq(lm, 1000e18);
+        assertEq(im, 2000e18);
     }
 
     function test_IsLiquidatable_False() public {
@@ -263,8 +263,8 @@ contract AccountTest is Test {
         (bool liquidatable, uint256 im, uint256 lm, uint256 highestUnrealizedLoss) = accounts.isLiquidatable(accountId, Constants.TOKEN_0);
 
         assertEq(liquidatable, false);
-        assertEq(lm, 900e18);
-        assertEq(im, 1800e18);
+        assertEq(lm, 1000e18);
+        assertEq(im, 2000e18);
     }
 
     function test_IsIMSatisfied_False() public {
@@ -273,7 +273,7 @@ contract AccountTest is Test {
         (bool imSatisfied, uint256 im, uint256 highestUnrealizedLoss) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
 
         assertEq(imSatisfied, false);
-        assertEq(im, 1800e18);
+        assertEq(im, 2000e18);
         // todo: assert highestUnrealizedLoss
     }
 
@@ -283,14 +283,14 @@ contract AccountTest is Test {
         (bool imSatisfied, uint256 im, uint256 highestUnrealizedLoss) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
 
         assertEq(imSatisfied, true);
-        assertEq(im, 1800e18);
+        assertEq(im, 2000e18);
         // todo: assert highestUnrealizedLoss
     }
 
     function test_RevertWhen_ImCheck_False() public {
         setCollateralProfile("medium");
 
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, accountId, Constants.TOKEN_0, 1800e18));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, accountId, Constants.TOKEN_0, 2000e18, 0));
         accounts.imCheck(accountId, Constants.TOKEN_0);
     }
 
@@ -303,9 +303,14 @@ contract AccountTest is Test {
     function test_GetCollateralBalanceAvailable_Positive() public {
         setCollateralProfile("high");
 
+        // im = 2000e18
+        // highest unrealized loss = 0
+        // collateral balance = 5000e18
+        // collateral balance available = 3000e18
+
         uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_0);
 
-        assertEq(collateralBalanceAvailable, 3100e18);
+        assertEq(collateralBalanceAvailable, 3000e18);
     }
 
     function test_GetCollateralBalanceAvailable_NonSettlementToken() public {
