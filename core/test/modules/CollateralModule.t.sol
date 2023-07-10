@@ -79,7 +79,7 @@ contract CollateralModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-                mockExposures[0] = Account.Exposure({productId: 1, marketId: 20, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
+                mockExposures[0] = Account.Exposure({productId: 2, marketId: 20, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
 
                 products[1].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposures, mockExposures, mockExposures);
                 products[1].skipGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0); // skip old mock
@@ -103,12 +103,31 @@ contract CollateralModuleTest is Test {
 
 
     function test_GetAccountCollateralBalanceAvailable() public {
-        uint256 uPnL = 100e18;
-        uint256 im = 1800e18;
+        uint256 unrealizedLoss = 0;
+        uint256 im = 2000e18;
+
+        // first market (marketId 10, productId 1
+        // risk parameter = 1
+        //  liquidationMarginRequirementExposureLower: 100e18 (annualized notional = -100e18)
+        //  liquidationMarginRequirementExposureUpper: 300e18 (annualized notional = 300e18)
+
+        // second market
+        // risk parameter = 1
+        //  liquidationMarginRequirementExposureLower: 500e18 (annualized notional = 500e18)
+        //  liquidationMarginRequirementExposureUpper: 0
+
+        // third market
+        // risk parameter = 1
+        //  liquidationMarginRequirementExposureLower: 200e18 (annualized notional = -200e18)
+        //  liquidationMarginRequirementExposureUpper: 100e18 (annualized notional = 100e18)
+
+        // total lm = 300e18 + 500e18 + 200e18= 1000e18
+        // im mutliplier = 2
+        // im = 1000e18 * 2 = 2000e18
 
         assertEq(
             collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_0),
-            Constants.DEFAULT_TOKEN_0_BALANCE - uPnL - im
+            Constants.DEFAULT_TOKEN_0_BALANCE - unrealizedLoss - im
         );
     }
 
@@ -680,7 +699,7 @@ contract CollateralModuleTest is Test {
         vm.prank(Constants.ALICE);
 
         // Expect revert due to insufficient margin coverage
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, 1800e18));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, 2000e18, 0));
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 
