@@ -39,6 +39,11 @@ library Portfolio {
     error PortfolioNotFound(uint128 accountId);
 
     /**
+     * @dev Thrown when an account exceeds the positions limit.
+     */
+    error TooManyTakerPositions(uint128 accountId);
+
+    /**
      * @notice Emitted when attempting to settle before maturity
      */
     error SettlementBeforeMaturity(uint128 marketId, uint32 maturityTimestamp, uint256 accountId);
@@ -244,7 +249,7 @@ library Portfolio {
             pool.closeUnfilledBase(marketId, maturityTimestamp, self.accountId);
 
             // left-over exposure in pool
-            (int256 filledBasePool,) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+            (int256 filledBasePool, int256 filledQuotePool) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
 
             int256 unwindBase = -(position.baseBalance + filledBasePool);
 
@@ -265,10 +270,6 @@ library Portfolio {
             emit ProductPositionUpdated(
                 self.accountId, marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount, block.timestamp
                 );
-            
-            if (position.baseBalance == 0 && position.quoteBalance == 0) {
-                self.deactivateMarketMaturity(marketId, maturityTimestamp);
-            }
         }
     }
 
@@ -342,6 +343,9 @@ library Portfolio {
         }
         uint256 marketMaturityPacked = Pack.pack(marketId, maturityTimestamp);
         if (!self.activeMarketsAndMaturities[collateralType].contains(marketMaturityPacked)) {
+            if (self.activeMarketsAndMaturities.length() >= ProductConfiguration.load().positionsPerAccountLimit) {
+                TooManyTakerPositions(self.accountId);
+            }
             self.activeMarketsAndMaturities[collateralType].add(marketMaturityPacked);
         }
     }

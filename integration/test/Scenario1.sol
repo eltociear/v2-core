@@ -82,7 +82,8 @@ contract Scenario1 is BaseScenario, TestUtils {
       ProductConfiguration.Data({
         productId: productId,
         coreProxy: address(coreProxy),
-        poolAddress: address(vammProxy)
+        poolAddress: address(vammProxy),
+        positionsPerAccountLimit: 1
       })
     );
 
@@ -115,7 +116,9 @@ contract Scenario1 is BaseScenario, TestUtils {
         priceImpactPhi: ud60x18(1e17), // 0.1
         priceImpactBeta: ud60x18(125e15), // 0.125
         spread: ud60x18(3e15), // 0.3%
-        rateOracle: IRateOracle(address(aaveV3RateOracle))
+        rateOracle: IRateOracle(address(aaveV3RateOracle)),
+        minTick: TickMath.DEFAULT_MIN_TICK,
+        maxTick: TickMath.DEFAULT_MAX_TICK
     });
 
     vammProxy.setProductAddress(address(datedIrsProxy));
