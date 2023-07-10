@@ -136,7 +136,7 @@ library Account {
     }
 
     /**
-     * @dev Given a collateral type, returns information about the total balance of the account
+     * @dev Given a collateral type, returns information about the collateral balance of the account
      */
     function getCollateralBalance(Data storage self, address collateralType)
         internal

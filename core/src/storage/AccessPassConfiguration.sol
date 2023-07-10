@@ -26,6 +26,7 @@ library AccessPassConfiguration {
         assembly {
             config.slot := s
         }
+        return config;
     }
 
      /**
