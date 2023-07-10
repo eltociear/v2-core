@@ -52,6 +52,8 @@ contract LiquidationModule is ILiquidationModule {
             );
         } else {
             if (imPostClose != 0) {
+                console.log("imPreClose: %s", imPreClose);
+                console.log("imPostClose: %s", imPostClose);
                 revert PartialLiquidationNotIncentivized(liquidatedAccountId, imPreClose, imPostClose);
             }
 
@@ -86,6 +88,7 @@ contract LiquidationModule is ILiquidationModule {
             revert AccountExposureNotReduced(liquidatedAccountId, imPreClose, imPostClose);
         }
 
+        // todo: consider including unrealized loss in the liquidator reward amount calculation
         liquidatorRewardAmount = extractLiquidatorReward(liquidatedAccountId, collateralType, imPreClose, imPostClose);
 
         Account.Data storage liquidatorAccount = Account.exists(liquidatorAccountId);

@@ -251,12 +251,18 @@ contract LiquidationModuleTest is Test {
 
         // Trigger liquidation
         uint256 liquidatorReward = liquidationModule.liquidate(100, 888, Constants.TOKEN_0);
-        assertEq(liquidatorReward, 90e18);
+        assertEq(liquidatorReward, 100e18);
+
+        //    imPreClose: 2000e18
+        //    imPostClose: 0
+        //    imDelta: 1892e18
+        //    liquidator reward parameter = 0.05
+        //    liquidator reward = 100e18
 
         // Check balances after
         {
             uint256 balance = liquidationModule.getCollateralBalance(100, Constants.TOKEN_0);
-            assertEq(balance, LOW_COLLATERAL - 90e18);
+            assertEq(balance, LOW_COLLATERAL - 100e18);
         }
 
         {
@@ -266,7 +272,7 @@ contract LiquidationModuleTest is Test {
 
         {
             uint256 balance = liquidationModule.getCollateralBalance(888, Constants.TOKEN_0);
-            assertEq(balance, 90e18);
+            assertEq(balance, 100e18);
         }
 
         {
@@ -281,12 +287,19 @@ contract LiquidationModuleTest is Test {
 
         // Trigger liquidation
         uint256 liquidatorReward = liquidationModule.liquidate(100, 888, Constants.TOKEN_0);
-        assertEq(liquidatorReward, 883e17);
+
+        //    imPreClose: 2000e18
+        //    imPostClose: 108e18
+        //    imDelta: 1892e18
+        //    liquidator reward parameter = 0.05
+        //   liquidator reward = 94.6e18
+
+        assertEq(liquidatorReward, 946e17);
 
         // Check balances after
         {
             uint256 balance = liquidationModule.getCollateralBalance(100, Constants.TOKEN_0);
-            assertEq(balance, LOW_COLLATERAL - 883e17);
+            assertEq(balance, LOW_COLLATERAL - 946e17);
         }
 
         {
@@ -296,7 +309,7 @@ contract LiquidationModuleTest is Test {
 
         {
             uint256 balance = liquidationModule.getCollateralBalance(888, Constants.TOKEN_0);
-            assertEq(balance, 883e17);
+            assertEq(balance, 946e17);
         }
 
         {
@@ -356,9 +369,9 @@ contract LiquidationModuleTest is Test {
         liquidationModule.setLiquidationBooster(100, Constants.TOKEN_0, 101e18);
 
         vm.expectRevert(
-            abi.encodeWithSelector(ILiquidationModule.PartialLiquidationNotIncentivized.selector, 100, 1800e18, 34e18)
-        );
-        liquidationModule.liquidate(100, 888, Constants.TOKEN_0);
+                abi.encodeWithSelector(ILiquidationModule.PartialLiquidationNotIncentivized.selector, 100, 2000e18, 108e18)
+            );
+            liquidationModule.liquidate(100, 888, Constants.TOKEN_0);
     }
 
     function test_RevertWhen_Liquidate_NoAccount() public {
@@ -385,7 +398,7 @@ contract LiquidationModuleTest is Test {
 
         // Trigger liquidation
         vm.expectRevert(
-            abi.encodeWithSelector(ILiquidationModule.AccountExposureNotReduced.selector, 100, 1800e18, 1800e18)
+            abi.encodeWithSelector(ILiquidationModule.AccountExposureNotReduced.selector, 100, 2000e18, 2000e18)
         );
         liquidationModule.liquidate(100, 888, Constants.TOKEN_0);
     }
