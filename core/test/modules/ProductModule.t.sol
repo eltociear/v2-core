@@ -122,7 +122,7 @@ contract ProductModuleTest is Test {
 
         (Account.Exposure[] memory takerExposuresBefore, Account.Exposure[] memory makerLowerExposuresBefore, Account.Exposure[] memory makerUpperExposuresBefore) =
             productModule.getProducts()[0].getAccountTakerAndMakerExposures(100, Constants.TOKEN_0);
-        assertEq(takerExposuresBefore.length, 2);
+        assertEq(makerLowerExposuresBefore.length, 2);
 
         vm.prank(Constants.ALICE);
         //todo: check event was emitted (AN)
@@ -130,7 +130,7 @@ contract ProductModuleTest is Test {
 
         (Account.Exposure[] memory takerExposuresAfter, Account.Exposure[] memory makerLowerExposuresAfter, Account.Exposure[] memory makerUpperExposuresAfter) =
             productModule.getProducts()[0].getAccountTakerAndMakerExposures(100, Constants.TOKEN_0);
-        assertEq(takerExposuresAfter.length, 0);
+        assertEq(makerLowerExposuresAfter.length, 0);
     }
 
     function test_RevertWhen_CloseAccount_Global_Deny_All() public {
@@ -263,13 +263,13 @@ contract ProductModuleTest is Test {
     }
 
     function test_RevertWhen_propagateTakerOrder_ImCheck() public {
-        uint256 uPnL = 100e18;
-        uint256 im = 1800e18;
+        uint256 unrealizedLoss = 0;
+        uint256 im = 2000e18;
 
         vm.prank(address(productModule.getProducts()[0]));
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im, unrealizedLoss));
         productModule.propagateTakerOrder(
-            100, 1, 10, Constants.TOKEN_0, int256(20 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - uPnL) + 1e18)
+            100, 1, 10, Constants.TOKEN_0, int256(20 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - unrealizedLoss) + 1e18)
         );
     }
 
@@ -344,13 +344,13 @@ contract ProductModuleTest is Test {
     }
 
     function test_RevertWhen_propagateMakerOrder_ImCheck() public {
-        uint256 uPnL = 100e18;
-        uint256 im = 1800e18;
+        uint256 unrealizedLoss = 0;
+        uint256 im = 2000e18;
 
         vm.prank(address(productModule.getProducts()[0]));
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im, unrealizedLoss));
         productModule.propagateMakerOrder(
-            100, 1, 10, Constants.TOKEN_0, int256(100 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - uPnL) + 1e18)
+            100, 1, 10, Constants.TOKEN_0, int256(100 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - unrealizedLoss) + 1e18)
         );
     }
 
