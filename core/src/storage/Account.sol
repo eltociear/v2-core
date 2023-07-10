@@ -46,7 +46,7 @@ library Account {
     /**
      * @dev Thrown when a given account's total value is below the initial margin requirement
      */
-    error AccountBelowIM(uint128 accountId, address collateralType, uint256 initialMarginRequirement);
+    error AccountBelowIM(uint128 accountId, address collateralType, uint256 initialMarginRequirement, uint256 highestUnrealizedLoss);
 
     /**
      * @dev Thrown when an account cannot be found.
@@ -242,22 +242,22 @@ library Account {
     /**
      * @dev Checks if the account is below initial margin requirement and reverts if so, other returns the initial margin requirement
      */
-    function imCheck(Data storage self, address collateralType) internal view returns (uint256) {
-        (bool isSatisfied, uint256 initialMarginRequirement) = self.isIMSatisfied(collateralType);
+    function imCheck(Data storage self, address collateralType) internal view returns (uint256, uint256) {
+        (bool isSatisfied, uint256 initialMarginRequirement, uint256 highestUnrealizedLoss) = self.isIMSatisfied(collateralType);
         if (!isSatisfied) {
-            revert AccountBelowIM(self.id, collateralType, initialMarginRequirement);
+            revert AccountBelowIM(self.id, collateralType, initialMarginRequirement, highestUnrealizedLoss);
         }
-        return initialMarginRequirement;
+        return (initialMarginRequirement, highestUnrealizedLoss);
     }
 
     /**
      * @dev Returns a boolean imSatisfied (true if the account is above initial margin requirement) and the initial margin requirement
      */
-    function isIMSatisfied(Data storage self, address collateralType) internal view returns (bool imSatisfied, uint256 initialMarginRequirement) {
+    function isIMSatisfied(Data storage self, address collateralType) internal view returns (bool imSatisfied, uint256 initialMarginRequirement, uint256 highestUnrealizedLoss) {
         (uint256 initialMarginRequirement,,uint256 highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
         uint256 collateralBalance = self.getCollateralBalance(collateralType);
         imSatisfied = collateralBalance >= initialMarginRequirement + highestUnrealizedLoss;
-        return (imSatisfied, initialMarginRequirement);
+        return (imSatisfied, initialMarginRequirement, highestUnrealizedLoss);
     }
 
     /**
