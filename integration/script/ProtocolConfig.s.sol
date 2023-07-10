@@ -149,7 +149,8 @@ contract ProtocolConfig is ProtocolBase {
       ProductConfiguration.Data({
         productId: productId,
         coreProxy: address(coreProxy),
-        poolAddress: address(vammProxy)
+        poolAddress: address(vammProxy),
+        positionsPerAccountLimit: 2 // todo: modify
       })
     );
 
