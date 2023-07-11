@@ -176,22 +176,18 @@ library Portfolio {
         return exposuresWithoutEmptySlots;
     }
 
-    function getAccountTakerAndMakerExposures(
+    function getAccountTakerAndMakerExposuresWithEmptySlots(
         Data storage self,
         address poolAddress,
         address collateralType
-    )
-        internal
-        view
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
-    {
-        uint256 marketsAndMaturitiesCount = self.activeMarketsAndMaturities[collateralType].length();
+    ) internal view returns (Account.Exposure[] memory, Account.Exposure[] memory, Account.Exposure[] memory, uint256, uint256) {
         uint128 productID = ProductConfiguration.getProductId();
+        uint256 marketsAndMaturitiesCount = self.activeMarketsAndMaturities[collateralType].length();
         uint256 takerExposuresLength;
         uint256 makerExposuresLowerAndUpperLength;
-        Account.Exposure[] memory takerExposuresPadded = new Account.Exposure[](marketsAndMaturitiesCount);
-        Account.Exposure[] memory makerExposuresLowerPadded = new Account.Exposure[](marketsAndMaturitiesCount);
-        Account.Exposure[] memory makerExposuresUpperPadded = new Account.Exposure[](marketsAndMaturitiesCount);
+        Account.Exposure[] memory takerExposuresWithEmptySlots = new Account.Exposure[](marketsAndMaturitiesCount);
+        Account.Exposure[] memory makerExposuresLowerWithEmptySlots = new Account.Exposure[](marketsAndMaturitiesCount);
+        Account.Exposure[] memory makerExposuresUpperWithEmptySlots = new Account.Exposure[](marketsAndMaturitiesCount);
 
         for (uint256 i = 0; i < marketsAndMaturitiesCount; i++) {
             (uint128 marketId, uint32 maturityTimestamp) = self.getMarketAndMaturity(i + 1, collateralType);
@@ -199,7 +195,7 @@ library Portfolio {
             int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
             (int256 baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
             (uint256 unfilledBaseLong, uint256 unfilledBaseShort) =
-                IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
+            IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
             UD60x18 _annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
 
             // todo: pull market twap
@@ -207,7 +203,7 @@ library Portfolio {
             if (unfilledBaseLong == 0 && unfilledBaseShort == 0) {
                 // no unfilled exposures => only consider taker exposures
                 // todo: pull annualized locked fixed rate to populate the lockedPrice field
-                takerExposures[takerExposuresLength] = Account.Exposure({
+                takerExposuresWithEmptySlots[takerExposuresLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
                     annualizedNotional: mulUDxInt(_annualizedExposureFactor, baseBalance + baseBalancePool),
@@ -218,14 +214,14 @@ library Portfolio {
             } else {
                 // unfilled exposures => consider maker lower (unfilled short gets filled) and upper exposures (unfilled long gets filled)
                 // todo: compute locked price for lower and upper exposures
-                makerExposuresLower[makerExposuresLowerAndUpperLength] = Account.Exposure({
+                makerExposuresLowerWithEmptySlots[makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
                     annualizedNotional: mulUDxUint(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseShort),
                     lockedPrice: 0,
                     marketTwap: 0
                 });
-                makerExposuresUpper[makerExposuresLowerAndUpperLength] = Account.Exposure({
+                makerExposuresUpperWithEmptySlots[makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
                     annualizedNotional: mulUDxUint(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseLong),
@@ -236,6 +232,22 @@ library Portfolio {
             }
 
         }
+
+        return (takerExposuresWithEmptySlots, makerExposuresLowerWithEmptySlots, makerExposuresUpperWithEmptySlots, takerExposuresLength, makerExposuresLowerAndUpperLength);
+
+    }
+
+    function getAccountTakerAndMakerExposures(
+        Data storage self,
+        address poolAddress,
+        address collateralType
+    )
+        internal
+        view
+        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
+    {
+
+        (Account.Exposure[] memory takerExposuresPadded, Account.Exposure[] memory makerExposuresLowerPadded, Account.Exposure[] memory makerExposuresUpperPadded, uint256 takerExposuresLength, uint256 makerExposuresLowerAndUpperLength) = getAccountTakerAndMakerExposuresWithEmptySlots(self, poolAddress, collateralType);
 
         takerExposures = removeEmptySlotsFromExposuresArray(takerExposuresPadded, takerExposuresLength);
         makerExposuresLower = removeEmptySlotsFromExposuresArray(makerExposuresLowerPadded, makerExposuresLowerAndUpperLength);
