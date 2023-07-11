@@ -22,9 +22,6 @@ import "oz/utils/math/SignedMath.sol";
 import {UD60x18, sub as subSD59x18} from "@prb/math/SD59x18.sol";
 import {mulUDxUint, mulUDxInt, mulSDxInt, sd59x18, SD59x18, UD60x18} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
-
-import "forge-std/console.sol";
-
 /**
  * @title Object for tracking accounts with access control and collateral tracking.
  */
@@ -158,11 +155,8 @@ library Account {
         returns (uint256 collateralBalanceAvailable)
     {
         (uint256 initialMarginRequirement,,uint256 highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
-        console.log("initialMarginRequirement", initialMarginRequirement);
-        console.log("highestUnrealizedLoss", highestUnrealizedLoss);
 
         uint256 collateralBalance = self.getCollateralBalance(collateralType);
-        console.log("collateralBalance", collateralBalance);
 
         if (collateralBalance > initialMarginRequirement + highestUnrealizedLoss) {
             collateralBalanceAvailable = collateralBalance - initialMarginRequirement - highestUnrealizedLoss;
