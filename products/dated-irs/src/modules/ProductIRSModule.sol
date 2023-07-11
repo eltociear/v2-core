@@ -125,22 +125,6 @@ contract ProductIRSModule is IProductIRSModule {
         return "Dated IRS Product";
     }
 
-    /**
-     * @inheritdoc IProduct
-     */
-    function getAccountUnrealizedPnL(
-        uint128 accountId,
-        address collateralType
-    )
-        external
-        view
-        override
-        returns (int256 unrealizedPnL)
-    {
-        Portfolio.Data storage portfolio = Portfolio.exists(accountId);
-        address poolAddress = ProductConfiguration.getPoolAddress();
-        return portfolio.getAccountUnrealizedPnL(poolAddress, collateralType);
-    }
 
     /**
      * @inheritdoc IProduct
@@ -161,18 +145,18 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-    function getAccountAnnualizedExposures(
+    function getAccountTakerAndMakerExposures(
         uint128 accountId,
         address collateralType
     )
         external
         view
         override
-        returns (Account.Exposure[] memory exposures)
+        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
     {
         Portfolio.Data storage portfolio = Portfolio.exists(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
-        return portfolio.getAccountAnnualizedExposures(poolAddress, collateralType);
+        return portfolio.getAccountTakerAndMakerExposures(poolAddress, collateralType);
     }
 
     /**
