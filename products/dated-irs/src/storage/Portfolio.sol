@@ -217,14 +217,14 @@ library Portfolio {
                 makerExposuresLowerWithEmptySlots[makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
-                    annualizedNotional: mulUDxUint(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseShort),
+                    annualizedNotional: mulUDxInt(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseShort.toInt()),
                     lockedPrice: 0,
                     marketTwap: 0
                 });
                 makerExposuresUpperWithEmptySlots[makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
-                    annualizedNotional: mulUDxUint(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseLong),
+                    annualizedNotional: mulUDxInt(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseLong.toInt()),
                     lockedPrice: 0,
                     marketTwap: 0
                 });
