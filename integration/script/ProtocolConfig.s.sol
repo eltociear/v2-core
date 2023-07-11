@@ -35,7 +35,7 @@ contract ProtocolConfig is ProtocolBase {
       liquidatorRewardParameter: ud60x18(5e16),
       feeCollectorAccountId: 999
     });
-    registerDatedIrsProduct();
+    registerDatedIrsProduct(1);
     configureMarket({
       rateOracleAddress: address(aaveV3RateOracle),
       tokenAddress: Utils.getUSDCAddress(chainId),
@@ -58,7 +58,8 @@ contract ProtocolConfig is ProtocolBase {
       priceImpactBeta: ud60x18(125e15), // 0.125
       spread: ud60x18(3e15), // 0.3%
       initTick: -13860, // price = 4%
-      observationCardinalityNext: 16
+      observationCardinalityNext: 16,
+      makerPositionsPerAccountLimit: 1
     });
     mintOrBurn({
       marketId: 1,
@@ -138,7 +139,7 @@ contract ProtocolConfig is ProtocolBase {
     });
   }
 
-  function registerDatedIrsProduct() public {
+  function registerDatedIrsProduct(uint256 _takerPositionsPerAccountLimit) public {
     // predict product id
     uint128 productId = coreProxy.getLastCreatedProductId() + 1;
     console2.log("Predicted Product Id:", productId);
@@ -150,7 +151,7 @@ contract ProtocolConfig is ProtocolBase {
         productId: productId,
         coreProxy: address(coreProxy),
         poolAddress: address(vammProxy),
-        positionsPerAccountLimit: 2 // todo: modify
+        takerPositionsPerAccountLimit: _takerPositionsPerAccountLimit
       })
     );
 
@@ -223,7 +224,8 @@ contract ProtocolConfig is ProtocolBase {
     UD60x18 priceImpactBeta,
     UD60x18 spread,
     int24 initTick,
-    uint16 observationCardinalityNext
+    uint16 observationCardinalityNext,
+    uint256 makerPositionsPerAccountLimit
   ) public {
     VammConfiguration.Immutable memory immutableConfig = VammConfiguration.Immutable({
         maturityTimestamp: maturityTimestamp,
@@ -254,8 +256,7 @@ contract ProtocolConfig is ProtocolBase {
       observationCardinalityNext: observationCardinalityNext
     });
 
-    setLpPositionsPerAccountLimit(1);
-    setTakerPositionsPerAccountLimit(1);
+    setMakerPositionsPerAccountLimit(makerPositionsPerAccountLimit);
   }
 
   /// @notice this should only be used for testnet (for mainnet
@@ -385,7 +386,7 @@ contract ProtocolConfig is ProtocolBase {
       marketId,
       maturityTimestamp,
       baseAmount,
-      (baseAmount > 0) ? TickMath.getSqrtRatioAtTick(TickMath.MIN_TICK + 1) : TickMath.getSqrtRatioAtTick(TickMath.MAX_TICK - 1)
+      0
     );
 
     periphery_execute(commands, inputs, block.timestamp + 100);  

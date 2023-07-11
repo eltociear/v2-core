@@ -1628,7 +1628,11 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
+<<<<<<< HEAD
     "@voltz-protocol/v2-vamm": 1.16.0
+=======
+    "@voltz-protocol/v2-vamm": 1.14.0
+>>>>>>> f905fa7 (fix: bump vamm & fix naming)
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1679,7 +1683,11 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
+<<<<<<< HEAD
     "@voltz-protocol/v2-vamm": 1.12.1
+=======
+    "@voltz-protocol/v2-vamm": 1.14.0
+>>>>>>> f905fa7 (fix: bump vamm & fix naming)
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1700,7 +1708,11 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
+<<<<<<< HEAD
     "@voltz-protocol/v2-vamm": 1.16.0
+=======
+    "@voltz-protocol/v2-vamm": 1.14.0
+>>>>>>> f905fa7 (fix: bump vamm & fix naming)
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1773,9 +1785,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/v2-vamm@npm:1.12.1":
-  version: 1.12.1
-  resolution: "@voltz-protocol/v2-vamm@npm:1.12.1::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.12.1%2F5e2b833dc17fce6a40a277480298c835806b2e64"
+"@voltz-protocol/v2-vamm@npm:1.14.0":
+  version: 1.14.0
+  resolution: "@voltz-protocol/v2-vamm@npm:1.14.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.14.0%2F7206b9f3b584efd306f444cdf6c2766d5f3e0e7c"
   dependencies:
     "@openzeppelin/contracts": 4.9.2
     "@prb/math": 3.3.0
@@ -1783,7 +1795,11 @@ __metadata:
     "@voltz-protocol/products-dated-irs": 2.2.1
     "@voltz-protocol/util-contracts": 1.2.0
     "@voltz-protocol/util-modules": 1.1.0
+<<<<<<< HEAD
   checksum: 4648a5a8ac4e536b22c7dd85db59cdd16b83c8209570ec422f884c16e172bdcd55f5316bc96697a71a24d95d0f10a041b88017017ab6fcfd76b1ea3275269ac2
+=======
+  checksum: ffdd7869d0b1c4c716dc92ed4603e7c7efe9aadb97f08bf78299ac3508279fbcaaec687929d80799893f5b07709f8db596bdbda3f2c4b6d78c805ccb1d729250
+>>>>>>> f905fa7 (fix: bump vamm & fix naming)
   languageName: node
   linkType: hard
 

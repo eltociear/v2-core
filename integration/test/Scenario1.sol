@@ -83,7 +83,7 @@ contract Scenario1 is BaseScenario, TestUtils {
         productId: productId,
         coreProxy: address(coreProxy),
         poolAddress: address(vammProxy),
-        positionsPerAccountLimit: 1
+        takerPositionsPerAccountLimit: 1
       })
     );
 
@@ -129,6 +129,7 @@ contract Scenario1 is BaseScenario, TestUtils {
       mutableConfig
     );
     vammProxy.increaseObservationCardinalityNext(marketId, maturityTimestamp, 16);
+    vammProxy.setMakerPositionsPerAccountLimit(1);
 
     peripheryProxy.configure(
       Config.Data({
@@ -230,7 +231,7 @@ contract Scenario1 is BaseScenario, TestUtils {
         marketId,
         maturityTimestamp,
         500e18,
-        TickMath.getSqrtRatioAtTick(TickMath.MIN_TICK + 1)
+        0
       );
       peripheryProxy.execute(commands, inputs, block.timestamp + 1);
     }

@@ -30,7 +30,7 @@ library ProductConfiguration {
         /**
          * @dev Maximum number of positions of an account in this product
          */
-        uint256 positionsPerAccountLimit;
+        uint256 takerPositionsPerAccountLimit;
     }
 
     /**
@@ -56,7 +56,7 @@ library ProductConfiguration {
         storedConfig.productId = config.productId;
         storedConfig.coreProxy = config.coreProxy;
         storedConfig.poolAddress = config.poolAddress;
-        storedConfig.positionsPerAccountLimit = config.positionsPerAccountLimit;
+        storedConfig.takerPositionsPerAccountLimit = config.takerPositionsPerAccountLimit;
     }
 
     function getPoolAddress() internal view returns (address storedPoolAddress) {
@@ -74,8 +74,8 @@ library ProductConfiguration {
         storedProductId = storedConfig.productId;
     }
 
-    function getPositionsPerAccountLimit() internal view returns (uint256 positionsPerAccountLimit) {
+    function getTakerPositionsPerAccountLimit() internal view returns (uint256 takerPositionsPerAccountLimit) {
         Data storage storedConfig = load();
-        positionsPerAccountLimit = storedConfig.positionsPerAccountLimit;
+        takerPositionsPerAccountLimit = storedConfig.takerPositionsPerAccountLimit;
     }
 }

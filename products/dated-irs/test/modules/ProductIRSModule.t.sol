@@ -89,14 +89,14 @@ contract ProductIRSModuleTest is Test {
 
         // create product
         productIrs.configureProduct(
-            ProductConfiguration.Data({ productId: MOCK_PRODUCT_ID, coreProxy: address(mockCoreStorage), poolAddress: address(2), positionsPerAccountLimit: 2 })
+            ProductConfiguration.Data({ productId: MOCK_PRODUCT_ID, coreProxy: address(mockCoreStorage), poolAddress: address(2), takerPositionsPerAccountLimit: 2 })
         );
     }
 
     function test_ProductConfiguredCorrectly() public {
         // expect ProductConfigured event
         ProductConfiguration.Data memory config =
-            ProductConfiguration.Data({ productId: 124, coreProxy: address(3), poolAddress: address(4), positionsPerAccountLimit: 3 });
+            ProductConfiguration.Data({ productId: 124, coreProxy: address(3), poolAddress: address(4), takerPositionsPerAccountLimit: 3 });
 
         vm.expectEmit(true, true, false, true);
         emit ProductConfigured(config, block.timestamp);
@@ -107,7 +107,7 @@ contract ProductIRSModuleTest is Test {
         assertEq(configRecived.productId, 124);
         assertEq(configRecived.coreProxy, address(3));
         assertEq(configRecived.poolAddress, address(4));
-        assertEq(configRecived.positionsPerAccountLimit, address(3));
+        assertEq(configRecived.takerPositionsPerAccountLimit, 3);
     }
 
     function test_SupportsInterfaceIERC165() public {
