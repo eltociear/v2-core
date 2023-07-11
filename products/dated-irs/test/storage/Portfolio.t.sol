@@ -34,8 +34,8 @@ contract ExposePortfolio {
         }
     }
 
-    function setProductConfig(address pool) external {
-        ProductConfiguration.set(ProductConfiguration.Data({ productId: 1, coreProxy: address(12), poolAddress: pool, positionsPerAccountLimit: 2 }));
+    function setProductConfig(address pool, address coreProxy) external {
+        ProductConfiguration.set(ProductConfiguration.Data({ productId: 1, coreProxy: coreProxy, poolAddress: pool, takerPositionsPerAccountLimit: 2 }));
     }
 
     function loadOrCreate(uint128 id) external returns (bytes32 s) {
@@ -185,6 +185,7 @@ contract PortfolioTest is Test {
     MockRateOracle mockRateOracle;
     MockPool mockPool;
     uint32 currentTimestamp;
+    address coreProxy;
 
     address constant MOCK_COLLATERAL_TYPE = 0x1122334455667788990011223344556677889900;
     uint32 internal constant ONE_YEAR = 31536000;
@@ -206,7 +207,8 @@ contract PortfolioTest is Test {
 
         portfolio.setMarket(marketId, MOCK_COLLATERAL_TYPE);
 
-        portfolio.setProductConfig(address(mockPool));
+        coreProxy = address(13);
+        portfolio.setProductConfig(address(mockPool), coreProxy);
     }
 
     function test_LoadAtCorrectSlot() public {
@@ -249,8 +251,8 @@ contract PortfolioTest is Test {
 
         mockRateOracle.setLastUpdatedIndex(liqudityIndex);
         vm.mockCall(
-            address(0),
-            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 0, marketId),
+            coreProxy,
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId),
             abi.encode(mockCoreMarketConfig)
         );
 
@@ -282,8 +284,8 @@ contract PortfolioTest is Test {
 
         mockRateOracle.setLastUpdatedIndex(liqudityIndex);
         vm.mockCall(
-            address(0),
-            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 0, marketId),
+            coreProxy,
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId),
             abi.encode(mockCoreMarketConfig)
         );
 
@@ -317,8 +319,8 @@ contract PortfolioTest is Test {
 
         mockRateOracle.setLastUpdatedIndex(liqudityIndex);
         vm.mockCall(
-            address(0),
-            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 0, marketId),
+            coreProxy,
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId),
             abi.encode(mockCoreMarketConfig)
         );
 
@@ -339,8 +341,8 @@ contract PortfolioTest is Test {
         mockRateOracle.setLastUpdatedIndex(liqudityIndex);
 
         vm.mockCall(
-            address(0),
-            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 0, marketId),
+            coreProxy,
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId),
             abi.encode(mockCoreMarketConfig)
         );
 
@@ -379,7 +381,7 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp = currentTimestamp + 2;
 
         vm.mockCall(
-            address(12),
+            coreProxy,
             abi.encodeWithSelector(IProductModule.propagateTakerOrder.selector, accountId, 1, marketId, MOCK_COLLATERAL_TYPE, 0),
             abi.encode(0, 0)
         );
@@ -399,7 +401,7 @@ contract PortfolioTest is Test {
         portfolio.updatePosition(accountId, marketId, maturityTimestamp, 10, 10);
 
         vm.mockCall(
-            address(12),
+            coreProxy,
             abi.encodeWithSelector(IProductModule.propagateTakerOrder.selector, accountId, 1, marketId, MOCK_COLLATERAL_TYPE, 0),
             abi.encode(0, 0)
         );
@@ -409,8 +411,8 @@ contract PortfolioTest is Test {
         );
         portfolio.closeAccount(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 
-        // market deactivated, executed amounts == position amounts
-        assertFalse(portfolio.isActiveMarketAndMaturity(accountId, marketId, maturityTimestamp, MOCK_COLLATERAL_TYPE));
+        // market still active
+        assertTrue(portfolio.isActiveMarketAndMaturity(accountId, marketId, maturityTimestamp, MOCK_COLLATERAL_TYPE));
     }
 
     function test_Settle() public {
@@ -446,7 +448,7 @@ contract PortfolioTest is Test {
         portfolio.activateMarketMaturity(accountId, marketId, 21988);
         portfolio.activateMarketMaturity(accountId, marketId, 21989);
 
-        expectRevert(abi.encodeWithSelector(Portfolio.TooManyTakerPositions.selector, accountId));
+        vm.expectRevert(abi.encodeWithSelector(Portfolio.TooManyTakerPositions.selector, accountId));
         portfolio.activateMarketMaturity(accountId, marketId, 21990);
 
         assertFalse(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21990, MOCK_COLLATERAL_TYPE));

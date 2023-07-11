@@ -249,7 +249,7 @@ library Portfolio {
             pool.closeUnfilledBase(marketId, maturityTimestamp, self.accountId);
 
             // left-over exposure in pool
-            (int256 filledBasePool, int256 filledQuotePool) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+            (int256 filledBasePool,) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
 
             int256 unwindBase = -(position.baseBalance + filledBasePool);
 
@@ -343,8 +343,11 @@ library Portfolio {
         }
         uint256 marketMaturityPacked = Pack.pack(marketId, maturityTimestamp);
         if (!self.activeMarketsAndMaturities[collateralType].contains(marketMaturityPacked)) {
-            if (self.activeMarketsAndMaturities.length() >= ProductConfiguration.load().positionsPerAccountLimit) {
-                TooManyTakerPositions(self.accountId);
+            if (
+                self.activeMarketsAndMaturities[collateralType].length() >= 
+                ProductConfiguration.load().takerPositionsPerAccountLimit
+            ) {
+                revert TooManyTakerPositions(self.accountId);
             }
             self.activeMarketsAndMaturities[collateralType].add(marketMaturityPacked);
         }

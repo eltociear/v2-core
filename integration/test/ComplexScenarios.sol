@@ -93,7 +93,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         productId: productId,
         coreProxy: address(coreProxy),
         poolAddress: address(vammProxy),
-        positionsPerAccountLimit: 1
+        takerPositionsPerAccountLimit: 1
       })
     );
 
@@ -139,6 +139,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
       mutableConfig
     );
     vammProxy.increaseObservationCardinalityNext(marketId, maturityTimestamp, 16);
+    vammProxy.setMakerPositionsPerAccountLimit(1);
 
     vm.stopPrank();
 
@@ -206,9 +207,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         marketId,
         maturityTimestamp,
         baseAmount,
-        baseAmount > 0 ? 
-            TickMath.MIN_SQRT_RATIO + 1 :
-            TickMath.MAX_SQRT_RATIO - 1 // MIN_SQRT_LIMIT, VT
+        0
     );
     bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
@@ -248,8 +247,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         marketId,
         maturityTimestamp,
         baseAmount,
-        baseAmount > 0 ? TickMath.getSqrtRatioAtTick(TickMath.MIN_TICK + 1) :
-            TickMath.getSqrtRatioAtTick(TickMath.MAX_TICK - 1)
+        0
     );
     bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
