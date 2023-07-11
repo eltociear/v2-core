@@ -200,7 +200,7 @@ contract ProductIRSModule is IProductIRSModule {
         uint128 accountId,
         uint128 marketId,
         uint32 maturityTimestamp,
-        int256 annualizedBaseAmount
+        int256 annualizedBaseAmount // todo: consider renaming this to annualizedNotional != annualizedBase
     ) external returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss) {
         if (msg.sender != ProductConfiguration.getPoolAddress()) {
             revert NotAuthorized(msg.sender, "propagateMakerOrder");
