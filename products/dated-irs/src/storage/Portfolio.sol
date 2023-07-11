@@ -165,10 +165,17 @@ library Portfolio {
         }
     }
 
-    /**
-     * @dev note: given that all the accounts are single-token, annualized exposures for a given account are in terms
-     * of the settlement token of that account
-     */
+    function removeEmptySlotsFromExposuresArray(
+        Account.Exposure[] memory exposures,
+        uint256 length
+    ) internal view returns (Account.Exposure[] memory exposuresWithoutEmptySlots) {
+        exposuresWithoutEmptySlots = new Account.Exposure[](length);
+        for (uint256 i = 0; i < length; i++) {
+            exposuresWithoutEmptySlots[i] = exposures[i];
+        }
+        return exposuresWithoutEmptySlots;
+    }
+
     function getAccountTakerAndMakerExposures(
         Data storage self,
         address poolAddress,
@@ -179,10 +186,15 @@ library Portfolio {
         returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
     {
         uint256 marketsAndMaturitiesCount = self.activeMarketsAndMaturities[collateralType].length();
+        uint128 productID = ProductConfiguration.getProductId();
+        uint256 takerExposuresLength;
+        uint256 makerExposuresLowerAndUpperLength;
+        Account.Exposure[] memory takerExposuresPadded = new Account.Exposure[](marketsAndMaturitiesCount);
+        Account.Exposure[] memory makerExposuresLowerPadded = new Account.Exposure[](marketsAndMaturitiesCount);
+        Account.Exposure[] memory makerExposuresUpperPadded = new Account.Exposure[](marketsAndMaturitiesCount);
 
         for (uint256 i = 0; i < marketsAndMaturitiesCount; i++) {
             (uint128 marketId, uint32 maturityTimestamp) = self.getMarketAndMaturity(i + 1, collateralType);
-            uint128 productID = ProductConfiguration.getProductId();
 
             int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
             (int256 baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
@@ -195,35 +207,41 @@ library Portfolio {
             if (unfilledBaseLong == 0 && unfilledBaseShort == 0) {
                 // no unfilled exposures => only consider taker exposures
                 // todo: pull annualized locked fixed rate to populate the lockedPrice field
-                takerExposures.push(Account.Exposure({
+                takerExposures[takerExposuresLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
                     annualizedNotional: mulUDxInt(_annualizedExposureFactor, baseBalance + baseBalancePool),
                     lockedPrice: 0,
                     marketTwap: 0
-                }));
+                });
+                takerExposuresLength = takerExposuresLength + 1;
             } else {
                 // unfilled exposures => consider maker lower (unfilled short gets filled) and upper exposures (unfilled long gets filled)
                 // todo: compute locked price for lower and upper exposures
-                makerExposuresLower.push(Account.Exposure({
+                makerExposuresLower[makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
                     annualizedNotional: mulUDxUint(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseShort),
                     lockedPrice: 0,
                     marketTwap: 0
-                }));
-                makerExposuresUpper.push(Account.Exposure({
+                });
+                makerExposuresUpper[makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
                     annualizedNotional: mulUDxUint(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseLong),
                     lockedPrice: 0,
                     marketTwap: 0
-                }));
+                });
+                makerExposuresLowerAndUpperLength = makerExposuresLowerAndUpperLength + 1;
             }
 
         }
 
-        return exposures;
+        takerExposures = removeEmptySlotsFromExposuresArray(takerExposuresPadded, takerExposuresLength);
+        makerExposuresLower = removeEmptySlotsFromExposuresArray(makerExposuresLowerPadded, makerExposuresLowerAndUpperLength);
+        makerExposuresUpper = removeEmptySlotsFromExposuresArray(makerExposuresUpperPadded, makerExposuresLowerAndUpperLength);
+
+        return (takerExposures, makerExposuresLower, makerExposuresUpper);
     }
 
     /**
