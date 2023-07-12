@@ -89,14 +89,24 @@ contract ProductIRSModuleTest is Test {
 
         // create product
         productIrs.configureProduct(
-            ProductConfiguration.Data({ productId: MOCK_PRODUCT_ID, coreProxy: address(mockCoreStorage), poolAddress: address(2), takerPositionsPerAccountLimit: 2 })
+            ProductConfiguration.Data({
+                productId: MOCK_PRODUCT_ID,
+                coreProxy: address(mockCoreStorage),
+                poolAddress: address(2),
+                takerPositionsPerAccountLimit: 2 
+            })
         );
     }
 
     function test_ProductConfiguredCorrectly() public {
         // expect ProductConfigured event
         ProductConfiguration.Data memory config =
-            ProductConfiguration.Data({ productId: 124, coreProxy: address(3), poolAddress: address(4), takerPositionsPerAccountLimit: 3 });
+            ProductConfiguration.Data({
+                productId: 124,
+                coreProxy: address(3),
+                poolAddress: address(4),
+                takerPositionsPerAccountLimit: 3 
+            });
 
         vm.expectEmit(true, true, false, true);
         emit ProductConfigured(config, block.timestamp);
@@ -255,7 +265,11 @@ contract ProductIRSModuleTest is Test {
             abi.encode(10, 12)
         );
 
-        (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper) = productIrs.getAccountTakerAndMakerExposures(MOCK_ACCOUNT_ID, MOCK_QUOTE_TOKEN);
+        (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        ) = productIrs.getAccountTakerAndMakerExposures(MOCK_ACCOUNT_ID, MOCK_QUOTE_TOKEN);
 
         // todo: layer in asserts
 //        assertEq(exposures.length, 1);

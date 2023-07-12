@@ -54,7 +54,12 @@ contract ProductConfigurationTest is Test {
     function setUp() public virtual {
         productConfiguration = new ExposeProductConfiguration();
         productConfiguration.set(
-            ProductConfiguration.Data({ productId: MOCK_PRODUCT_ID, coreProxy: MOCK_PROXY_ADDRESS, poolAddress: MOCK_POOL_ADDRESS, takerPositionsPerAccountLimit: 2 })
+            ProductConfiguration.Data({ 
+                productId: MOCK_PRODUCT_ID,
+                coreProxy: MOCK_PROXY_ADDRESS,
+                poolAddress: MOCK_POOL_ADDRESS,
+                takerPositionsPerAccountLimit: 2 
+            })
         );
     }
 
@@ -71,7 +76,12 @@ contract ProductConfigurationTest is Test {
     }
 
     function test_SetNewConfigForOldProduct() public {
-        productConfiguration.set(ProductConfiguration.Data({ productId: 677, coreProxy: address(3), poolAddress: address(4), takerPositionsPerAccountLimit: 3 }));
+        productConfiguration.set(ProductConfiguration.Data({
+            productId: 677,
+            coreProxy: address(3),
+            poolAddress: address(4),
+            takerPositionsPerAccountLimit: 3 
+        }));
 
         assertEq(productConfiguration.getProductId(), 677);
         assertEq(productConfiguration.getCoreProxyAddress(), address(3));

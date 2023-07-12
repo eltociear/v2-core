@@ -22,7 +22,7 @@
     "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg",
     "release": "semantic-release",
     "bump": "yarn version minor",
-    "test": "forge test"
+    "test": "forge test --via-ir"
   },
   "devDependencies": {
     "lcov-badge-generator": "1.0.5",

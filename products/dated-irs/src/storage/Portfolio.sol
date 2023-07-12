@@ -218,19 +218,26 @@ library Portfolio {
                 });
                 takerExposuresLength = takerExposuresLength + 1;
             } else {
-                // unfilled exposures => consider maker lower (unfilled short gets filled) and upper exposures (unfilled long gets filled)
+                // unfilled exposures => consider maker lower 
+                // (unfilled short gets filled) and upper exposures (unfilled long gets filled)
                 // todo: compute locked price for lower and upper exposures
                 makerExposuresLowerWithEmptySlots[makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
-                    annualizedNotional: mulUDxInt(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseShort.toInt()),
+                    annualizedNotional: mulUDxInt(
+                        _annualizedExposureFactor, 
+                        baseBalance + baseBalancePool + unfilledBaseShort.toInt()
+                    ),
                     lockedPrice: 0,
                     marketTwap: 0
                 });
                 makerExposuresUpperWithEmptySlots[makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: productID,
                     marketId: marketId,
-                    annualizedNotional: mulUDxInt(_annualizedExposureFactor, baseBalance + baseBalancePool + unfilledBaseLong.toInt()),
+                    annualizedNotional: mulUDxInt(
+                        _annualizedExposureFactor,
+                        baseBalance + baseBalancePool + unfilledBaseLong.toInt()
+                    ),
                     lockedPrice: 0,
                     marketTwap: 0
                 });
@@ -239,8 +246,13 @@ library Portfolio {
 
         }
 
-        return (takerExposuresWithEmptySlots, makerExposuresLowerWithEmptySlots, makerExposuresUpperWithEmptySlots, takerExposuresLength, makerExposuresLowerAndUpperLength);
-
+        return (
+            takerExposuresWithEmptySlots,
+            makerExposuresLowerWithEmptySlots,
+            makerExposuresUpperWithEmptySlots,
+            takerExposuresLength,
+            makerExposuresLowerAndUpperLength
+        );
     }
 
     function getAccountTakerAndMakerExposures(
@@ -250,10 +262,20 @@ library Portfolio {
     )
         internal
         view
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
+        returns (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        )
     {
 
-        (Account.Exposure[] memory takerExposuresPadded, Account.Exposure[] memory makerExposuresLowerPadded, Account.Exposure[] memory makerExposuresUpperPadded, uint256 takerExposuresLength, uint256 makerExposuresLowerAndUpperLength) = getAccountTakerAndMakerExposuresWithEmptySlots(self, poolAddress, collateralType);
+        (
+            Account.Exposure[] memory takerExposuresPadded,
+            Account.Exposure[] memory makerExposuresLowerPadded,
+            Account.Exposure[] memory makerExposuresUpperPadded,
+            uint256 takerExposuresLength,
+            uint256 makerExposuresLowerAndUpperLength
+        ) = getAccountTakerAndMakerExposuresWithEmptySlots(self, poolAddress, collateralType);
 
         takerExposures = removeEmptySlotsFromExposuresArray(takerExposuresPadded, takerExposuresLength);
         makerExposuresLower = removeEmptySlotsFromExposuresArray(makerExposuresLowerPadded, makerExposuresLowerAndUpperLength);

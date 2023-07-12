@@ -153,7 +153,11 @@ contract ProductIRSModule is IProductIRSModule {
         external
         view
         override
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
+        returns (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        )
     {
         Portfolio.Data storage portfolio = Portfolio.exists(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();

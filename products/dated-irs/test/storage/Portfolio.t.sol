@@ -34,7 +34,12 @@ contract ExposePortfolio {
     }
 
     function setProductConfig(address pool, address coreProxy) external {
-        ProductConfiguration.set(ProductConfiguration.Data({ productId: 1, coreProxy: coreProxy, poolAddress: pool, takerPositionsPerAccountLimit: 2 }));
+        ProductConfiguration.set(ProductConfiguration.Data({
+            productId: 1,
+            coreProxy: coreProxy,
+            poolAddress: pool,
+            takerPositionsPerAccountLimit: 2 
+        }));
     }
 
     function loadOrCreate(uint128 id) external returns (bytes32 s) {
@@ -55,7 +60,11 @@ contract ExposePortfolio {
         address collateralType
     )
         external
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
+        returns (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        )
     {
         return Portfolio.load(id).getAccountTakerAndMakerExposures(poolAddress, collateralType);
     }
@@ -546,7 +555,11 @@ contract PortfolioTest is Test {
 
         mockRateOracle.setLastUpdatedIndex(1e27);
 
-        (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper) =
+        (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        ) =
             portfolio.getAccountTakerAndMakerExposures(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 
         // todo: asserts
@@ -565,7 +578,11 @@ contract PortfolioTest is Test {
 
         mockRateOracle.setLastUpdatedIndex(1e27);
 
-        (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper) =
+        (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        ) =
             portfolio.getAccountTakerAndMakerExposures(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 
         // todo: asserts
