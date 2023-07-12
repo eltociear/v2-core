@@ -109,7 +109,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
       MarketRiskConfiguration.Data({
         productId: productId, 
         marketId: marketId, 
-        riskParameter: SD59x18.wrap(1e18), 
+        riskParameter: UD60x18.wrap(1e18), 
         twapLookbackWindow: 120
       })
     );

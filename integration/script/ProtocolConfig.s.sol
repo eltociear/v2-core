@@ -46,7 +46,7 @@ contract ProtocolConfig is ProtocolBase {
       cap: 1000e6,
       atomicMakerFee: ud60x18(1e16),
       atomicTakerFee: ud60x18(5e16),
-      riskParameter: sd59x18(1e18),
+      riskParameter: ud60x18(1e18),
       twapLookbackWindow: 120,
       maturityIndexCachingWindowInSeconds: 3600
     });
@@ -168,7 +168,7 @@ contract ProtocolConfig is ProtocolBase {
     uint256 cap,
     UD60x18 atomicMakerFee,
     UD60x18 atomicTakerFee,
-    SD59x18 riskParameter,
+    UD60x18 riskParameter,
     uint32 twapLookbackWindow,
     uint256 maturityIndexCachingWindowInSeconds
   ) public {
