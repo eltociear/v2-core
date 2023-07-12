@@ -211,7 +211,15 @@ contract ProductIRSModuleTest is Test {
         );
         vm.startPrank(MOCK_USER);
 
-        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100, 0);
+        productIrs.initiateTakerOrder(
+            IProductIRSModule.TakerOrderParams({
+                accountId: MOCK_ACCOUNT_ID,
+                marketId: MOCK_MARKET_ID,
+                maturityTimestamp: maturityTimestamp,
+                baseAmount: 100,
+                priceLimit: 0
+            })
+        );
         vm.stopPrank();
     }
 
@@ -222,7 +230,15 @@ contract ProductIRSModuleTest is Test {
             IAccountModule.PermissionNotGranted.selector,
             MOCK_ACCOUNT_ID, AccountRBAC._ADMIN_PERMISSION, address(this)
         ));
-        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100, 0);
+        productIrs.initiateTakerOrder(
+            IProductIRSModule.TakerOrderParams({
+                accountId: MOCK_ACCOUNT_ID,
+                marketId: MOCK_MARKET_ID,
+                maturityTimestamp: maturityTimestamp,
+                baseAmount: 100,
+                priceLimit: 0
+            })
+        );
     }
 
     function test_CloseExistingAccount() public {

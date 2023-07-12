@@ -20,9 +20,16 @@ library V2DatedIRS {
             int24 currentTick
         )
     {
+        IProductIRSModule.TakerOrderParams memory params  = IProductIRSModule.TakerOrderParams({
+            accountId: accountId,
+            marketId: marketId,
+            maturityTimestamp: maturityTimestamp,
+            baseAmount: baseAmount,
+            priceLimit: priceLimit
+        }); 
         (executedBaseAmount, executedQuoteAmount, fee, im, highestUnrealizedLoss) =
             IProductIRSModule(Config.load().VOLTZ_V2_DATED_IRS_PROXY)
-                .initiateTakerOrder(accountId, marketId, maturityTimestamp, baseAmount, priceLimit);
+                .initiateTakerOrder(params);
         // get current tick
         currentTick = IVammModule(Config.load().VOLTZ_V2_DATED_IRS_VAMM_PROXY).getVammTick(marketId, maturityTimestamp);
     }
