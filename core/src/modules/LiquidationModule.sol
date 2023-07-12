@@ -52,8 +52,6 @@ contract LiquidationModule is ILiquidationModule {
             );
         } else {
             if (imPostClose != 0) {
-                console.log("imPreClose: %s", imPreClose);
-                console.log("imPostClose: %s", imPostClose);
                 revert PartialLiquidationNotIncentivized(liquidatedAccountId, imPreClose, imPostClose);
             }
 

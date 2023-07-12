@@ -200,13 +200,16 @@ contract ProductIRSModule is IProductIRSModule {
         uint128 accountId,
         uint128 marketId,
         uint32 maturityTimestamp,
-        int256 annualizedBaseAmount // todo: consider renaming this to annualizedNotional != annualizedBase
+        int256 baseAmount
     ) external returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss) {
+
         if (msg.sender != ProductConfiguration.getPoolAddress()) {
             revert NotAuthorized(msg.sender, "propagateMakerOrder");
         }
 
         Portfolio.loadOrCreate(accountId).updatePosition(marketId, maturityTimestamp, 0, 0);
+
+        int256 annualizedNotionalAmount = getSingleAnnualizedExposure(baseAmount, marketId, maturityTimestamp);
 
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
         (fee, im, highestUnrealizedLoss) = IProductModule(coreProxy).propagateMakerOrder(
@@ -214,7 +217,7 @@ contract ProductIRSModule is IProductIRSModule {
             ProductConfiguration.getProductId(),
             marketId,
             MarketConfiguration.load(marketId).quoteToken,
-            annualizedBaseAmount
+            annualizedNotionalAmount
         );
 
         return (fee, im, highestUnrealizedLoss);
