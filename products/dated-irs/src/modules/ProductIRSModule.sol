@@ -79,7 +79,6 @@ contract ProductIRSModule is IProductIRSModule {
             block.timestamp
             );
 
-        return (executedBaseAmount, executedQuoteAmount, fee, im, highestUnrealizedLoss);
     }
 
     function getSingleAnnualizedExposure(
@@ -220,7 +219,6 @@ contract ProductIRSModule is IProductIRSModule {
             annualizedNotionalAmount
         );
 
-        return (fee, im, highestUnrealizedLoss);
     }
 
     /**

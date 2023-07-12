@@ -36,23 +36,23 @@ contract LiquidationModule is ILiquidationModule {
     function extractLiquidatorReward(
         uint128 liquidatedAccountId,
         address collateralType,
-        uint256 imPreClose,
-        uint256 imPostClose
+        uint256 coverPreClose,
+        uint256 coverPostClose
     ) internal returns (uint256 liquidatorRewardAmount) {
         Account.Data storage account = Account.load(liquidatedAccountId);
 
         UD60x18 liquidatorRewardParameter = ProtocolRiskConfiguration.load().liquidatorRewardParameter;
         uint256 liquidationBooster = CollateralConfiguration.load(collateralType).liquidationBooster;
 
-        if (mulUDxUint(liquidatorRewardParameter, imPreClose) >= liquidationBooster) {
-            liquidatorRewardAmount = mulUDxUint(liquidatorRewardParameter, imPreClose - imPostClose);
+        if (mulUDxUint(liquidatorRewardParameter, coverPreClose) >= liquidationBooster) {
+            liquidatorRewardAmount = mulUDxUint(liquidatorRewardParameter, coverPreClose - coverPostClose);
             account.collaterals[collateralType].decreaseCollateralBalance(liquidatorRewardAmount);
             emit Collateral.CollateralUpdate(
                 liquidatedAccountId, collateralType, -liquidatorRewardAmount.toInt(), block.timestamp
             );
         } else {
-            if (imPostClose != 0) {
-                revert PartialLiquidationNotIncentivized(liquidatedAccountId, imPreClose, imPostClose);
+            if (coverPostClose != 0) {
+                revert PartialLiquidationNotIncentivized(liquidatedAccountId, coverPreClose, coverPostClose);
             }
 
             liquidatorRewardAmount = liquidationBooster;
@@ -83,11 +83,10 @@ contract LiquidationModule is ILiquidationModule {
         (uint256 imPostClose,,uint256 highestUnrealizedLossPostClose) = account.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
 
         if (imPreClose + highestUnrealizedLossPreClose <= imPostClose + highestUnrealizedLossPostClose) {
-            revert AccountExposureNotReduced(liquidatedAccountId, imPreClose, imPostClose);
+            revert AccountExposureNotReduced(liquidatedAccountId, imPreClose, imPostClose, highestUnrealizedLossPreClose, highestUnrealizedLossPostClose);
         }
 
-        // todo: consider including unrealized loss in the liquidator reward amount calculation
-        liquidatorRewardAmount = extractLiquidatorReward(liquidatedAccountId, collateralType, imPreClose, imPostClose);
+        liquidatorRewardAmount = extractLiquidatorReward(liquidatedAccountId, collateralType, imPreClose+highestUnrealizedLossPreClose, imPostClose+highestUnrealizedLossPostClose);
 
         Account.Data storage liquidatorAccount = Account.exists(liquidatorAccountId);
         liquidatorAccount.collaterals[collateralType].increaseCollateralBalance(liquidatorRewardAmount);
@@ -103,6 +102,8 @@ contract LiquidationModule is ILiquidationModule {
             liquidatorRewardAmount,
             imPreClose,
             imPostClose,
+            highestUnrealizedLossPreClose,
+            highestUnrealizedLossPostClose,
             block.timestamp
         );
     }

@@ -169,11 +169,12 @@ library Portfolio {
         Account.Exposure[] memory exposures,
         uint256 length
     ) internal view returns (Account.Exposure[] memory exposuresWithoutEmptySlots) {
+        // todo: consider into a utility library
+        require(exposures.length >= length);
         exposuresWithoutEmptySlots = new Account.Exposure[](length);
         for (uint256 i = 0; i < length; i++) {
             exposuresWithoutEmptySlots[i] = exposures[i];
         }
-        return exposuresWithoutEmptySlots;
     }
 
     function getAccountTakerAndMakerExposuresWithEmptySlots(

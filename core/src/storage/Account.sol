@@ -162,7 +162,6 @@ library Account {
             collateralBalanceAvailable = collateralBalance - initialMarginRequirement - highestUnrealizedLoss;
         }
 
-        return collateralBalanceAvailable;
     }
 
     /**
@@ -224,7 +223,6 @@ library Account {
     {
         Product.Data storage _product = Product.load(productId);
         (productTakerExposures, productMakerExposuresLower, productMakerExposuresUpper) = _product.getAccountTakerAndMakerExposures(self.id, collateralType);
-        return (productTakerExposures, productMakerExposuresLower, productMakerExposuresUpper);
     }
 
 
@@ -255,10 +253,9 @@ library Account {
      * @dev Returns a boolean imSatisfied (true if the account is above initial margin requirement) and the initial margin requirement
      */
     function isIMSatisfied(Data storage self, address collateralType) internal view returns (bool imSatisfied, uint256 initialMarginRequirement, uint256 highestUnrealizedLoss) {
-        (uint256 initialMarginRequirement,,uint256 highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+        (initialMarginRequirement,,highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
         uint256 collateralBalance = self.getCollateralBalance(collateralType);
         imSatisfied = collateralBalance >= initialMarginRequirement + highestUnrealizedLoss;
-        return (imSatisfied, initialMarginRequirement, highestUnrealizedLoss);
     }
 
     /**
@@ -269,10 +266,9 @@ library Account {
         view
         returns (bool liquidatable, uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
     {
-        (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+        (initialMarginRequirement, liquidationMarginRequirement, highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
         uint256 collateralBalance = self.getCollateralBalance(collateralType);
         liquidatable = collateralBalance < liquidationMarginRequirement + highestUnrealizedLoss;
-        return (liquidatable, initialMarginRequirement, liquidationMarginRequirement, highestUnrealizedLoss);
     }
 
 
@@ -302,7 +298,6 @@ library Account {
 
         UD60x18 imMultiplier = getIMMultiplier();
         initialMarginRequirement = computeInitialMarginRequirement(liquidationMarginRequirement, imMultiplier);
-        return (initialMarginRequirement, liquidationMarginRequirement, highestUnrealizedLoss);
     }
 
 
@@ -317,7 +312,6 @@ library Account {
         assembly {
             account.slot := s
         }
-        return account;
     }
 
     /**
@@ -337,7 +331,6 @@ library Account {
             unrealizedLoss += unrealizedLossExposure;
         }
 
-        return (liquidationMarginRequirement, unrealizedLoss);
     }
 
     /**
@@ -363,7 +356,6 @@ library Account {
     returns (uint256 initialMarginRequirement)
     {
         initialMarginRequirement = mulUDxUint(imMultiplier, liquidationMarginRequirement);
-        return initialMarginRequirement;
     }
 
     /**
@@ -379,7 +371,6 @@ library Account {
         if (unrealizedPnL < 0) {
             unrealizedLoss = (-unrealizedPnL).toUint();
         }
-        return unrealizedLoss;
     }
 
     function computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(Exposure[] memory exposuresLower, Exposure[] memory exposuresUpper) internal view
@@ -406,7 +397,6 @@ library Account {
                 highestUnrealizedLoss += unrealizedLossExposureUpper;
             }
         }
-        return (liquidationMarginRequirement, highestUnrealizedLoss);
     }
 
 }

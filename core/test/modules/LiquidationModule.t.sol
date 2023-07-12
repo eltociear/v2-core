@@ -398,7 +398,7 @@ contract LiquidationModuleTest is Test {
 
         // Trigger liquidation
         vm.expectRevert(
-            abi.encodeWithSelector(ILiquidationModule.AccountExposureNotReduced.selector, 100, 2000e18, 2000e18)
+            abi.encodeWithSelector(ILiquidationModule.AccountExposureNotReduced.selector, 100, 2000e18, 2000e18, 0, 0)
         );
         liquidationModule.liquidate(100, 888, Constants.TOKEN_0);
     }

@@ -51,7 +51,6 @@ contract ProductModule is IProductModule {
         returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
     {
         (takerExposures, makerExposuresLower, makerExposuresUpper) = Product.load(productId).getAccountTakerAndMakerExposures(accountId, collateralType);
-        return (takerExposures, makerExposuresLower, makerExposuresUpper);
     }
 
     /**
@@ -129,7 +128,6 @@ contract ProductModule is IProductModule {
         }
 
         (im, highestUnrealizedLoss) = account.imCheck(collateralType);
-        return (fee, im, highestUnrealizedLoss);
     }
 
     function propagateMakerOrder(
@@ -154,7 +152,6 @@ contract ProductModule is IProductModule {
         }
 
         (im, highestUnrealizedPnL) = account.imCheck(collateralType);
-        return (fee, im, highestUnrealizedPnL);
     }
 
     function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
