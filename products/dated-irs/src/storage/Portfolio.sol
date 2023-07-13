@@ -123,7 +123,7 @@ library Portfolio {
         address poolAddress,
         int256 baseBalance,
         int256 quoteBalance
-    ) internal pure returns (uint256 unrealizedLoss) {
+    ) internal view returns (uint256 unrealizedLoss) {
         int256 unwindQuote = computeUnwindQuote(marketId, maturityTimestamp, poolAddress, baseBalance);
         int256 unrealizedPnL = quoteBalance + unwindQuote;
 

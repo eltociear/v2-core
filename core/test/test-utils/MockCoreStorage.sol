@@ -337,7 +337,7 @@ contract CoreState is MockCoreStorage, Ownable {
             Account.Exposure({productId: 1, marketId: 10, annualizedNotional: 300e18, unrealizedLoss: 0});
             mockExposuresMakerLower[1] =
                 Account.Exposure({productId: 1, marketId: 11, annualizedNotional: -200e18, unrealizedLoss: 0});
-            mockExposuresMakerLower[1] =
+            mockExposuresMakerUpper[1] =
             Account.Exposure({productId: 1, marketId: 11, annualizedNotional: 500e18, unrealizedLoss: 0});
 
             products[0].mockGetAccountTakerAndMakerExposures(
