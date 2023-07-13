@@ -14,7 +14,9 @@ contract MockPool is IPool {
     int256 baseBalancePool;
     int256 quoteBalancePool;
     uint256 unfilledBaseLong;
+    uint256 unfilledQuoteLong;
     uint256 unfilledBaseShort;
+    uint256 unfilledQuoteShort;
     mapping(uint256 => UD60x18) datedIRSTwaps;
 
     function name(uint128 poolId) external view returns (string memory) {
@@ -37,6 +39,7 @@ contract MockPool is IPool {
     function setBalances(
         int256 _baseBalancePool,
         int256 _quoteBalancePool,
+        // todo: consider turning these into int256 variables
         uint256 _unfilledBaseLong,
         uint256 _unfilledQuoteLong,
         uint256 _unfilledBaseShort,

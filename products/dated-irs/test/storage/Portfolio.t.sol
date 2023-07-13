@@ -574,7 +574,7 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
 
         portfolio.updatePosition(accountId, marketId, maturityTimestamp, 10, 20);
-        mockPool.setBalances(15, 21, 2, 3);
+        mockPool.setBalances(15, 21, 2, 2, 3, 3);
 
         mockRateOracle.setLastUpdatedIndex(1e27);
 

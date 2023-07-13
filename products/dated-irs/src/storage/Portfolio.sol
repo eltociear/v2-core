@@ -266,7 +266,7 @@ library Portfolio {
                     pes.marketId,
                     pes.maturityTimestamp,
                     poolAddress,
-                    pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseShort.toInt(),
+                    pes.baseBalance + pes.baseBalancePool - pes.unfilledBaseShort.toInt(),
                     pes.quoteBalance + pes.quoteBalancePool + pes.unfilledQuoteShort.toInt()
                 );
                 ces.makerExposuresLowerWithEmptySlots[ces.makerExposuresLowerAndUpperLength] = Account.Exposure({
@@ -283,7 +283,7 @@ library Portfolio {
                     pes.maturityTimestamp,
                     poolAddress,
                     pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseLong.toInt(),
-                    pes.quoteBalance + pes.quoteBalancePool + pes.unfilledQuoteLong.toInt()
+                    pes.quoteBalance + pes.quoteBalancePool - pes.unfilledQuoteLong.toInt()
                 );
                 ces.makerExposuresUpperWithEmptySlots[ces.makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: ces.productId,
