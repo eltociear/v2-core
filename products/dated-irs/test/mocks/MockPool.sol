@@ -38,14 +38,18 @@ contract MockPool is IPool {
         int256 _baseBalancePool,
         int256 _quoteBalancePool,
         uint256 _unfilledBaseLong,
-        uint256 _unfilledBaseShort
+        uint256 _unfilledQuoteLong,
+        uint256 _unfilledBaseShort,
+        uint256 _unfilledQuoteShort
     )
         external
     {
         baseBalancePool = _baseBalancePool;
         quoteBalancePool = _quoteBalancePool;
         unfilledBaseLong = _unfilledBaseLong;
+        unfilledQuoteLong = _unfilledQuoteLong;
         unfilledBaseShort = _unfilledBaseShort;
+        unfilledQuoteShort = _unfilledQuoteShort;
     }
 
     function getAccountFilledBalances(
@@ -60,16 +64,16 @@ contract MockPool is IPool {
         return (baseBalancePool, quoteBalancePool);
     }
 
-    function getAccountUnfilledBases(
+    function getAccountUnfilledBaseAndQuote(
         uint128 marketId,
         uint32 maturityTimestamp,
         uint128 accountId
     )
         external
         view
-        returns (uint256, uint256)
+        returns (uint256, uint256, uint256, uint256)
     {
-        return (unfilledBaseLong, unfilledBaseShort);
+        return (unfilledBaseLong, unfilledQuoteLong, unfilledBaseShort, unfilledQuoteShort);
     }
 
     function closeUnfilledBase(

@@ -320,7 +320,7 @@ library Portfolio {
         pes.quoteBalance = self.positions[pes.marketId][pes.maturityTimestamp].quoteBalance;
         (pes.baseBalancePool,pes.quoteBalancePool) = IPool(poolAddress).getAccountFilledBalances(pes.marketId, pes.maturityTimestamp, self.accountId);
         (pes.unfilledBaseLong, pes.unfilledQuoteLong, pes.unfilledBaseShort, pes.unfilledQuoteShort) =
-            IPool(poolAddress).getAccountUnfilledBases(pes.marketId, pes.maturityTimestamp, self.accountId);
+            IPool(poolAddress).getAccountUnfilledBaseAndQuote(pes.marketId, pes.maturityTimestamp, self.accountId);
         pes._annualizedExposureFactor = annualizedExposureFactor(pes.marketId, pes.maturityTimestamp);
     }
 
