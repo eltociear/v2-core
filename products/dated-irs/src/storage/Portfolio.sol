@@ -128,6 +128,7 @@ library Portfolio {
         int256 unrealizedPnL = quoteBalance + unwindQuote;
 
         if (unrealizedPnL < 0) {
+            // todo: check if safecasting with .Uint() is necessary
             unrealizedLoss = uint256(-unrealizedPnL);
         }
     }
@@ -236,6 +237,7 @@ library Portfolio {
             makerExposuresLowerWithEmptySlots: new Account.Exposure[](self.activeMarketsAndMaturities[collateralType].length()),
             makerExposuresUpperWithEmptySlots: new Account.Exposure[](self.activeMarketsAndMaturities[collateralType].length())
         });
+
 
         for (uint256 i = 0; i < ces.poolsCount; i++) {
             PoolExposureState memory pes = self.getPoolExposureState(
