@@ -40,7 +40,7 @@ interface IPool is IERC165 {
     )
         external
         view
-        returns (uint256 unfilledBaseLong, uint256 unfilledBaseShort);
+        returns (uint256 unfilledBaseLong, uint256 unfilledQuoteLong, uint256 unfilledBaseShort, uint256 unfilledQuoteShort);
 
     function closeUnfilledBase(
         uint128 marketId,
