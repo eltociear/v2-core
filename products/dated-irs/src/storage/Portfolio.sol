@@ -251,7 +251,7 @@ library Portfolio {
                     pes.maturityTimestamp,
                     poolAddress,
                     pes.baseBalance + pes.baseBalancePool,
-                    pes.baseBalancePool
+                    pes.quoteBalance + pes.quoteBalancePool
                 );
                 ces.takerExposuresWithEmptySlots[ces.takerExposuresLength] = Account.Exposure({
                     productId: ces.productId,
@@ -262,6 +262,13 @@ library Portfolio {
                 ces.takerExposuresLength = ces.takerExposuresLength + 1;
             } else {
                 // unfilled exposures => consider maker lower
+                uint256 unrealizedLossLower = computeUnrealizedLoss(
+                    pes.marketId,
+                    pes.maturityTimestamp,
+                    poolAddress,
+                    pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseShort.toInt(),
+                    pes.quoteBalance + pes.quoteBalancePool + pes.unfilledQuoteShort.toInt()
+                );
                 ces.makerExposuresLowerWithEmptySlots[ces.makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: ces.productId,
                     marketId: pes.marketId,
@@ -269,8 +276,15 @@ library Portfolio {
                         pes._annualizedExposureFactor, 
                         pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseShort.toInt()
                     ),
-                    unrealizedLoss: 0
+                    unrealizedLoss: unrealizedLossLower
                 });
+                uint256 unrealizedLossUpper = computeUnrealizedLoss(
+                    pes.marketId,
+                    pes.maturityTimestamp,
+                    poolAddress,
+                    pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseLong.toInt(),
+                    pes.quoteBalance + pes.quoteBalancePool + pes.unfilledQuoteLong.toInt()
+                );
                 ces.makerExposuresUpperWithEmptySlots[ces.makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: ces.productId,
                     marketId: pes.marketId,
@@ -278,7 +292,7 @@ library Portfolio {
                         pes._annualizedExposureFactor,
                         pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseLong.toInt()
                     ),
-                    unrealizedLoss: 0
+                    unrealizedLoss: unrealizedLossUpper
                 });
                 ces.makerExposuresLowerAndUpperLength = ces.makerExposuresLowerAndUpperLength + 1;
             }
