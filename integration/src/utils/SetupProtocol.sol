@@ -2,10 +2,10 @@ pragma solidity >=0.8.19;
 
 import {BatchScript} from "../utils/BatchScript.sol";
 
-import {CoreProxy, AccountNftProxy} from "../src/Core.sol";
-import {DatedIrsProxy} from "../src/DatedIrs.sol";
-import {PeripheryProxy} from "../src/Periphery.sol";
-import {VammProxy} from "../src/Vamm.sol";
+import {CoreProxy, AccountNftProxy} from "../proxies/Core.sol";
+import {DatedIrsProxy} from "../proxies/DatedIrs.sol";
+import {PeripheryProxy} from "../proxies/Periphery.sol";
+import {VammProxy} from "../proxies/Vamm.sol";
 
 import {AccessPassNFT} from "@voltz-protocol/access-pass-nft/src/AccessPassNFT.sol";
 
@@ -27,42 +27,56 @@ import {Config} from "@voltz-protocol/periphery/src/storage/Config.sol";
 import {Ownable} from "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
 import {IERC20} from "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
 
-contract ProtocolBase is BatchScript {
-  uint256 internal chainId;
+contract SetupProtocol is BatchScript {
+  struct Contracts {
+    CoreProxy coreProxy;
+    DatedIrsProxy datedIrsProxy;
+    PeripheryProxy peripheryProxy;
+    VammProxy vammProxy;
 
-  CoreProxy internal coreProxy = CoreProxy(payable(vm.envAddress("CORE_PROXY")));
-  DatedIrsProxy internal datedIrsProxy = DatedIrsProxy(payable(vm.envAddress("DATED_IRS_PROXY")));
-  PeripheryProxy internal peripheryProxy = PeripheryProxy(payable(vm.envAddress("PERIPHERY_PROXY")));
-  VammProxy internal vammProxy = VammProxy(payable(vm.envAddress("VAMM_PROXY")));
+    AaveV3RateOracle aaveV3RateOracle;
+    AaveV3BorrowRateOracle aaveV3BorrowRateOracle;
+  }
+  Contracts contracts;
 
-  AaveV3RateOracle internal aaveV3RateOracle = AaveV3RateOracle(vm.envAddress("AAVE_V3_RATE_ORACLE"));
-  AaveV3BorrowRateOracle internal aaveV3BorrowRateOracle = AaveV3BorrowRateOracle(vm.envAddress("AAVE_V3_BORROW_RATE_ORACLE"));
+  struct Settings {
+    bool multisig;
+    address multisigAddress;
+    bool multisigSend;
+  }
+  Settings settings;
 
-  AccessPassNFT internal accessPassNft = AccessPassNFT(vm.envAddress("ACCESS_PASS_NFT"));
-  AccountNftProxy internal accountNftProxy;
+  struct Metadata {
+    uint256 chainId;
+    address owner;
 
-  address internal owner = coreProxy.owner();
-
-  bool internal multisig = vm.envBool("MULTISIG");
-  address internal multisigAddress;
-  bool internal multisigSend;
+    AccessPassNFT accessPassNft;
+    AccountNftProxy accountNftProxy;
+  }
+  Metadata metadata;
 
   bytes32 internal constant _GLOBAL_FEATURE_FLAG = "global";
   bytes32 internal constant _CREATE_ACCOUNT_FEATURE_FLAG = "createAccount";
   bytes32 internal constant _NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG = "notifyAccountTransfer";
   bytes32 internal constant _REGISTER_PRODUCT_FEATURE_FLAG = "registerProduct";
 
-  constructor() {
-    if (multisig) {
-      multisigAddress = vm.envAddress("MULTISIG_ADDRESS");
-      multisigSend = vm.envBool("MULTISIG_SEND");
-    }
+  constructor(
+    Contracts memory _contracts,
+    Settings memory _settings
+  ) {
+    contracts = _contracts;
+    settings = _settings;
 
-    (address accountNftProxyAddress, ) = coreProxy.getAssociatedSystem(bytes32("accountNFT"));
-    accountNftProxy = AccountNftProxy(payable(accountNftProxyAddress));
+    AccessPassConfiguration.Data memory accessPassConfig = contracts.coreProxy.getAccessPassConfiguration();
+    metadata.accessPassNft = AccessPassNFT(accessPassConfig.accessPassNFTAddress);
+
+    (address accountNftProxyAddress, ) = contracts.coreProxy.getAssociatedSystem(bytes32("accountNFT"));
+    metadata.accountNftProxy = AccountNftProxy(payable(accountNftProxyAddress));
 
     Chain memory chain = getChain(vm.envString("CHAIN"));
-    chainId = chain.chainId;
+    metadata.chainId = chain.chainId;
+
+    metadata.owner = contracts.coreProxy.owner();
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -70,8 +84,8 @@ contract ProtocolBase is BatchScript {
   ////////////////////////////////////////////////////////////////////
 
   function erc20_approve(IERC20 token, address spender, uint256 amount) public {
-    if (!multisig) {
-      vm.broadcast(owner);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
       token.approve(spender, amount);
     } else {
       addToBatch(
@@ -89,8 +103,8 @@ contract ProtocolBase is BatchScript {
   ////////////////////////////////////////////////////////////////////
 
   function acceptOwnership(address ownableProxyAddress) public {
-    if (!multisig) {
-      vm.broadcast(owner);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
       Ownable(ownableProxyAddress).acceptOwnership();
     } else {
       addToBatch(
@@ -104,16 +118,16 @@ contract ProtocolBase is BatchScript {
   }
 
   function setFeatureFlagAllowAll(bytes32 feature, bool allowAll) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.setFeatureFlagAllowAll(
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.setFeatureFlagAllowAll(
         feature, allowAll
       );
     } else {
       addToBatch(
-        address(coreProxy),
+        address(contracts.coreProxy),
         abi.encodeCall(
-          coreProxy.setFeatureFlagAllowAll, 
+          contracts.coreProxy.setFeatureFlagAllowAll, 
           (feature, allowAll)
         )
       );
@@ -121,14 +135,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function addToFeatureFlagAllowlist(bytes32 feature, address account) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.addToFeatureFlagAllowlist(feature, account);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.addToFeatureFlagAllowlist(feature, account);
     } else {
       addToBatch(
-        address(coreProxy), 
+        address(contracts.coreProxy), 
         abi.encodeCall(
-          coreProxy.addToFeatureFlagAllowlist, 
+          contracts.coreProxy.addToFeatureFlagAllowlist, 
           (feature, account)
         )
       );
@@ -136,14 +150,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function setPeriphery(address peripheryAddress) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.setPeriphery(peripheryAddress);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.setPeriphery(peripheryAddress);
     } else {
       addToBatch(
-        address(coreProxy),
+        address(contracts.coreProxy),
         abi.encodeCall(
-          coreProxy.setPeriphery,
+          contracts.coreProxy.setPeriphery,
           (peripheryAddress)
         )
       );
@@ -151,14 +165,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function configureMarketRisk(MarketRiskConfiguration.Data memory config) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.configureMarketRisk(config);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.configureMarketRisk(config);
     } else {
       addToBatch(
-        address(coreProxy),
+        address(contracts.coreProxy),
         abi.encodeCall(
-          coreProxy.configureMarketRisk,
+          contracts.coreProxy.configureMarketRisk,
           (config)
         )
       );
@@ -166,14 +180,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function configureProtocolRisk(ProtocolRiskConfiguration.Data memory config) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.configureProtocolRisk(config);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.configureProtocolRisk(config);
     } else {
       addToBatch(
-        address(coreProxy),
+        address(contracts.coreProxy),
         abi.encodeCall(
-          coreProxy.configureProtocolRisk,
+          contracts.coreProxy.configureProtocolRisk,
           (config)
         )
       );
@@ -181,14 +195,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function configureAccessPass(AccessPassConfiguration.Data memory config) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.configureAccessPass(config);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.configureAccessPass(config);
     } else {
       addToBatch(
-        address(coreProxy),
+        address(contracts.coreProxy),
         abi.encodeCall(
-          coreProxy.configureAccessPass,
+          contracts.coreProxy.configureAccessPass,
           (config)
         )
       );
@@ -196,14 +210,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function registerProduct(address product, string memory name) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.registerProduct(product, name);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.registerProduct(product, name);
     } else {
       addToBatch(
-        address(coreProxy),
+        address(contracts.coreProxy),
         abi.encodeCall(
-          coreProxy.registerProduct,
+          contracts.coreProxy.registerProduct,
           (product, name)
         )
       );
@@ -211,14 +225,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function configureCollateral(CollateralConfiguration.Data memory config) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.configureCollateral(config);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.configureCollateral(config);
     } else {
       addToBatch(
-        address(coreProxy),
+        address(contracts.coreProxy),
         abi.encodeCall(
-          coreProxy.configureCollateral,
+          contracts.coreProxy.configureCollateral,
           (config)
         )
       );
@@ -226,14 +240,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function createAccount(uint128 requestedAccountId, address accountOwner) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.createAccount(requestedAccountId, accountOwner);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.createAccount(requestedAccountId, accountOwner);
     } else {
       addToBatch(
-        address(coreProxy),
+        address(contracts.coreProxy),
         abi.encodeCall(
-          coreProxy.createAccount,
+          contracts.coreProxy.createAccount,
           (requestedAccountId, accountOwner)
         )
       );
@@ -241,14 +255,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function configureMarketFee(MarketFeeConfiguration.Data memory config) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      coreProxy.configureMarketFee(config);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.coreProxy.configureMarketFee(config);
     } else {
       addToBatch(
-        address(coreProxy),
+        address(contracts.coreProxy),
         abi.encodeCall(
-          coreProxy.configureMarketFee,
+          contracts.coreProxy.configureMarketFee,
           (config)
         )
       );
@@ -260,14 +274,14 @@ contract ProtocolBase is BatchScript {
   ////////////////////////////////////////////////////////////////////
 
   function configureProduct(ProductConfiguration.Data memory config) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      datedIrsProxy.configureProduct(config);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.datedIrsProxy.configureProduct(config);
     } else {
       addToBatch(
-        address(datedIrsProxy),
+        address(contracts.datedIrsProxy),
         abi.encodeCall(
-          datedIrsProxy.configureProduct,
+          contracts.datedIrsProxy.configureProduct,
           (config)
         )
       );
@@ -275,14 +289,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function configureMarket(MarketConfiguration.Data memory config) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      datedIrsProxy.configureMarket(config);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.datedIrsProxy.configureMarket(config);
     } else {
       addToBatch(
-        address(datedIrsProxy),
+        address(contracts.datedIrsProxy),
         abi.encodeCall(
-          datedIrsProxy.configureMarket,
+          contracts.datedIrsProxy.configureMarket,
           (config)
         )
       );
@@ -290,14 +304,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function setVariableOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      datedIrsProxy.setVariableOracle(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.datedIrsProxy.setVariableOracle(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
     } else {
       addToBatch(
-        address(datedIrsProxy),
+        address(contracts.datedIrsProxy),
         abi.encodeCall(
-          datedIrsProxy.setVariableOracle,
+          contracts.datedIrsProxy.setVariableOracle,
           (marketId, oracleAddress, maturityIndexCachingWindowInSeconds)
         )
       );
@@ -309,14 +323,14 @@ contract ProtocolBase is BatchScript {
   ////////////////////////////////////////////////////////////////////
 
   function setProductAddress(address productAddress) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      vammProxy.setProductAddress(productAddress);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.vammProxy.setProductAddress(productAddress);
     } else {
       addToBatch(
-        address(vammProxy),
+        address(contracts.vammProxy),
         abi.encodeCall(
-          vammProxy.setProductAddress,
+          contracts.vammProxy.setProductAddress,
           (productAddress)
         )
       );
@@ -329,14 +343,14 @@ contract ProtocolBase is BatchScript {
     VammConfiguration.Immutable memory config, 
     VammConfiguration.Mutable memory mutableConfig
   ) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      vammProxy.createVamm(marketId, sqrtPriceX96, config, mutableConfig);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.vammProxy.createVamm(marketId, sqrtPriceX96, config, mutableConfig);
     } else {
       addToBatch(
-        address(vammProxy),
+        address(contracts.vammProxy),
         abi.encodeCall(
-          vammProxy.createVamm,
+          contracts.vammProxy.createVamm,
           (marketId, sqrtPriceX96, config, mutableConfig)
         )
       );
@@ -348,16 +362,16 @@ contract ProtocolBase is BatchScript {
     uint32 maturityTimestamp, 
     uint16 observationCardinalityNext
   ) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      vammProxy.increaseObservationCardinalityNext(
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.vammProxy.increaseObservationCardinalityNext(
         marketId, maturityTimestamp, observationCardinalityNext
       );
     } else {
       addToBatch(
-        address(vammProxy),
+        address(contracts.vammProxy),
         abi.encodeCall(
-          vammProxy.increaseObservationCardinalityNext,
+          contracts.vammProxy.increaseObservationCardinalityNext,
           (marketId, maturityTimestamp, observationCardinalityNext)
         )
       );
@@ -365,14 +379,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function setMakerPositionsPerAccountLimit(uint256 makerPositionsPerAccountLimit) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      vammProxy.setMakerPositionsPerAccountLimit(makerPositionsPerAccountLimit);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.vammProxy.setMakerPositionsPerAccountLimit(makerPositionsPerAccountLimit);
     } else {
       addToBatch(
-        address(vammProxy),
+        address(contracts.vammProxy),
         abi.encodeCall(
-          vammProxy.setMakerPositionsPerAccountLimit,
+          contracts.vammProxy.setMakerPositionsPerAccountLimit,
           (makerPositionsPerAccountLimit)
         )
       );
@@ -384,14 +398,14 @@ contract ProtocolBase is BatchScript {
   ////////////////////////////////////////////////////////////////////
 
   function periphery_configure(Config.Data memory config) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      peripheryProxy.configure(config);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.peripheryProxy.configure(config);
     } else {
       addToBatch(
-        address(peripheryProxy),
+        address(contracts.peripheryProxy),
         abi.encodeCall(
-          peripheryProxy.configure,
+          contracts.peripheryProxy.configure,
           (config)
         )
       );
@@ -399,14 +413,14 @@ contract ProtocolBase is BatchScript {
   }
 
   function periphery_execute(bytes memory commands, bytes[] memory inputs, uint256 deadline) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      peripheryProxy.execute(commands, inputs, deadline);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      contracts.peripheryProxy.execute(commands, inputs, deadline);
     } else {
       addToBatch(
-        address(peripheryProxy),
+        address(contracts.peripheryProxy),
         abi.encodeCall(
-          peripheryProxy.execute,
+          contracts.peripheryProxy.execute,
           (commands, inputs, deadline)
         )
       );
@@ -418,14 +432,14 @@ contract ProtocolBase is BatchScript {
   ////////////////////////////////////////////////////////////////////
 
   function addNewRoot(AccessPassNFT.RootInfo memory rootInfo) public {
-    if (!multisig) {
-      vm.broadcast(owner);
-      accessPassNft.addNewRoot(rootInfo);
+    if (!settings.multisig) {
+      vm.broadcast(metadata.owner);
+      metadata.accessPassNft.addNewRoot(rootInfo);
     } else {
       addToBatch(
-        address(accessPassNft),
+        address(metadata.accessPassNft),
         abi.encodeCall(
-          accessPassNft.addNewRoot,
+          metadata.accessPassNft.addNewRoot,
           (rootInfo)
         )
       );

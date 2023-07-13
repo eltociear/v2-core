@@ -1,7 +1,7 @@
 pragma solidity >=0.8.19;
 
-import "../utils/ProtocolBase.sol";
-import {Utils} from "../utils/Utils.sol";
+import "../src/utils/SetupProtocol.sol";
+import {Utils} from "../src/utils/Utils.sol";
 
 import {console2} from "forge-std/Script.sol";
 
@@ -17,11 +17,31 @@ import {IWETH9} from "@voltz-protocol/periphery/src/interfaces/external/IWETH9.s
 import {Merkle} from "murky/Merkle.sol";
 import {SetUtil} from "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 
-contract ProtocolConfig is ProtocolBase {
+contract ProtocolConfig is SetupProtocol {  
   using SetUtil for SetUtil.Bytes32Set;
 
   SetUtil.Bytes32Set private addressPassNftInfo;
   Merkle private merkle = new Merkle();
+
+  bool private _multisig = vm.envBool("MULTISIG");
+
+  constructor() 
+    SetupProtocol(
+      SetupProtocol.Contracts({
+        coreProxy: CoreProxy(payable(vm.envAddress("CORE_PROXY"))),
+        datedIrsProxy: DatedIrsProxy(payable(vm.envAddress("DATED_IRS_PROXY"))),
+        peripheryProxy: PeripheryProxy(payable(vm.envAddress("PERIPHERY_PROXY"))),
+        vammProxy: VammProxy(payable(vm.envAddress("VAMM_PROXY"))),
+        aaveV3RateOracle: AaveV3RateOracle(vm.envAddress("AAVE_V3_RATE_ORACLE")),
+        aaveV3BorrowRateOracle: AaveV3BorrowRateOracle(vm.envAddress("AAVE_V3_BORROW_RATE_ORACLE"))
+      }),
+      SetupProtocol.Settings({
+        multisig: _multisig,
+        multisigAddress: (_multisig) ? vm.envAddress("MULTISIG_ADDRESS") : address(0),
+        multisigSend: (_multisig) ? vm.envBool("MULTISIG_SEND") : false
+      })
+    )
+  {}
 
   function run() public {
     // Populate with transactions
@@ -37,8 +57,8 @@ contract ProtocolConfig is ProtocolBase {
     });
     registerDatedIrsProduct(1);
     configureMarket({
-      rateOracleAddress: address(aaveV3RateOracle),
-      tokenAddress: Utils.getUSDCAddress(chainId),
+      rateOracleAddress: address(contracts.aaveV3RateOracle),
+      tokenAddress: Utils.getUSDCAddress(metadata.chainId),
       productId: 1,
       marketId: 1,
       feeCollectorAccountId: 999,
@@ -53,7 +73,7 @@ contract ProtocolConfig is ProtocolBase {
     deployPool({
       marketId: 1,
       maturityTimestamp: 1688990400,
-      rateOracleAddress: address(aaveV3RateOracle),
+      rateOracleAddress: address(contracts.aaveV3RateOracle),
       priceImpactPhi: ud60x18(1e17), // 0.1
       priceImpactBeta: ud60x18(125e15), // 0.125
       spread: ud60x18(3e15), // 0.3%
@@ -63,22 +83,22 @@ contract ProtocolConfig is ProtocolBase {
     });
     mintOrBurn({
       marketId: 1,
-      tokenAddress: Utils.getUSDCAddress(chainId),
+      tokenAddress: Utils.getUSDCAddress(metadata.chainId),
       accountId: 123,
       maturityTimestamp: 1688990400,
       marginAmount: 10e6,
       notionalAmount: 100e6,
       tickLower: -14100, // 4.1%
       tickUpper: -13620, // 3.9%
-      rateOracleAddress: address(aaveV3RateOracle)
+      rateOracleAddress: address(contracts.aaveV3RateOracle)
     });
   }
 
   function acceptOwnerships() public {
-    acceptOwnership(address(coreProxy));
-    acceptOwnership(address(datedIrsProxy));
-    acceptOwnership(address(vammProxy));
-    acceptOwnership(address(peripheryProxy));
+    acceptOwnership(address(contracts.coreProxy));
+    acceptOwnership(address(contracts.datedIrsProxy));
+    acceptOwnership(address(contracts.vammProxy));
+    acceptOwnership(address(contracts.peripheryProxy));
   }
 
   function enableFeatures() public {
@@ -97,7 +117,7 @@ contract ProtocolConfig is ProtocolBase {
 
     addToFeatureFlagAllowlist({
       feature: _REGISTER_PRODUCT_FEATURE_FLAG,
-      account: owner
+      account: metadata.owner
     });
   }
 
@@ -107,7 +127,7 @@ contract ProtocolConfig is ProtocolBase {
     uint128 feeCollectorAccountId
   ) public {  
     setPeriphery({
-      peripheryAddress: address(peripheryProxy)
+      peripheryAddress: address(contracts.peripheryProxy)
     });
 
     configureProtocolRisk(
@@ -119,44 +139,44 @@ contract ProtocolConfig is ProtocolBase {
 
     periphery_configure(
       Config.Data({
-        WETH9: IWETH9(Utils.getWETH9Address(chainId)),
-        VOLTZ_V2_CORE_PROXY: address(coreProxy),
-        VOLTZ_V2_DATED_IRS_PROXY: address(datedIrsProxy),
-        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy)
+        WETH9: IWETH9(Utils.getWETH9Address(metadata.chainId)),
+        VOLTZ_V2_CORE_PROXY: address(contracts.coreProxy),
+        VOLTZ_V2_DATED_IRS_PROXY: address(contracts.datedIrsProxy),
+        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(contracts.vammProxy)
       })
     );
 
     configureAccessPass(
       AccessPassConfiguration.Data({
-        accessPassNFTAddress: address(accessPassNft)
+        accessPassNFTAddress: address(metadata.accessPassNft)
       })
     );
 
     // create fee collector account owned by protocol owner
     createAccount({
       requestedAccountId: feeCollectorAccountId, 
-      accountOwner: owner
+      accountOwner: metadata.owner
     });
   }
 
   function registerDatedIrsProduct(uint256 _takerPositionsPerAccountLimit) public {
     // predict product id
-    uint128 productId = coreProxy.getLastCreatedProductId() + 1;
+    uint128 productId = contracts.coreProxy.getLastCreatedProductId() + 1;
     console2.log("Predicted Product Id:", productId);
 
-    registerProduct(address(datedIrsProxy), "Dated IRS Product");
+    registerProduct(address(contracts.datedIrsProxy), "Dated IRS Product");
 
     configureProduct(
       ProductConfiguration.Data({
         productId: productId,
-        coreProxy: address(coreProxy),
-        poolAddress: address(vammProxy),
+        coreProxy: address(contracts.coreProxy),
+        poolAddress: address(contracts.vammProxy),
         takerPositionsPerAccountLimit: _takerPositionsPerAccountLimit
       })
     );
 
     setProductAddress({
-      productAddress: address(datedIrsProxy)
+      productAddress: address(contracts.datedIrsProxy)
     });
   }
 
@@ -263,7 +283,7 @@ contract ProtocolConfig is ProtocolBase {
   /// it should be done through cannon)
   function addNewRoot(address[] memory accountOwners, string memory baseMetadataURI) public {
     addressPassNftInfo.add(keccak256(abi.encodePacked(address(0), uint256(0))));
-    addressPassNftInfo.add(keccak256(abi.encodePacked(address(owner), uint256(1))));
+    addressPassNftInfo.add(keccak256(abi.encodePacked(address(metadata.owner), uint256(1))));
     for (uint256 i = 0; i < accountOwners.length; i += 1) {
       bytes32 leaf = keccak256(abi.encodePacked(accountOwners[i], uint256(1)));
       if (!addressPassNftInfo.contains(leaf)) {
@@ -292,20 +312,20 @@ contract ProtocolConfig is ProtocolBase {
   ) public {
     IRateOracle rateOracle = IRateOracle(rateOracleAddress);
 
-    uint256 liquidationBooster = coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
-    uint256 accountLiquidationBoosterBalance = coreProxy.getAccountLiquidationBoosterBalance(accountId, tokenAddress);
+    uint256 liquidationBooster = contracts.coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
+    uint256 accountLiquidationBoosterBalance = contracts.coreProxy.getAccountLiquidationBoosterBalance(accountId, tokenAddress);
 
     int256 baseAmount = sd59x18(notionalAmount).div(rateOracle.getCurrentIndex().intoSD59x18()).unwrap();
 
     erc20_approve(
       IERC20(tokenAddress), 
-      address(peripheryProxy), 
+      address(contracts.peripheryProxy), 
       marginAmount + liquidationBooster - accountLiquidationBoosterBalance
     );
 
     bytes memory commands;
     bytes[] memory inputs;
-    if (Utils.existsAccountNft(accountNftProxy, accountId)) {
+    if (Utils.existsAccountNft(metadata.accountNftProxy, accountId)) {
       commands = abi.encodePacked(
         bytes1(uint8(Commands.TRANSFER_FROM)),
         bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
@@ -348,20 +368,20 @@ contract ProtocolConfig is ProtocolBase {
   ) public {
     IRateOracle rateOracle = IRateOracle(rateOracleAddress);
 
-    uint256 liquidationBooster = coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
-    uint256 accountLiquidationBoosterBalance = coreProxy.getAccountLiquidationBoosterBalance(accountId, tokenAddress);
+    uint256 liquidationBooster = contracts.coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
+    uint256 accountLiquidationBoosterBalance = contracts.coreProxy.getAccountLiquidationBoosterBalance(accountId, tokenAddress);
 
     int256 baseAmount = sd59x18(notionalAmount).div(rateOracle.getCurrentIndex().intoSD59x18()).unwrap();
 
     erc20_approve(
       IERC20(tokenAddress), 
-      address(peripheryProxy), 
+      address(contracts.peripheryProxy), 
       marginAmount + liquidationBooster - accountLiquidationBoosterBalance
     );
 
     bytes memory commands;
     bytes[] memory inputs;
-    if (Utils.existsAccountNft(accountNftProxy, accountId)) {
+    if (Utils.existsAccountNft(metadata.accountNftProxy, accountId)) {
       commands = abi.encodePacked(
         bytes1(uint8(Commands.TRANSFER_FROM)),
         bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
