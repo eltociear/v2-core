@@ -555,7 +555,8 @@ contract PortfolioTest is Test {
 
         mockRateOracle.setLastUpdatedIndex(1e27);
 
-        vm.mockCall(coreProxy, abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId), abi.encode(1,marketId,1,3600));
+        vm.mockCall(coreProxy, abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1,
+            marketId), abi.encode(1,marketId,1,3600));
 
         (
             Account.Exposure[] memory takerExposures,
@@ -580,7 +581,8 @@ contract PortfolioTest is Test {
 
         mockRateOracle.setLastUpdatedIndex(1e27);
 
-        vm.mockCall(coreProxy, abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId), abi.encode(1,marketId,1,3600));
+        vm.mockCall(coreProxy, abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector,
+            1, marketId), abi.encode(1,marketId,1,3600));
 
         (
             Account.Exposure[] memory takerExposures,
