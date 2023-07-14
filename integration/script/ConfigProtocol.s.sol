@@ -1,23 +1,11 @@
 pragma solidity >=0.8.19;
 
 import "../src/utils/SetupProtocol.sol";
-import {Utils} from "../src/utils/Utils.sol";
-
-import {console2} from "forge-std/Script.sol";
-
-import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
-import {SD59x18, sd59x18} from "@prb/math/SD59x18.sol";
-
-import {TickMath} from "@voltz-protocol/v2-vamm/utils/vamm-math/TickMath.sol";
-import {IRateOracle} from "@voltz-protocol/v2-vamm/utils/vamm-math/VammConfiguration.sol";
-
-import {Commands} from "@voltz-protocol/periphery/src/libraries/Commands.sol";
-import {IWETH9} from "@voltz-protocol/periphery/src/interfaces/external/IWETH9.sol";
 
 import {Merkle} from "murky/Merkle.sol";
 import {SetUtil} from "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 
-contract ProtocolConfig is SetupProtocol {  
+contract ConfigProtocol is SetupProtocol {  
   using SetUtil for SetUtil.Bytes32Set;
 
   SetUtil.Bytes32Set private addressPassNftInfo;
@@ -38,8 +26,11 @@ contract ProtocolConfig is SetupProtocol {
       SetupProtocol.Settings({
         multisig: _multisig,
         multisigAddress: (_multisig) ? vm.envAddress("MULTISIG_ADDRESS") : address(0),
-        multisigSend: (_multisig) ? vm.envBool("MULTISIG_SEND") : false
-      })
+        multisigSend: (_multisig) ? vm.envBool("MULTISIG_SEND") : false,
+        echidna: false,
+        broadcast: !_multisig
+      }),
+      vm.envAddress("OWNER")
     )
   {}
 
@@ -94,191 +85,6 @@ contract ProtocolConfig is SetupProtocol {
     });
   }
 
-  function acceptOwnerships() public {
-    acceptOwnership(address(contracts.coreProxy));
-    acceptOwnership(address(contracts.datedIrsProxy));
-    acceptOwnership(address(contracts.vammProxy));
-    acceptOwnership(address(contracts.peripheryProxy));
-  }
-
-  function enableFeatures() public {
-    setFeatureFlagAllowAll({
-      feature: _GLOBAL_FEATURE_FLAG,
-      allowAll: true
-    });
-    setFeatureFlagAllowAll({
-      feature: _CREATE_ACCOUNT_FEATURE_FLAG, 
-      allowAll: true
-    });
-    setFeatureFlagAllowAll({
-      feature: _NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG, 
-      allowAll: true
-    });
-
-    addToFeatureFlagAllowlist({
-      feature: _REGISTER_PRODUCT_FEATURE_FLAG,
-      account: metadata.owner
-    });
-  }
-
-  function configureProtocol(
-    UD60x18 imMultiplier,
-    UD60x18 liquidatorRewardParameter,
-    uint128 feeCollectorAccountId
-  ) public {  
-    setPeriphery({
-      peripheryAddress: address(contracts.peripheryProxy)
-    });
-
-    configureProtocolRisk(
-      ProtocolRiskConfiguration.Data({
-        imMultiplier:imMultiplier,
-        liquidatorRewardParameter: liquidatorRewardParameter
-      })
-    );
-
-    periphery_configure(
-      Config.Data({
-        WETH9: IWETH9(Utils.getWETH9Address(metadata.chainId)),
-        VOLTZ_V2_CORE_PROXY: address(contracts.coreProxy),
-        VOLTZ_V2_DATED_IRS_PROXY: address(contracts.datedIrsProxy),
-        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(contracts.vammProxy)
-      })
-    );
-
-    configureAccessPass(
-      AccessPassConfiguration.Data({
-        accessPassNFTAddress: address(metadata.accessPassNft)
-      })
-    );
-
-    // create fee collector account owned by protocol owner
-    createAccount({
-      requestedAccountId: feeCollectorAccountId, 
-      accountOwner: metadata.owner
-    });
-  }
-
-  function registerDatedIrsProduct(uint256 _takerPositionsPerAccountLimit) public {
-    // predict product id
-    uint128 productId = contracts.coreProxy.getLastCreatedProductId() + 1;
-    console2.log("Predicted Product Id:", productId);
-
-    registerProduct(address(contracts.datedIrsProxy), "Dated IRS Product");
-
-    configureProduct(
-      ProductConfiguration.Data({
-        productId: productId,
-        coreProxy: address(contracts.coreProxy),
-        poolAddress: address(contracts.vammProxy),
-        takerPositionsPerAccountLimit: _takerPositionsPerAccountLimit
-      })
-    );
-
-    setProductAddress({
-      productAddress: address(contracts.datedIrsProxy)
-    });
-  }
-
-  function configureMarket(
-    address rateOracleAddress,
-    address tokenAddress,
-    uint128 productId,
-    uint128 marketId,
-    uint128 feeCollectorAccountId,
-    uint256 liquidationBooster,
-    uint256 cap,
-    UD60x18 atomicMakerFee,
-    UD60x18 atomicTakerFee,
-    UD60x18 riskParameter,
-    uint32 twapLookbackWindow,
-    uint256 maturityIndexCachingWindowInSeconds
-  ) public {
-    configureCollateral(
-      CollateralConfiguration.Data({
-        depositingEnabled: true,
-        liquidationBooster: liquidationBooster,
-        tokenAddress: tokenAddress,
-        cap: cap
-      })
-    );
-
-    configureMarket(
-      MarketConfiguration.Data({
-        marketId: marketId,
-        quoteToken: tokenAddress
-      })
-    );
-
-    setVariableOracle({
-      marketId: marketId,
-      oracleAddress: rateOracleAddress,
-      maturityIndexCachingWindowInSeconds: maturityIndexCachingWindowInSeconds
-    });
-
-    configureMarketFee(
-      MarketFeeConfiguration.Data({
-        productId: productId,
-        marketId: marketId,
-        feeCollectorAccountId: feeCollectorAccountId,
-        atomicMakerFee: atomicMakerFee,
-        atomicTakerFee: atomicTakerFee
-      })
-    );
-
-    configureMarketRisk(
-      MarketRiskConfiguration.Data({
-        productId: productId, 
-        marketId: marketId, 
-        riskParameter: riskParameter,
-        twapLookbackWindow: twapLookbackWindow
-      })
-    );
-  }
-
-  function deployPool(
-    uint128 marketId,
-    uint32 maturityTimestamp,
-    address rateOracleAddress,
-    UD60x18 priceImpactPhi,
-    UD60x18 priceImpactBeta,
-    UD60x18 spread,
-    int24 initTick,
-    uint16 observationCardinalityNext,
-    uint256 makerPositionsPerAccountLimit
-  ) public {
-    VammConfiguration.Immutable memory immutableConfig = VammConfiguration.Immutable({
-        maturityTimestamp: maturityTimestamp,
-        _maxLiquidityPerTick: type(uint128).max,
-        _tickSpacing: 60,
-        marketId: marketId
-    });
-
-    VammConfiguration.Mutable memory mutableConfig = VammConfiguration.Mutable({
-        priceImpactPhi: priceImpactPhi,
-        priceImpactBeta: priceImpactBeta,
-        spread: spread,
-        rateOracle: IRateOracle(address(rateOracleAddress)),
-        minTick: TickMath.DEFAULT_MIN_TICK,
-        maxTick: TickMath.DEFAULT_MAX_TICK
-    });
-
-    createVamm({
-      marketId: marketId,
-      sqrtPriceX96: TickMath.getSqrtRatioAtTick(initTick),
-      config: immutableConfig,
-      mutableConfig: mutableConfig
-    });
-
-    increaseObservationCardinalityNext({
-      marketId: marketId,
-      maturityTimestamp: maturityTimestamp,
-      observationCardinalityNext: observationCardinalityNext
-    });
-
-    setMakerPositionsPerAccountLimit(makerPositionsPerAccountLimit);
-  }
-
   /// @notice this should only be used for testnet (for mainnet
   /// it should be done through cannon)
   function addNewRoot(address[] memory accountOwners, string memory baseMetadataURI) public {
@@ -297,118 +103,5 @@ contract ProtocolConfig is SetupProtocol {
         baseMetadataURI: baseMetadataURI
       })
     );
-  }
-
-  function mintOrBurn(
-    uint128 marketId,
-    address tokenAddress,
-    uint128 accountId,
-    uint32 maturityTimestamp,
-    uint256 marginAmount,
-    int256 notionalAmount,  // positive means mint, negative means burn
-    int24 tickLower,
-    int24 tickUpper,
-    address rateOracleAddress
-  ) public {
-    IRateOracle rateOracle = IRateOracle(rateOracleAddress);
-
-    uint256 liquidationBooster = contracts.coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
-    uint256 accountLiquidationBoosterBalance = contracts.coreProxy.getAccountLiquidationBoosterBalance(accountId, tokenAddress);
-
-    int256 baseAmount = sd59x18(notionalAmount).div(rateOracle.getCurrentIndex().intoSD59x18()).unwrap();
-
-    erc20_approve(
-      IERC20(tokenAddress), 
-      address(contracts.peripheryProxy), 
-      marginAmount + liquidationBooster - accountLiquidationBoosterBalance
-    );
-
-    bytes memory commands;
-    bytes[] memory inputs;
-    if (Utils.existsAccountNft(metadata.accountNftProxy, accountId)) {
-      commands = abi.encodePacked(
-        bytes1(uint8(Commands.TRANSFER_FROM)),
-        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-        bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
-      );
-      inputs = new bytes[](3);
-    } else {
-      commands = abi.encodePacked(
-        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
-        bytes1(uint8(Commands.TRANSFER_FROM)),
-        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-        bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
-      );
-
-      inputs = new bytes[](4);
-      inputs[0] = abi.encode(accountId);
-    }
-    inputs[inputs.length-3] = abi.encode(tokenAddress, marginAmount + liquidationBooster - accountLiquidationBoosterBalance);
-    inputs[inputs.length-2] = abi.encode(accountId, tokenAddress, marginAmount);
-    inputs[inputs.length-1] = abi.encode(
-      accountId,
-      marketId,
-      maturityTimestamp,
-      tickLower,
-      tickUpper,
-      Utils.getLiquidityForBase(tickLower, tickUpper, baseAmount)    
-    );
-
-    periphery_execute(commands, inputs, block.timestamp + 100);  
-  }
-
-  function swap(
-    uint128 marketId,
-    address tokenAddress,
-    uint128 accountId,
-    uint32 maturityTimestamp,
-    uint256 marginAmount,
-    int256 notionalAmount,  // positive means VT, negative means FT
-    address rateOracleAddress
-  ) public {
-    IRateOracle rateOracle = IRateOracle(rateOracleAddress);
-
-    uint256 liquidationBooster = contracts.coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
-    uint256 accountLiquidationBoosterBalance = contracts.coreProxy.getAccountLiquidationBoosterBalance(accountId, tokenAddress);
-
-    int256 baseAmount = sd59x18(notionalAmount).div(rateOracle.getCurrentIndex().intoSD59x18()).unwrap();
-
-    erc20_approve(
-      IERC20(tokenAddress), 
-      address(contracts.peripheryProxy), 
-      marginAmount + liquidationBooster - accountLiquidationBoosterBalance
-    );
-
-    bytes memory commands;
-    bytes[] memory inputs;
-    if (Utils.existsAccountNft(metadata.accountNftProxy, accountId)) {
-      commands = abi.encodePacked(
-        bytes1(uint8(Commands.TRANSFER_FROM)),
-        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
-      );
-      inputs = new bytes[](3);
-    } else {
-      commands = abi.encodePacked(
-        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
-        bytes1(uint8(Commands.TRANSFER_FROM)),
-        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
-      );
-
-      inputs = new bytes[](4);
-      inputs[0] = abi.encode(accountId);
-    }
-    inputs[inputs.length-3] = abi.encode(tokenAddress, marginAmount + liquidationBooster - accountLiquidationBoosterBalance);
-    inputs[inputs.length-2] = abi.encode(accountId, tokenAddress, marginAmount);
-    inputs[inputs.length-1] = abi.encode(
-      accountId,
-      marketId,
-      maturityTimestamp,
-      baseAmount,
-      0
-    );
-
-    periphery_execute(commands, inputs, block.timestamp + 100);  
   }
 }
