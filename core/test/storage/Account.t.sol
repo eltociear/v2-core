@@ -12,6 +12,7 @@ import "../../src/storage/Account.sol";
 import "../test-utils/MockCoreStorage.sol";
 
 import {SD59x18} from "@prb/math/SD59x18.sol";
+import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 
 contract ExposedAccounts is CoreState {
     using Account for Account.Data;
@@ -106,6 +107,23 @@ contract ExposedAccounts is CoreState {
         returns (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) {
         Account.Data storage account = Account.load(id);
         return account.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+    }
+
+    function computeLMAndUnrealizedLossFromExposures(Account.Exposure[] memory exposures)
+    external
+    view
+    returns (uint256 liquidationMarginRequirement, uint256 unrealizedLoss)
+    {
+        return Account.computeLMAndUnrealizedLossFromExposures(exposures);
+    }
+
+    function computeLiquidationMarginRequirement(int256 annualizedNotional, UD60x18 riskParameter)
+    external
+    view
+    returns (uint256 liquidationMarginRequirement)
+    {
+       
+        return Account.computeLiquidationMarginRequirement(annualizedNotional, riskParameter);
     }
 }
 
@@ -361,5 +379,26 @@ contract AccountTest is Test {
         uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_UNKNOWN);
 
         assertEq(collateralBalanceAvailable, 1e18);
+    }
+
+    function test_ComputeLMAndUnrealizedLossFromExposures() public {
+        uint256 length = 3;
+        Account.Exposure[] memory exposures = new Account.Exposure[](length);
+        
+        uint256 expectedUnrealizedLoss;
+        for (uint256 i = 0; i < 3; i += 1) {
+            exposures[i] = Account.Exposure({
+                productId: 1,
+                marketId: (i % 2 == 0) ? 10 : 11,
+                annualizedNotional: int256(i * 100),
+                unrealizedLoss: i * 50
+            });
+
+            expectedUnrealizedLoss += exposures[i].unrealizedLoss;
+        } 
+
+        (uint256 liquidationMarginRequirement, uint256 unrealizedLoss) = accounts.computeLMAndUnrealizedLossFromExposures(exposures);
+        assertEq(liquidationMarginRequirement, 300);
+        assertEq(unrealizedLoss, expectedUnrealizedLoss);
     }
 }
