@@ -325,6 +325,14 @@ library Portfolio {
      */
     function closeAccount(Data storage self, address poolAddress, address collateralType) internal {
         IPool pool = IPool(poolAddress);
+        IProductModule coreProxy = IProductModule(ProductConfiguration.getCoreProxyAddress());
+
+        (
+            uint256 imPreAction,
+            uint256 highestUnrealizedPnLPreAction,
+            uint256 collateralBalancePreAction
+        ) = coreProxy.getAccountRiskExposure(self.accountId, collateralType);
+
         for (uint256 i = 1; i <= self.activeMarketsAndMaturities[collateralType].length(); i++) {
             (uint128 marketId, uint32 maturityTimestamp) = self.getMarketAndMaturity(i, collateralType);
 
@@ -341,12 +349,13 @@ library Portfolio {
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, unwindBase, 0);
 
             UD60x18 _annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
-            IProductModule(ProductConfiguration.getCoreProxyAddress()).propagateTakerOrder(
+            coreProxy.propagateFees(
                 self.accountId,
                 ProductConfiguration.getProductId(),
                 marketId,
                 collateralType,
-                mulUDxInt(_annualizedExposureFactor, executedBaseAmount)
+                mulUDxInt(_annualizedExposureFactor, executedBaseAmount),
+                true
             );
 
             position.update(executedBaseAmount, executedQuoteAmount);
@@ -355,6 +364,14 @@ library Portfolio {
                 self.accountId, marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount, block.timestamp
                 );
         }
+
+        coreProxy.checkReducedRisk(
+            self.accountId,
+            collateralType,
+            imPreAction,
+            highestUnrealizedPnLPreAction,
+            collateralBalancePreAction
+        );
     }
 
     /**

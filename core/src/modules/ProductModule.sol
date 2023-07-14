@@ -159,6 +159,58 @@ contract ProductModule is IProductModule {
         (im, highestUnrealizedPnL) = account.imCheck(collateralType);
     }
 
+    function getAccountRiskExposure(
+        uint128 accountId,
+        address collateralType
+    ) public override returns (uint256 im, uint256 highestUnrealizedPnL, uint256 collateralBalance) {
+        Account.Data storage account = Account.exists(accountId);
+
+        collateralBalance = account.getCollateralBalance(collateralType);
+        (,im, highestUnrealizedPnL) = account.isIMSatisfied(collateralType);
+    }
+
+    function propagateFees(
+        uint128 accountId,
+        uint128 productId,
+        uint128 marketId,
+        address collateralType,
+        int256 annualizedNotional,
+        bool isTaker
+    ) external override returns (uint256 fee) {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
+        Product.onlyProductAddress(productId, msg.sender);
+
+        MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
+        fee = distributeFees(
+            accountId, feeConfig.feeCollectorAccountId, isTaker ? feeConfig.atomicTakerFee : feeConfig.atomicMakerFee, collateralType, annualizedNotional
+        );
+
+        Account.Data storage account = Account.exists(accountId);
+
+        if (!account.activeProducts.contains(productId)) {
+            account.activeProducts.add(productId);
+        }
+    }
+
+    function checkReducedRisk(
+        uint128 accountId,
+        address collateralType,
+        uint256 imPreAction,
+        uint256 highestUnrealizedPnLPreAction,
+        uint256 collateralBalancePre
+    ) external override {
+
+        (uint256 imPostAction, uint256 highestUnrealizedPnLPostAction, uint256 collateralBalancePost) = 
+            getAccountRiskExposure(accountId, collateralType);
+        
+        if (
+            imPreAction + highestUnrealizedPnLPreAction - collateralBalancePre <= 
+            imPostAction + highestUnrealizedPnLPostAction - collateralBalancePost
+        ) {
+            revert();
+        }
+    }
+
     function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
         external
         override

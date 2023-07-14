@@ -83,4 +83,26 @@ interface IProductModule {
 
     // todo: consider naming propagateCashflow to be more generic to work with e.g. perps that may have funding cashflows
     function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external;
+
+    function getAccountRiskExposure(
+        uint128 accountId,
+        address collateralType
+    ) external returns (uint256 im, uint256 highestUnrealizedPnL, uint256 collateralBalance);
+
+    function propagateFees(
+        uint128 accountId,
+        uint128 productId,
+        uint128 marketId,
+        address collateralType,
+        int256 annualizedNotional,
+        bool isTaker
+    ) external returns (uint256 fee);
+
+    function checkReducedRisk(
+        uint128 accountId,
+        address collateralType,
+        uint256 imPreAction,
+        uint256 highestUnrealizedPnLPreAction,
+        uint256 collateralBalancePre
+    ) external;
 }
