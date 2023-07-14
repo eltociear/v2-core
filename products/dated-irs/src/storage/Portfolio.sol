@@ -259,7 +259,7 @@ library Portfolio {
                     productId: ces.productId,
                     marketId: pes.marketId,
                     annualizedNotional: mulUDxInt(pes._annualizedExposureFactor, pes.baseBalance + pes.baseBalancePool),
-                    unrealizedLoss: 0
+                    unrealizedLoss: unrealizedLoss
                 });
                 ces.takerExposuresLength = ces.takerExposuresLength + 1;
             } else {
