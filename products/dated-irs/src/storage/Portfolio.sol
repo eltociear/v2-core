@@ -229,6 +229,7 @@ library Portfolio {
 
         CollateralExposureState memory ces = CollateralExposureState({
             productId: ProductConfiguration.getProductId(),
+            // todo: consider renaming poolsCoint to activeMarketsAndMaturitiesCount
             poolsCount: self.activeMarketsAndMaturities[collateralType].length(),
             takerExposuresLength: 0,
             makerExposuresLowerAndUpperLength: 0,
@@ -275,10 +276,11 @@ library Portfolio {
                     marketId: pes.marketId,
                     annualizedNotional: mulUDxInt(
                         pes._annualizedExposureFactor, 
-                        pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseShort.toInt()
+                        pes.baseBalance + pes.baseBalancePool - pes.unfilledBaseShort.toInt()
                     ),
                     unrealizedLoss: unrealizedLossLower
                 });
+
                 uint256 unrealizedLossUpper = computeUnrealizedLoss(
                     pes.marketId,
                     pes.maturityTimestamp,
