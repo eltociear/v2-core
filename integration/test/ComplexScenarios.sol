@@ -131,6 +131,13 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         maxTick: TickMath.DEFAULT_MAX_TICK
     });
 
+    vm.warp(block.timestamp + 86400); // advance by 1 days
+    uint32[] memory times = new uint32[](2);
+    times[0] = uint32(block.timestamp - 86400);
+    times[1] = uint32(block.timestamp - 43200);
+    int24[] memory observedTicks = new int24[](2);
+    observedTicks[0] = -13860;
+    observedTicks[1] = -13860;
     vammProxy.setProductAddress(address(datedIrsProxy));
     vm.warp(block.timestamp + 86400); // advance by 1 days
     uint32[] memory times = new uint32[](2);

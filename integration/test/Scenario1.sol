@@ -122,7 +122,7 @@ contract Scenario1 is BaseScenario, TestUtils {
     });
 
     vammProxy.setProductAddress(address(datedIrsProxy));
-    vm.warp(block.timestamp + 86400); // advance by 1 days
+    // make sure the current time > 1 day
     uint32[] memory times = new uint32[](2);
     times[0] = uint32(block.timestamp - 86400);
     times[1] = uint32(block.timestamp - 43200);
@@ -132,6 +132,8 @@ contract Scenario1 is BaseScenario, TestUtils {
     vammProxy.createVamm(
       marketId,
       TickMath.getSqrtRatioAtTick(-13860), // price = 4%
+      times,
+      observedTicks,
       times,
       observedTicks,
       immutableConfig,

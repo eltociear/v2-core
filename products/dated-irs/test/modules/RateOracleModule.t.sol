@@ -46,7 +46,7 @@ contract ERC165 is IERC165 {
 contract RateOracleModuleTest is Test {
     using { unwrap } for UD60x18;
 
-    RateOracleModuleExtended RateOracleModule;
+    RateOracleModuleExtended rateOracleModule;
 
     using RateOracleReader for RateOracleReader.Data;
 
@@ -58,15 +58,15 @@ contract RateOracleModuleTest is Test {
     uint128 public marketId;
 
     function setUp() public virtual {
-        RateOracleModule = new RateOracleModuleExtended();
-        RateOracleModule.setOwner(address(this));
+        rateOracleModule = new RateOracleModuleExtended();
+        rateOracleModule.setOwner(address(this));
 
         mockRateOracle = new MockRateOracle();
 
         maturityTimestamp = Time.blockTimestampTruncated() + 31536000;
         marketId = 100;
 
-        RateOracleModule.setVariableOracle(marketId, address(mockRateOracle), 3600);
+        rateOracleModule.setVariableOracle(marketId, address(mockRateOracle), 3600);
     }
 
     function test_InitSetVariableOracle() public {
