@@ -117,6 +117,15 @@ contract ExposedAccounts is CoreState {
         return Account.computeLMAndUnrealizedLossFromExposures(exposures);
     }
 
+    function computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(
+        Account.Exposure[] memory exposuresLower,
+        Account.Exposure[] memory exposuresUpper
+    ) external view
+    returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
+    {
+        return Account.computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(exposuresLower, exposuresUpper);
+    }
+
     function computeLiquidationMarginRequirement(int256 annualizedNotional, UD60x18 riskParameter)
     external
     view
@@ -400,5 +409,39 @@ contract AccountTest is Test {
         (uint256 liquidationMarginRequirement, uint256 unrealizedLoss) = accounts.computeLMAndUnrealizedLossFromExposures(exposures);
         assertEq(liquidationMarginRequirement, 300);
         assertEq(unrealizedLoss, expectedUnrealizedLoss);
+    }
+
+
+    function test_ComputeLMAndHighestUnrealizedLossFromLowerAndUpperExposures() public {
+        uint256 length = 3;
+        Account.Exposure[] memory lowerExposures = new Account.Exposure[](length);
+        Account.Exposure[] memory upperExposures = new Account.Exposure[](length);
+
+        uint256 expectedUnrealizedLoss;
+        uint256 expectedLiquidationMarginRequirement;
+        for (uint256 i = 0; i < length; i += 1) {
+            lowerExposures[i] = Account.Exposure({
+                productId: 1,
+                marketId: (i % 2 == 0) ? 10 : 11,
+                annualizedNotional: int256(i * 1000),
+                unrealizedLoss: i * 500
+            });
+
+            upperExposures[i] = Account.Exposure({
+                productId: 1,
+                marketId: (i % 2 == 0) ? 10 : 11,
+                annualizedNotional: int256(i * 100),
+                unrealizedLoss: i * 50
+            });
+
+            // note, in here we're only taking into account lower exposures because they pose the highest risk
+            expectedUnrealizedLoss += lowerExposures[i].unrealizedLoss;
+            // in here we're assuming the risk parameter is 1, hence lm = annualized notional * 1 = annualized notional
+            expectedLiquidationMarginRequirement += lowerExposures[i].annualizedNotional.toUint();
+        }
+
+        (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) = accounts.computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(lowerExposures, upperExposures);
+        assertEq(liquidationMarginRequirement, expectedLiquidationMarginRequirement);
+        assertEq(highestUnrealizedLoss, expectedUnrealizedLoss);
     }
 }
