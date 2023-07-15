@@ -128,11 +128,19 @@ contract ExposedAccounts is CoreState {
 
     function computeLiquidationMarginRequirement(int256 annualizedNotional, UD60x18 riskParameter)
     external
-    view
+    pure
     returns (uint256 liquidationMarginRequirement)
     {
        
         return Account.computeLiquidationMarginRequirement(annualizedNotional, riskParameter);
+    }
+
+    function computeInitialMarginRequirement(uint256 liquidationMarginRequirement, UD60x18 imMultiplier)
+    external
+    pure
+    returns (uint256 initialMarginRequirement)
+    {
+        return Account.computeInitialMarginRequirement(liquidationMarginRequirement, imMultiplier);
     }
 }
 
@@ -464,5 +472,13 @@ contract AccountTest is Test {
         uint256 expectedLiquidationMarginRequirement = 2000;
         uint256 liquidationMarginRequirement = accounts.computeLiquidationMarginRequirement(annualizedNotional, riskParameter);
         assertEq(liquidationMarginRequirement, expectedLiquidationMarginRequirement);
+    }
+
+    function test_ComputeInitialMarginRequirement() public {
+        uint256 liquidaionMarginRequirement = 2000;
+        UD60x18 imMultiplier = UD60x18.wrap(2e18);
+        uint256 expectedInitialMarginRequirement = 4000;
+        uint256 initialMarginRequirement = accounts.computeInitialMarginRequirement(liquidaionMarginRequirement, imMultiplier);
+        assertEq(initialMarginRequirement, expectedInitialMarginRequirement);
     }
 }
