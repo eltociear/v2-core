@@ -55,8 +55,8 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     user1 = vm.addr(1);
     user2 = vm.addr(2);
     marketId = 1;
-    maturityTimestamp = uint32(block.timestamp) + 259200; // in 3 days
-    maturityTimestamp2 = uint32(block.timestamp) + 259201; // in 3 days
+    maturityTimestamp = uint32(block.timestamp) + 345600; // in 3 days
+    maturityTimestamp2 = uint32(block.timestamp) + 345600; // in 3 days
     extendedPoolModule = new ExtendedPoolModule();
   }
 
