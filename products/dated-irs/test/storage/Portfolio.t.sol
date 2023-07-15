@@ -168,6 +168,13 @@ contract ExposePortfolio {
         );
     }
 
+    function removeEmptySlotsFromExposuresArray(
+        Account.Exposure[] memory exposures,
+        uint256 length
+    ) external pure returns (Account.Exposure[] memory exposuresWithoutEmptySlots) {
+        exposuresWithoutEmptySlots = Portfolio.removeEmptySlotsFromExposuresArray(exposures, length);
+    }
+
     // EXTRA GETTERS
 
     function getPositionData(
@@ -661,6 +668,29 @@ contract PortfolioTest is Test {
         // unrealized loss = 9.89E19
 
         assertEq(unrealizedLoss, 9.89e19);
+    }
+
+    function test_RemoveEmptySlotsFromExposuresArray() public {
+        Account.Exposure[] memory exposures = new Account.Exposure[](3);
+        exposures[0] = Account.Exposure(
+            {productId: 1, marketId: 11, annualizedNotional: 2e18, unrealizedLoss: 0}
+        );
+        exposures[1] = Account.Exposure(
+            {productId: 1, marketId: 12, annualizedNotional: 2e18, unrealizedLoss: 0}
+        );
+
+        Account.Exposure[] memory exposuresWithoutEmotySlots = portfolio.removeEmptySlotsFromExposuresArray(exposures, 2);
+
+        assertEq(exposuresWithoutEmotySlots.length, 2);
+        assertEq(exposuresWithoutEmotySlots[0].productId, 1);
+        assertEq(exposuresWithoutEmotySlots[1].productId, 1);
+        assertEq(exposuresWithoutEmotySlots[0].marketId, 11);
+        assertEq(exposuresWithoutEmotySlots[1].marketId, 12);
+        assertEq(exposuresWithoutEmotySlots[0].annualizedNotional, 2e18);
+        assertEq(exposuresWithoutEmotySlots[1].annualizedNotional, 2e18);
+        assertEq(exposuresWithoutEmotySlots[0].unrealizedLoss, 0);
+        assertEq(exposuresWithoutEmotySlots[1].unrealizedLoss, 0);
+
     }
 
 }

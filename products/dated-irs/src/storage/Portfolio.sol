@@ -188,7 +188,7 @@ library Portfolio {
     function removeEmptySlotsFromExposuresArray(
         Account.Exposure[] memory exposures,
         uint256 length
-    ) internal view returns (Account.Exposure[] memory exposuresWithoutEmptySlots) {
+    ) internal pure returns (Account.Exposure[] memory exposuresWithoutEmptySlots) {
         // todo: consider into a utility library
         require(exposures.length >= length);
         exposuresWithoutEmptySlots = new Account.Exposure[](length);
