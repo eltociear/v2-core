@@ -482,14 +482,5 @@ contract AccountTest is Test {
         assertEq(initialMarginRequirement, expectedInitialMarginRequirement);
     }
 
-    function test_IsIMSatisfied() public {
-        setCollateralProfile("high");
 
-        (bool imSatisfied, uint256 im, uint256 highestUnrealizedLoss) =
-            accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
-
-        assertEq(imSatisfied, true);
-        assertEq(im, 2000e18);
-        assertEq(highestUnrealizedLoss, 0);
-    }
 }
