@@ -457,4 +457,12 @@ contract AccountTest is Test {
         assertEq(liquidationMarginRequirement, expectedLiquidationMarginRequirement);
         assertEq(highestUnrealizedLoss, expectedUnrealizedLoss);
     }
+
+    function test_ComputeLiquidationMarginRequirement() public {
+        int256 annualizedNotional = 1000;
+        UD60x18 riskParameter = UD60x18.wrap(2e18);
+        uint256 expectedLiquidationMarginRequirement = 2000;
+        uint256 liquidationMarginRequirement = accounts.computeLiquidationMarginRequirement(annualizedNotional, riskParameter);
+        assertEq(liquidationMarginRequirement, expectedLiquidationMarginRequirement);
+    }
 }
