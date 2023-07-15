@@ -116,7 +116,6 @@ library Portfolio {
         }
     }
 
-    // todo: consider breaking below functions into pure functions
     function computeUnrealizedLoss(
         uint128 marketId,
         uint32 maturityTimestamp,

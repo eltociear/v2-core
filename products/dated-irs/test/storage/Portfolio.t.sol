@@ -152,6 +152,22 @@ contract ExposePortfolio {
         MarketConfiguration.set(MarketConfiguration.Data({ marketId: marketId, quoteToken: quoteToken }));
     }
 
+    function computeUnrealizedLoss(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        address poolAddress,
+        int256 baseBalance,
+        int256 quoteBalance
+    ) external view returns (uint256 unrealizedLoss) {
+        unrealizedLoss = Portfolio.computeUnrealizedLoss(
+            marketId,
+            maturityTimestamp,
+            poolAddress,
+            baseBalance,
+            quoteBalance
+        );
+    }
+
     // EXTRA GETTERS
 
     function getPositionData(
@@ -598,4 +614,53 @@ contract PortfolioTest is Test {
 //        assertEq(exposures[0].unfilledLong, 2);
 //        assertEq(exposures[0].unfilledShort, 3);
     }
+
+    function test_ComputeUnrealizedLoss_Zero() public {
+        uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
+        uint256 liqudityIndex = 1e27;
+        UD60x18 twap = ud(0.3e18);
+
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp, twap);
+
+        mockRateOracle.setLastUpdatedIndex(liqudityIndex);
+
+        vm.mockCall(
+            coreProxy,
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId),
+            abi.encode(mockCoreMarketConfig)
+        );
+
+        uint256 unrealizedLoss = portfolio.computeUnrealizedLoss(marketId, maturityTimestamp, address(mockPool), 1e18, -1e18);
+
+        // unwind quote = 1.3E18
+        // unrealized pnl = 1.3E18 - 1E18 = 0.3E18
+        // unrealized loss = 0
+
+        assertEq(unrealizedLoss, 0);
+    }
+
+    function test_ComputeUnrealizedLoss_Positive() public {
+        uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
+        uint256 liqudityIndex = 1e27;
+        UD60x18 twap = ud(0.1e18);
+
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp, twap);
+
+        mockRateOracle.setLastUpdatedIndex(liqudityIndex);
+
+        vm.mockCall(
+            coreProxy,
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId),
+            abi.encode(mockCoreMarketConfig)
+        );
+
+        uint256 unrealizedLoss = portfolio.computeUnrealizedLoss(marketId, maturityTimestamp, address(mockPool), 1e18, -100e18);
+
+        // unwind quote = 1.1E18
+        // unrealized pnl = 1.1E18 - 100E18 = -9.89E19
+        // unrealized loss = 9.89E19
+
+        assertEq(unrealizedLoss, 9.89e19);
+    }
+
 }
