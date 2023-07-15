@@ -74,12 +74,12 @@ contract RateOracleModuleTest is Test {
         vm.expectEmit(true, true, false, true);
         emit RateOracleConfigured(200, address(mockRateOracle), 3600, block.timestamp);
 
-        RateOracleModule.setVariableOracle(200, address(mockRateOracle), 3600);
+        rateOracleModule.setVariableOracle(200, address(mockRateOracle), 3600);
     }
 
     function test_ResetExistingOracle() public {
         address newRateOracle = address(new MockRateOracle());
-        RateOracleModule.setVariableOracle(marketId, address(newRateOracle), 3600);
+        rateOracleModule.setVariableOracle(marketId, address(newRateOracle), 3600);
         // todo: check set variable oracle once we add getter function (AB)
     }
 
@@ -88,23 +88,23 @@ contract RateOracleModuleTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.InvalidVariableOracleAddress.selector, address(fakeOracle)));
 
-        RateOracleModule.setVariableOracle(200, address(fakeOracle), 3600);
+        rateOracleModule.setVariableOracle(200, address(fakeOracle), 3600);
     }
 
     function test_InitGetRateIndexCurrent() public {
-        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId);
+        UD60x18 rateIndexCurrent = rateOracleModule.getRateIndexCurrent(marketId);
         assertEq(rateIndexCurrent.unwrap(), 0);
     }
 
     function test_GetRateIndexCurrentBeforeMaturity() public {
         mockRateOracle.setLastUpdatedIndex(1.001e18 * 1e9);
-        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId);
+        UD60x18 rateIndexCurrent = rateOracleModule.getRateIndexCurrent(marketId);
         assertEq(rateIndexCurrent.unwrap(), 1.001e18);
     }
 
 
     function test_NoCacheBeforeMaturity() public {
-        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId);
+        UD60x18 rateIndexCurrent = rateOracleModule.getRateIndexCurrent(marketId);
     }
 
     function test_GetRateIndexMaturity() public {
@@ -113,15 +113,15 @@ contract RateOracleModuleTest is Test {
         uint256 indexToSet = 1.001e18;
 
         mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
-        RateOracleModule.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
+        rateOracleModule.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
 
-        UD60x18 rateIndexMaturity = RateOracleModule.getRateIndexMaturity(marketId, maturityTimestamp);
+        UD60x18 rateIndexMaturity = rateOracleModule.getRateIndexMaturity(marketId, maturityTimestamp);
         assertEq(rateIndexMaturity.unwrap(), indexToSet);
     }
 
     function test_RevertWhen_GetRateIndexMaturityBeforeMaturity() public {
         vm.expectRevert(abi.encodeWithSelector(RateOracleReader.MaturityNotReached.selector));
 
-        RateOracleModule.getRateIndexMaturity(marketId, maturityTimestamp);
+        rateOracleModule.getRateIndexMaturity(marketId, maturityTimestamp);
     }
 }

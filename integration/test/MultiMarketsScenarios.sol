@@ -393,7 +393,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
 
     ExecutedAmounts[] memory amounts = new ExecutedAmounts[](3);
 
-    console2.log("-------- LP -------");
+    // console2.log("-------- LP -------");
     newMaker(
         marketId,
         maturityTimestamp,
@@ -418,7 +418,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     );
 
     // FT
-    console2.log("-------- FT -------");
+    // console2.log("-------- FT -------");
     amounts[0] = newTaker(
         marketId,
         maturityTimestamp,
@@ -429,10 +429,10 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
         8e18, // toDeposit - margin = 7e18
         -500e18 // baseAmount
     ); // MR = 500e18 * 2.5/265 * 2 = 6.849315068493150000
-    console2.log("IM", amounts[0].im);
-    console2.log("BASE", amounts[0].executedBaseAmount);
+    // console2.log("IM", amounts[0].im);
+    // console2.log("BASE", amounts[0].executedBaseAmount);
 
-    console2.log("-------- FT -------");
+    // console2.log("-------- FT -------");
     amounts[1] = editTaker(
         marketId,
         maturityTimestamp2,
@@ -447,7 +447,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     // LMR = 500e18 * 2/365 * li2 = 7.5471
     // unrealized pnl = base * li2 * (twap * 2/365 + 1) - 500.136  = 500 * li * 1.000219 - 500.136 =
 
-    console2.log("-------- LIQUIDATION -------");
+    //console2.log("-------- LIQUIDATION -------");
     // LIQUIDQATE
     vm.startPrank(vm.addr(3));
     redeemAccessPass(vm.addr(3), 1, 4);
