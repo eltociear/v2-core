@@ -261,7 +261,15 @@ contract AccountTest is Test {
     }
 
     function test_GetProductTakerAndMakerExposures() public {
-        // todo: implementation
+        (
+        Account.Exposure[] memory productTakerExposures,
+        Account.Exposure[] memory productMakerExposuresLower,
+        Account.Exposure[] memory productMakerExposuresUpper
+        ) = accounts.getProductTakerAndMakerExposures(accountId, 1, Constants.TOKEN_0);
+
+        assertEq(productTakerExposures.length, 0);
+        assertEq(productMakerExposuresLower.length, 2);
+        assertEq(productMakerExposuresUpper.length, 2);
     }
 
     function test_GetRiskParameter() public {
@@ -277,7 +285,12 @@ contract AccountTest is Test {
     }
 
     function test_GetMarginRequirementsAndHighestUnrealizedLoss() public {
-        // todo: implementation
+        (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) =
+            accounts.getMarginRequirementsAndHighestUnrealizedLoss(accountId, Constants.TOKEN_0);
+
+        assertEq(initialMarginRequirement, 2000e18);
+        assertEq(liquidationMarginRequirement, 1000e18);
+        assertEq(highestUnrealizedLoss, 0);
     }
 
     function test_IsLiquidatable_True() public {
