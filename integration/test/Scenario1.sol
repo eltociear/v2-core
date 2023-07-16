@@ -134,8 +134,6 @@ contract Scenario1 is BaseScenario, TestUtils {
       TickMath.getSqrtRatioAtTick(-13860), // price = 4%
       times,
       observedTicks,
-      times,
-      observedTicks,
       immutableConfig,
       mutableConfig
     );
