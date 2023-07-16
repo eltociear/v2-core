@@ -458,7 +458,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
         maturityTimestamp,
         1, // accountId
         vm.addr(1), // user
-        makerAmounts
+        makerAmounts[0]
     );
 
     vm.warp(block.timestamp + 86400); // advance by 1 day
