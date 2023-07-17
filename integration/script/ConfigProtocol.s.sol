@@ -49,17 +49,18 @@ contract ConfigProtocol is SetupProtocol {
     configureProtocol({
       imMultiplier: ud60x18(1.5e18),
       liquidatorRewardParameter: ud60x18(0.05e18),
-      feeCollectorAccountId: 999                                    // todo: confirm
+      feeCollectorAccountId: 999
     });
 
     registerDatedIrsProduct(1);
 
     configureMarket({
       rateOracleAddress: address(contracts.aaveV3RateOracle),
-      tokenAddress: Utils.getUSDCAddress(metadata.chainId),         // todo: update helper function if we want native USDC
+      // note, let's keep as bridged usdc for now
+      tokenAddress: Utils.getUSDCAddress(metadata.chainId),  // todo: update helper function if we want native USDC
       productId: 1,
       marketId: 1,
-      feeCollectorAccountId: 999,                                   // todo: confirm, must match id from above
+      feeCollectorAccountId: 999,
       liquidationBooster: 0,
       cap: 100000e6,
       atomicMakerFee: ud60x18(0),
@@ -68,35 +69,37 @@ contract ConfigProtocol is SetupProtocol {
       twapLookbackWindow: 259200,
       maturityIndexCachingWindowInSeconds: 3600
     });
-    uint32[] memory times = new uint32[](0);                        // todo: populate length
-    // times[0] = uint32(block.timestamp - 86400);                  // todo: populate values
-    // times[1] = uint32(block.timestamp - 43200);
-    int24[] memory observedTicks = new int24[](0);                  // todo: populate length
-    // observedTicks[0] = -13860;                                   // todo: populate values
-    // observedTicks[1] = -13860;
+    uint32[] memory times = new uint32[](2);
+     times[0] = uint32(block.timestamp - 86400*4); // note goes back 4 days, while lookback is 3 days, so should be fine?
+     times[1] = uint32(block.timestamp - 86400*3);
+    int24[] memory observedTicks = new int24[](2);
+     observedTicks[0] = -12500; // 3.4% note worth double checking
+     observedTicks[1] = -12500; // 3.4%
     deployPool({
       marketId: 1,
       maturityTimestamp: 1692356400,                                // Fri Aug 18 2023 11:00:00 GMT+0000
       rateOracleAddress: address(contracts.aaveV3RateOracle),
-      priceImpactPhi: ud60x18(0),                                   // todo: confirm and populate
-      priceImpactBeta: ud60x18(0),                                  // todo: confirm and populate
+      priceImpactPhi: ud60x18(0),
+      priceImpactBeta: ud60x18(0),
       spread: ud60x18(0.001e18),
-      initTick: 0,                                                  // todo: confirm
+      initTick: -12500, // 3.4%
       tickSpacing: 60,
-      observationCardinalityNext: 0,                                // todo: confirm
+      // todo: note, is this sufficient, or should we increase? what's the min gap between consecutive observations?
+      observationCardinalityNext: 20,
       makerPositionsPerAccountLimit: 1,
       times: times,
       observedTicks: observedTicks
     });
+    // todo: note, is this pcv?
     mintOrBurn({
       marketId: 1,
       tokenAddress: Utils.getUSDCAddress(metadata.chainId),
-      accountId: 0,                                                 // todo: populate as we wish (it also create it)
+      accountId: 0,
       maturityTimestamp: 1692356400,
       marginAmount: 25000e6,
       notionalAmount: 25000e6 * 500,
-      tickLower: 0,                                                 // todo: confirm
-      tickUpper: 0,                                                 // todo: confirm
+      tickLower: -15400, // 4.66% note worth double checking
+      tickUpper: -8600, // 2.36% note worth double checking
       rateOracleAddress: address(contracts.aaveV3RateOracle)
     });
 
