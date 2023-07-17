@@ -39,10 +39,15 @@ contract ConfigProtocol is SetupProtocol {
   function run() public {
     // Populate with transactions
 
-    upgradeProxy(address(contracts.coreProxy), address(0));         // todo: populate
-    upgradeProxy(address(contracts.datedIrsProxy), address(0));     // todo: populate
-    upgradeProxy(address(contracts.peripheryProxy), address(0));    // todo: populate
-    upgradeProxy(address(contracts.vammProxy), address(0));         // todo: populate
+    // todo: double check if we also configure
+    // ACCESS_PASS_NFT=0xf28E795B214230ba192f7f9167d6CbEc2558B00c
+    // AAVE_V3_RATE_ORACLE=0x4072356632230f14385c28e9143fb1c34096bddb
+    // AAVE_V3_BORROW_RATE_ORACLE=0xb792a53a24F313CcF3eBF9A51C7eF4aF216b6D4E
+
+    upgradeProxy(address(contracts.coreProxy), address(0x6BB334e672729b63AA7d7c4867D4EbD3f9444Ca3));
+    upgradeProxy(address(contracts.datedIrsProxy), address(0xcc22e3862D13f40142C1Ccd9294e8AD66f845bE2));
+    upgradeProxy(address(contracts.peripheryProxy), address(0x7917ADcd534c78f6901fc8A07d3834b9b47EAf26));
+    upgradeProxy(address(contracts.vammProxy), address(0x1d45dDD16ba18fEE069Adcd85827E71FcD54fc38));
 
     enableFeatures();
 
