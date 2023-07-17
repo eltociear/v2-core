@@ -5,6 +5,8 @@ import "../src/utils/SetupProtocol.sol";
 import {Merkle} from "murky/Merkle.sol";
 import {SetUtil} from "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 
+import {uUNIT as uWAD} from "@prb/math/UD60x18.sol";
+
 contract ConfigProtocol is SetupProtocol {  
   using SetUtil for SetUtil.Bytes32Set;
 
@@ -36,9 +38,77 @@ contract ConfigProtocol is SetupProtocol {
 
   function run() public {
     // Populate with transactions
+
+    upgradeProxy(address(contracts.coreProxy), address(0));         // todo: populate
+    upgradeProxy(address(contracts.datedIrsProxy), address(0));     // todo: populate
+    upgradeProxy(address(contracts.peripheryProxy), address(0));    // todo: populate
+    upgradeProxy(address(contracts.vammProxy), address(0));         // todo: populate
+
+    enableFeatures();
+
+    configureProtocol({
+      imMultiplier: ud60x18(1.5e18),
+      liquidatorRewardParameter: ud60x18(0.05e18),
+      feeCollectorAccountId: 999                                    // todo: confirm
+    });
+
+    registerDatedIrsProduct(1);
+
+    configureMarket({
+      rateOracleAddress: address(contracts.aaveV3RateOracle),
+      tokenAddress: Utils.getUSDCAddress(metadata.chainId),         // todo: update helper function if we want native USDC
+      productId: 1,
+      marketId: 1,
+      feeCollectorAccountId: 999,                                   // todo: confirm, must match id from above
+      liquidationBooster: 0,
+      cap: 100000e6,
+      atomicMakerFee: ud60x18(0),
+      atomicTakerFee: ud60x18(0.0002e18),
+      riskParameter: ud60x18(0.013e18),
+      twapLookbackWindow: 259200,
+      maturityIndexCachingWindowInSeconds: 3600
+    });
+    uint32[] memory times = new uint32[](0);                        // todo: populate length
+    // times[0] = uint32(block.timestamp - 86400);                  // todo: populate values
+    // times[1] = uint32(block.timestamp - 43200);
+    int24[] memory observedTicks = new int24[](0);                  // todo: populate length
+    // observedTicks[0] = -13860;                                   // todo: populate values
+    // observedTicks[1] = -13860;
+    deployPool({
+      marketId: 1,
+      maturityTimestamp: 1692356400,                                // Fri Aug 18 2023 11:00:00 GMT+0000
+      rateOracleAddress: address(contracts.aaveV3RateOracle),
+      priceImpactPhi: ud60x18(0),                                   // todo: confirm and populate
+      priceImpactBeta: ud60x18(0),                                  // todo: confirm and populate
+      spread: ud60x18(0.001e18),
+      initTick: 0,                                                  // todo: confirm
+      tickSpacing: 60,
+      observationCardinalityNext: 0,                                // todo: confirm
+      makerPositionsPerAccountLimit: 1,
+      times: times,
+      observedTicks: observedTicks
+    });
+    mintOrBurn({
+      marketId: 1,
+      tokenAddress: Utils.getUSDCAddress(metadata.chainId),
+      accountId: 0,                                                 // todo: populate as we wish (it also create it)
+      maturityTimestamp: 1692356400,
+      marginAmount: 25000e6,
+      notionalAmount: 25000e6 * 500,
+      tickLower: 0,                                                 // todo: confirm
+      tickUpper: 0,                                                 // todo: confirm
+      rateOracleAddress: address(contracts.aaveV3RateOracle)
+    });
+
+    execute_multisig_batch();
   }
 
   function configure_protocol() public {
+    // upgradeProxy(address(contracts.coreProxy), address(0));
+    // upgradeProxy(address(contracts.datedIrsProxy), address(0));
+    // upgradeProxy(address(contracts.peripheryProxy), address(0));
+    // upgradeProxy(address(contracts.vammProxy), address(0));
+
     acceptOwnerships();
     enableFeatures();
     configureProtocol({
@@ -75,6 +145,7 @@ contract ConfigProtocol is SetupProtocol {
       priceImpactBeta: ud60x18(125e15), // 0.125
       spread: ud60x18(3e15), // 0.3%
       initTick: -13860, // price = 4%
+      tickSpacing: 60,
       observationCardinalityNext: 16,
       makerPositionsPerAccountLimit: 1,
       times: times,
@@ -91,6 +162,8 @@ contract ConfigProtocol is SetupProtocol {
       tickUpper: -13620, // 3.9%
       rateOracleAddress: address(contracts.aaveV3RateOracle)
     });
+
+    execute_multisig_batch();
   }
 
   /// @notice this should only be used for testnet (for mainnet
