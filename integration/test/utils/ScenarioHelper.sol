@@ -98,14 +98,14 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
         address user,
         uint256 count,
         uint256 merkleIndex,
-        uint256 toDeposit,
+        uint256 margin,
         int256 baseAmount,
         int24 tickLower,
         int24 tickUpper
     ) public returns (MakerExecutedAmounts memory){
         changeSender(user);
 
-        token.mint(user, toDeposit);
+        token.mint(user, margin);
 
         // note: merkleIndex = 0 is a flag for edit position,
         // only owner had index 0
@@ -121,7 +121,7 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
             tokenAddress: address(token),
             accountId: accountId,
             maturityTimestamp: _maturityTimestamp,
-            marginAmount: toDeposit,
+            marginAmount: margin,
             notionalAmount: baseAmount * liquidityIndex / 1e18,
             tickLower: tickLower, // 4.67%
             tickUpper: tickUpper, // 2.35%
@@ -135,7 +135,7 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
 
         return MakerExecutedAmounts({
             baseAmount: baseAmount,
-            depositedAmount: toDeposit,
+            depositedAmount: margin,
             tickLower: tickLower,
             tickUpper: tickUpper,
             fee: fee,
@@ -172,7 +172,7 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
             accountId: accountId,
             maturityTimestamp: _maturityTimestamp,
             marginAmount: margin,
-            notionalAmount: baseAmount * liquidityIndex,  // positive means VT, negative means FT
+            notionalAmount: baseAmount * liquidityIndex / 1e18,  // positive means VT, negative means FT
             rateOracleAddress: address(contracts.aaveV3RateOracle)
         });
 
@@ -324,6 +324,30 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
         assertAlmostEq(expectedLmr, m.liquidationMarginRequirement, 1e5);
         assertAlmostEq(expectedLmr * imMultiplier, m.initialMarginRequirement, 1e5);
         assertGt(p.takerAmounts.depositedAmount, expectedLmr * imMultiplier + expectedUnrealizedLoss, "IMR taker");
+    }
+
+    function compareCurrentMarginData(uint128 accountId, MarginData memory m, bool higherHul) 
+        public returns (MarginData memory mCurrent) {
+        mCurrent = getMarginData(accountId);
+
+        assertEq(mCurrent.liquidatable, m.liquidatable, "liquidatable");
+        assertEq(mCurrent.initialMarginRequirement, m.initialMarginRequirement, "IMR");
+        assertEq(mCurrent.liquidationMarginRequirement, m.liquidationMarginRequirement, "LMR");
+
+        if (higherHul) {
+            assertGt(mCurrent.highestUnrealizedLoss, m.highestUnrealizedLoss, "highestUnrealizedLoss");
+        } else {
+            assertLt(mCurrent.highestUnrealizedLoss, m.highestUnrealizedLoss, "highestUnrealizedLoss");
+        }
+    }
+
+    function getMarginData(uint128 accountId) public returns (MarginData memory m) {
+        (
+            m.liquidatable,
+            m.initialMarginRequirement,
+            m.liquidationMarginRequirement,
+            m.highestUnrealizedLoss
+        ) = contracts.coreProxy.isLiquidatable(accountId, address(token));
     }
 
 }
