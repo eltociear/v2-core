@@ -394,8 +394,8 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       uint256 expectedUnrealizedLoss = unrealizedLossUpper;
       uint256 expectedLmr = expectedLmrUpper;
       if (unrealizedLossLower + expectedLmrLower >  unrealizedLossUpper + expectedLmrUpper) {
-          expectedUnrealizedLoss = unrealizedLossUpper;
-          expectedLmr = expectedLmrUpper;
+          expectedUnrealizedLoss = unrealizedLossLower;
+          expectedLmr = expectedLmrLower;
       }
 
       assertEq(expectedUnrealizedLoss, m.highestUnrealizedLoss, "expectedUnrealizedLoss");

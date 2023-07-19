@@ -17,10 +17,10 @@ contract Scenario1 is ScenarioHelper {
     function setUp() public {
         // COMPLETE WITH ACTORS' ADDRESSES
         address[] memory accessPassOwners = new address[](2);
-        accessPassOwners[0] = address(1);
-        accessPassOwners[1] = owner;
+        accessPassOwners[0] = owner; // note: do not change owner's index 0
+        accessPassOwners[1] = address(1);
         setUpAccessPassNft(accessPassOwners);
-        redeemAccessPass(owner, 1, 1);
+        redeemAccessPass(owner, 1, 0);
 
         acceptOwnerships();
         enableFeatures();
@@ -54,7 +54,7 @@ contract Scenario1 is ScenarioHelper {
         observedTicks[1] = -12240; // 3.4%
         deployPool({
             immutableConfig: VammConfiguration.Immutable({
-                maturityTimestamp: maturityTimestamp,                                // Fri Aug 18 2023 11:00:00 GMT+0000
+                maturityTimestamp: maturityTimestamp, // Fri Aug 18 2023 11:00:00 GMT+0000
                 _maxLiquidityPerTick: type(uint128).max,
                 _tickSpacing: 60,
                 marketId: marketId
@@ -80,13 +80,13 @@ contract Scenario1 is ScenarioHelper {
     }
 
     function test_happy_path() public {
-        newMaker({
+        executeMakerOrder({
             _marketId: marketId,
             _maturityTimestamp: maturityTimestamp,
             accountId: 1,
             user: address(1),
             count: 1,
-            merkleIndex: 0,
+            merkleIndex: 1, // NEW taker
             toDeposit: 10,
             baseAmount: 100,
             tickLower: -13800,

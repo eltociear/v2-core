@@ -356,16 +356,6 @@ contract SetupProtocol is BatchScript {
     return periphery_execute(commands, inputs, block.timestamp + 100)[inputs.length-1];  
   }
 
-  // function getAmountToDeposit(
-  //   uint128 accountId,
-  //   uint256 marginAmount,
-  //   address tokenAddress
-  // ) public returns (uint256) {
-  //   return marginAmount +
-  //     contracts.coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster -
-  //     contracts.coreProxy.getAccountLiquidationBoosterBalance(accountId, tokenAddress);
-  // }
-
   function swap(
     uint128 marketId,
     address tokenAddress,

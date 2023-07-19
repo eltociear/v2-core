@@ -31,22 +31,22 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
 
     constructor() SetupProtocol(
         SetupProtocol.Contracts({
-                coreProxy: deployProtocol.coreProxy(),
-                datedIrsProxy: deployProtocol.datedIrsProxy(),
-                peripheryProxy: deployProtocol.peripheryProxy(),
-                vammProxy: deployProtocol.vammProxy(),
-                aaveV3RateOracle: deployProtocol.aaveV3RateOracle(),
-                aaveV3BorrowRateOracle: deployProtocol.aaveV3BorrowRateOracle()
-            }),
-            SetupProtocol.Settings({
-                multisig: false,
-                multisigAddress: address(0),
-                multisigSend: false,
-                echidna: false,
-                broadcast: false,
-                prank: true
-            }),
-            owner
+            coreProxy: deployProtocol.coreProxy(),
+            datedIrsProxy: deployProtocol.datedIrsProxy(),
+            peripheryProxy: deployProtocol.peripheryProxy(),
+            vammProxy: deployProtocol.vammProxy(),
+            aaveV3RateOracle: deployProtocol.aaveV3RateOracle(),
+            aaveV3BorrowRateOracle: deployProtocol.aaveV3BorrowRateOracle()
+        }),
+        SetupProtocol.Settings({
+            multisig: false,
+            multisigAddress: address(0),
+            multisigSend: false,
+            echidna: false,
+            broadcast: false,
+            prank: true
+        }),
+        owner
     ){}
 
     function redeemAccessPass(address user, uint256 count, uint256 merkleIndex) public {
@@ -91,7 +91,7 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
         // todo: can we pull more information to play with in tests?
     }
 
-    function newMaker(
+    function executeMakerOrder(
         uint128 _marketId,
         uint32 _maturityTimestamp,
         uint128 accountId,
@@ -106,7 +106,12 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
         changeSender(user);
 
         token.mint(user, toDeposit);
-        redeemAccessPass(user, count, merkleIndex);
+
+        // note: merkleIndex = 0 is a flag for edit position,
+        // only owner had index 0
+        if ( merkleIndex != 0 ) {
+            redeemAccessPass(user, count, merkleIndex);
+        }
 
         // PERIPHERY LP COMMAND
         int256 liquidityIndex = UD60x18.unwrap(contracts.aaveV3RateOracle.getCurrentIndex()).toInt();
@@ -138,7 +143,7 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
         });
     }
 
-    function newTaker(
+    function executeTakerOrder(
         uint128 _marketId,
         uint32 _maturityTimestamp,
         uint128 accountId,
@@ -152,7 +157,12 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
 
         // todo: if liquidation booster > 0, mint margin + liqBooster - liqBoosterBalance
         token.mint(user, margin);
-        redeemAccessPass(user, count, merkleIndex);
+
+        // note: merkleIndex = 0 is a flag for edit position,
+        // only owner had index 0
+        if ( merkleIndex != 0 ) {
+            redeemAccessPass(user, count, merkleIndex);
+        }
 
         int256 liquidityIndex = UD60x18.unwrap(contracts.aaveV3RateOracle.getCurrentIndex()).toInt();
 
@@ -191,128 +201,129 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
         uint256 unfilledQuoteShort;
     }
 
-    // function checkImMaker(
-    //     uint128 _marketId,
-    //     uint32 _maturityTimestamp,
-    //     uint128 accountId,
-    //     address user,
-    //     int256 _filledBase,
-    //     MakerExecutedAmounts memory executedAmounts,
-    //     uint256 twap
-    // ) public returns (MarginData memory m, UnfilledData memory u){
+    struct CheckImParams {
+        uint128 _marketId;
+        uint32 _maturityTimestamp;
+        uint128 accountId;
+        address user;
+        int256 _filledBase;
+        MakerExecutedAmounts makerAmounts;
+        TakerExecutedAmounts takerAmounts;
+        uint256 twap;
+    }
 
-    //     uint256 currentLiquidityIndex = UD60x18.unwrap(contracts.aaveV3RateOracle.getCurrentIndex());
+    function checkImMaker(
+        CheckImParams memory p
+    ) public returns (MarginData memory m, UnfilledData memory u){
 
-    //     (
-    //         m.liquidatable,
-    //         m.initialMarginRequirement,
-    //         m.liquidationMarginRequirement,
-    //         m.highestUnrealizedLoss
-    //     ) = contracts.coreProxy.isLiquidatable(accountId, address(token));
+        uint256[] memory externalParams = new uint256[](3);
+        externalParams[0] = UD60x18.unwrap(contracts.aaveV3RateOracle.getCurrentIndex());
+        externalParams[1] = UD60x18.unwrap(contracts.coreProxy.getMarketRiskConfiguration(1, p._marketId).riskParameter);
+        externalParams[2] = UD60x18.unwrap(contracts.coreProxy.getProtocolRiskConfiguration().imMultiplier);
 
-    //     // console2.log("liquidatable", m.liquidatable);
-    //     // console2.log("initialMarginRequirement", m.initialMarginRequirement);
-    //     // console2.log("liquidationMarginRequirement", m.liquidationMarginRequirement);
-    //     // console2.log("highestUnrealizedLoss",m.highestUnrealizedLoss);
+        (
+            m.liquidatable,
+            m.initialMarginRequirement,
+            m.liquidationMarginRequirement,
+            m.highestUnrealizedLoss
+        ) = contracts.coreProxy.isLiquidatable(p.accountId, address(token));
 
-    //     (u.unfilledBaseLong, u.unfilledBaseShort, u.unfilledQuoteLong, u.unfilledQuoteShort) =
-    //         contracts.vammProxy.getAccountUnfilledBaseAndQuote(_marketId, _maturityTimestamp, accountId);
+        // console2.log("liquidatable", m.liquidatable);
+        // console2.log("initialMarginRequirement", m.initialMarginRequirement);
+        // console2.log("liquidationMarginRequirement", m.liquidationMarginRequirement);
+        // console2.log("highestUnrealizedLoss",m.highestUnrealizedLoss);
 
-    //     // console2.log("unfilledBaseLong", u.unfilledBaseLong);
-    //     // console2.log("unfilledQuoteLong", u.unfilledQuoteLong);
-    //     // console2.log("unfilledBaseShort", u.unfilledBaseShort);
-    //     // console2.log("unfilledQuoteShort", u.unfilledQuoteShort);
+        (u.unfilledBaseLong, u.unfilledBaseShort, u.unfilledQuoteLong, u.unfilledQuoteShort) =
+            contracts.vammProxy.getAccountUnfilledBaseAndQuote(p._marketId, p._maturityTimestamp, p.accountId);
 
-    //     assertEq(uint256(executedAmounts.baseAmount), u.unfilledBaseLong+u.unfilledBaseShort + 1, "unfilledBase");
-    //     assertEq(m.liquidatable, false, "liquidatable");
-    //     assertGe(m.initialMarginRequirement, m.liquidationMarginRequirement, "lmr");
+        // console2.log("unfilledBaseLong", u.unfilledBaseLong);
+        // console2.log("unfilledQuoteLong", u.unfilledQuoteLong);
+        // console2.log("unfilledBaseShort", u.unfilledBaseShort);
+        // console2.log("unfilledQuoteShort", u.unfilledQuoteShort);
 
-    //     // calculate LMRLow
-    //     uint256 baseLower = absUtil(_filledBase - u.unfilledBaseShort.toInt());
-    //     uint256 baseUpper = absUtil(_filledBase + u.unfilledBaseLong.toInt());
-    //     // todo: replace 1 with protocolId
-    //     uint256 riskParam = UD60x18.unwrap(contracts.coreProxy.getMarketRiskConfiguration(1, _marketId).riskParameter);
-    //     uint256 expectedLmrLower = (riskParam * baseLower) * currentLiquidityIndex * timeFactor(_maturityTimestamp) / 1e54;
-    //     uint256 expectedLmrUpper = (riskParam * baseUpper) * currentLiquidityIndex * timeFactor(_maturityTimestamp) / 1e54;
+        assertEq(uint256(p.makerAmounts.baseAmount), u.unfilledBaseLong+u.unfilledBaseShort + 1, "unfilledBase");
+        assertEq(m.liquidatable, false, "liquidatable");
+        assertGe(m.initialMarginRequirement, m.liquidationMarginRequirement, "lmr");
 
-    //     // console2.log("baseLower", baseLower);
-    //     // console2.log("baseUpper", baseUpper);
-    //     // console2.log("expectedLmrLower", expectedLmrLower);
-    //     // console2.log("expectedLmrUpper", expectedLmrUpper);
+        // calculate LMRLow
+        uint256 baseLower = absUtil(p._filledBase - u.unfilledBaseShort.toInt());
+        uint256 baseUpper = absUtil(p._filledBase + u.unfilledBaseLong.toInt());
+        // todo: replace 1 with protocolId
+        uint256 expectedLmrLower = (externalParams[1] * baseLower) * externalParams[0] * timeFactor(p._maturityTimestamp) / 1e54;
+        uint256 expectedLmrUpper = (externalParams[1] * baseUpper) * externalParams[0] * timeFactor(p._maturityTimestamp) / 1e54;
 
-    //     // calculate unrealized loss low
-    //     uint256 unrealizedLossLower = absOrZero(u.unfilledQuoteShort.toInt() - 
-    //         (baseLower * currentLiquidityIndex * (twap * timeFactor(_maturityTimestamp) / 1e18 + 1e18) / 1e36).toInt());
-    //     uint256 unrealizedLossUpper = absOrZero(-u.unfilledQuoteLong.toInt() + 
-    //         (baseUpper * currentLiquidityIndex * (twap * timeFactor(_maturityTimestamp) / 1e18 + 1e18) / 1e36).toInt());
-    //     // console2.log("unrealizedLossLower", unrealizedLossLower);
-    //     // console2.log("unrealizedLossUpper", unrealizedLossUpper);
+        // console2.log("baseLower", baseLower);
+        // console2.log("baseUpper", baseUpper);
+        // console2.log("expectedLmrLower", expectedLmrLower);
+        // console2.log("expectedLmrUpper", expectedLmrUpper);
 
-    //     // todo: manually calculate liquidation margin requirement for lower and upper scenarios and compare to the above
-    //     uint256 expectedUnrealizedLoss = unrealizedLossUpper;
-    //     uint256 expectedLmr = expectedLmrUpper;
-    //     if (unrealizedLossLower + expectedLmrLower >  unrealizedLossUpper + expectedLmrUpper) {
-    //         expectedUnrealizedLoss = unrealizedLossUpper;
-    //         expectedLmr = expectedLmrUpper;
-    //     }
+        // calculate unrealized loss low
+        uint256 unrealizedLossLower = absOrZero(u.unfilledQuoteShort.toInt() - 
+            (baseLower * externalParams[0] * (p.twap * timeFactor(p._maturityTimestamp) / 1e18 + 1e18) / 1e36).toInt());
+        uint256 unrealizedLossUpper = absOrZero(-u.unfilledQuoteLong.toInt() + 
+            (baseUpper * externalParams[0] * (p.twap * timeFactor(p._maturityTimestamp) / 1e18 + 1e18) / 1e36).toInt());
+        // console2.log("unrealizedLossLower", unrealizedLossLower);
+        // console2.log("unrealizedLossUpper", unrealizedLossUpper);
 
-    //     uint256 imMultiplier = UD60x18.unwrap(contracts.coreProxy.getProtocolRiskConfiguration().imMultiplier);
-    //     assertEq(expectedUnrealizedLoss, m.highestUnrealizedLoss, "expectedUnrealizedLoss");
-    //     assertAlmostEq(expectedLmr, m.liquidationMarginRequirement, 1e5);
-    //     assertAlmostEq(expectedLmr * imMultiplier, m.initialMarginRequirement, 1e5);
-    //     assertGt(executedAmounts.depositedAmount, expectedLmr * imMultiplier + expectedUnrealizedLoss, "IMR");
-    // }
+        // todo: manually calculate liquidation margin requirement for lower and upper scenarios and compare to the above
+        uint256 expectedUnrealizedLoss = unrealizedLossLower + expectedLmrLower >  unrealizedLossUpper + expectedLmrUpper ?
+            unrealizedLossLower :
+            unrealizedLossUpper;
+        uint256 expectedLmr = unrealizedLossLower + expectedLmrLower >  unrealizedLossUpper + expectedLmrUpper ?
+            expectedLmrLower :
+            expectedLmrUpper;
 
-    // function checkImTaker(
-    //     uint128 _marketId,
-    //     uint32 _maturityTimestamp,
-    //     uint128 accountId,
-    //     address user,
-    //     TakerExecutedAmounts memory executedAmounts,
-    //     uint256 twap
-    // ) public returns (MarginData memory m, UnfilledData memory u){
+        assertEq(expectedUnrealizedLoss, m.highestUnrealizedLoss, "expectedUnrealizedLoss");
+        assertAlmostEq(expectedLmr, m.liquidationMarginRequirement, 1e5);
+        assertAlmostEq(expectedLmr * externalParams[2], m.initialMarginRequirement, 1e5);
+        assertGt(p.makerAmounts.depositedAmount, expectedLmr * externalParams[2] + expectedUnrealizedLoss, "IMR");
+    }
 
-    //     uint256 currentLiquidityIndex = UD60x18.unwrap(contracts.aaveV3RateOracle.getCurrentIndex());
+    function checkImTaker(
+        CheckImParams memory p
+    ) public returns (MarginData memory m, UnfilledData memory u){
 
-    //     (
-    //         m.liquidatable,
-    //         m.initialMarginRequirement,
-    //         m.liquidationMarginRequirement,
-    //         m.highestUnrealizedLoss
-    //     ) = contracts.coreProxy.isLiquidatable(accountId, address(token));
+        uint256 currentLiquidityIndex = UD60x18.unwrap(contracts.aaveV3RateOracle.getCurrentIndex());
 
-    //     // console2.log("liquidatable", m.liquidatable);
-    //     // console2.log("initialMarginRequirement", m.initialMarginRequirement);
-    //     // console2.log("liquidationMarginRequirement", m.liquidationMarginRequirement);
-    //     // console2.log("highestUnrealizedLoss",m.highestUnrealizedLoss);
+        (
+            m.liquidatable,
+            m.initialMarginRequirement,
+            m.liquidationMarginRequirement,
+            m.highestUnrealizedLoss
+        ) = contracts.coreProxy.isLiquidatable(p.accountId, address(token));
 
-    //     (u.unfilledBaseLong, u.unfilledBaseShort, u.unfilledQuoteLong, u.unfilledQuoteShort) =
-    //         contracts.vammProxy.getAccountUnfilledBaseAndQuote(_marketId, _maturityTimestamp, accountId);
+        // console2.log("liquidatable", m.liquidatable);
+        // console2.log("initialMarginRequirement", m.initialMarginRequirement);
+        // console2.log("liquidationMarginRequirement", m.liquidationMarginRequirement);
+        // console2.log("highestUnrealizedLoss",m.highestUnrealizedLoss);
 
-    //     assertEq(0, u.unfilledBaseLong);
-    //     assertEq(0, u.unfilledQuoteLong);
-    //     assertEq(0, u.unfilledBaseShort);
-    //     assertEq(0, u.unfilledQuoteShort);
+        (u.unfilledBaseLong, u.unfilledBaseShort, u.unfilledQuoteLong, u.unfilledQuoteShort) =
+            contracts.vammProxy.getAccountUnfilledBaseAndQuote(p._marketId, p._maturityTimestamp, p.accountId);
 
-    //     // assertEq(m.liquidatable, false, "liquidatable");
-    //     assertGe(m.initialMarginRequirement, m.liquidationMarginRequirement, "lmr");
+        assertEq(0, u.unfilledBaseLong);
+        assertEq(0, u.unfilledQuoteLong);
+        assertEq(0, u.unfilledBaseShort);
+        assertEq(0, u.unfilledQuoteShort);
 
-    //     // calculate LMR
-    //     // todo: replace 1 with protocolId
-    //     uint256 riskParam = UD60x18.unwrap(contracts.coreProxy.getMarketRiskConfiguration(1, _marketId).riskParameter);
-    //     uint256 expectedLmr = (riskParam * absUtil(executedAmounts.executedBaseAmount)) * currentLiquidityIndex * timeFactor(_maturityTimestamp) / 1e54;
-    //     // console2.log("expectedLmr", expectedLmr);
+        // assertEq(m.liquidatable, false, "liquidatable");
+        assertGe(m.initialMarginRequirement, m.liquidationMarginRequirement, "lmr");
 
-    //     // calculate unrealized loss low
-    //     uint256 expectedUnrealizedLoss = absOrZero(executedAmounts.executedQuoteAmount + 
-    //         (executedAmounts.executedBaseAmount * currentLiquidityIndex.toInt() * (twap * timeFactor(_maturityTimestamp) / 1e18 + 1e18).toInt() / 1e36));
+        // calculate LMR
+        // todo: replace 1 with protocolId
+        uint256 riskParam = UD60x18.unwrap(contracts.coreProxy.getMarketRiskConfiguration(1, p._marketId).riskParameter);
+        uint256 expectedLmr = (riskParam * absUtil(p.takerAmounts.executedBaseAmount)) * currentLiquidityIndex * timeFactor(p._maturityTimestamp) / 1e54;
+        // console2.log("expectedLmr", expectedLmr);
 
-    //     // console2.log("expectedUnrealizedLoss", expectedUnrealizedLoss);
-    //     uint256 imMultiplier = UD60x18.unwrap(contracts.coreProxy.getProtocolRiskConfiguration().imMultiplier);
-    //     assertAlmostEq(expectedUnrealizedLoss.toInt(), m.highestUnrealizedLoss.toInt(), 1e5);
-    //     assertAlmostEq(expectedLmr, m.liquidationMarginRequirement, 1e5);
-    //     assertAlmostEq(expectedLmr * imMultiplier, m.initialMarginRequirement, 1e5);
-    //     assertGt(executedAmounts.depositedAmount, expectedLmr * imMultiplier + expectedUnrealizedLoss, "IMR taker");
-    // }
+        // calculate unrealized loss low
+        uint256 expectedUnrealizedLoss = absOrZero(p.takerAmounts.executedQuoteAmount + 
+            (p.takerAmounts.executedBaseAmount * currentLiquidityIndex.toInt() * (p.twap * timeFactor(p._maturityTimestamp) / 1e18 + 1e18).toInt() / 1e36));
+
+        // console2.log("expectedUnrealizedLoss", expectedUnrealizedLoss);
+        uint256 imMultiplier = UD60x18.unwrap(contracts.coreProxy.getProtocolRiskConfiguration().imMultiplier);
+        assertAlmostEq(expectedUnrealizedLoss.toInt(), m.highestUnrealizedLoss.toInt(), 1e5);
+        assertAlmostEq(expectedLmr, m.liquidationMarginRequirement, 1e5);
+        assertAlmostEq(expectedLmr * imMultiplier, m.initialMarginRequirement, 1e5);
+        assertGt(p.takerAmounts.depositedAmount, expectedLmr * imMultiplier + expectedUnrealizedLoss, "IMR taker");
+    }
 
 }
