@@ -596,7 +596,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 1, // accountId,
-                vm.addr(1), // user
+                address(1), // user
                 1000e6 - 1, // deposited margin
                 -(
                     takers[0].executedBaseAmount +
@@ -629,7 +629,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 2, // accountId,
-                vm.addr(2), // user
+                address(2), // user
                 110e6, // deposited margin
                 takers[0].executedBaseAmount,
                 takers[0].executedQuoteAmount,
@@ -651,7 +651,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 3, // accountId,
-                vm.addr(3), // user
+                address(3), // user
                 60e6, // deposited margin
                 takers[1].executedBaseAmount,
                 takers[1].executedQuoteAmount,
@@ -673,7 +673,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 4, // accountId,
-                vm.addr(4), // user
+                address(4), // user
                 1000e6, // deposited margin
                 -(
                     takers[2].executedBaseAmount / 2 +
@@ -700,7 +700,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 5, // accountId,
-                vm.addr(5), // user
+                address(5), // user
                 110e6, // deposited margin
                 takers[2].executedBaseAmount,
                 takers[2].executedQuoteAmount,
@@ -721,7 +721,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 6, // accountId,
-                vm.addr(6), // user
+                address(6), // user
                 10e6, // deposited margin
                 takers[3].executedBaseAmount,
                 takers[3].executedQuoteAmount,
@@ -1091,7 +1091,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 1, // accountId,
-                vm.addr(1), // user
+                address(1), // user
                 1000e6 - 1, // deposited margin
                 -(
                     takers[0].executedBaseAmount +
@@ -1124,7 +1124,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 2, // accountId,
-                vm.addr(2), // user
+                address(2), // user
                 110e6, // deposited margin
                 takers[0].executedBaseAmount,
                 takers[0].executedQuoteAmount,
@@ -1146,7 +1146,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 3, // accountId,
-                vm.addr(3), // user
+                address(3), // user
                 60e6, // deposited margin
                 takers[1].executedBaseAmount,
                 takers[1].executedQuoteAmount,
@@ -1168,7 +1168,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 4, // accountId,
-                vm.addr(4), // user
+                address(4), // user
                 1000e6 - 1, // deposited margin
                 -(
                     takers[2].executedBaseAmount / 2 +
@@ -1195,7 +1195,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 5, // accountId,
-                vm.addr(5), // user
+                address(5), // user
                 110e6, // deposited margin
                 takers[2].executedBaseAmount,
                 takers[2].executedQuoteAmount,
@@ -1216,7 +1216,7 @@ contract Scenario1 is ScenarioHelper {
                 marketId,
                 maturityTimestamp,
                 6, // accountId,
-                vm.addr(6), // user
+                address(6), // user
                 10e6, // deposited margin
                 takers[3].executedBaseAmount,
                 takers[3].executedQuoteAmount,

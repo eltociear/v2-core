@@ -15,7 +15,7 @@ contract ScenarioCloseAccount is ScenarioHelper {
     uint128 public marketId = 1;
 
     function setUp() public {
-        address[] memory accessPassOwners = new address[](7);
+        address[] memory accessPassOwners = new address[](4);
         accessPassOwners[0] = owner; // note: do not change owner's index 0
         accessPassOwners[1] = address(1); 
         accessPassOwners[2] = address(2); 

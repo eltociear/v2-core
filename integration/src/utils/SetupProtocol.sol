@@ -1,6 +1,7 @@
 pragma solidity >=0.8.19;
 
 import {BatchScript} from "../utils/BatchScript.sol";
+import {console2} from "forge-std/Test.sol";
 
 import "../../test/fuzzing/Hevm.sol";
 
@@ -80,6 +81,8 @@ contract SetupProtocol is BatchScript {
   bytes32 internal constant _NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG = "notifyAccountTransfer";
   bytes32 internal constant _REGISTER_PRODUCT_FEATURE_FLAG = "registerProduct";
 
+  uint16 internal constant MAX_BUFFER_GROWTH_PER_TRANSACTION = 100;
+
   constructor(
     Contracts memory _contracts,
     Settings memory _settings,
@@ -98,7 +101,7 @@ contract SetupProtocol is BatchScript {
     (address accountNftProxyAddress, ) = contracts.coreProxy.getAssociatedSystem(bytes32("accountNFT"));
     metadata.accountNftProxy = AccountNftProxy(payable(accountNftProxyAddress));
 
-    metadata.chainId = (!settings.echidna) ? vm.envUint("CHAIN_ID") : 0;
+    metadata.chainId = (settings.multisig || settings.broadcast) ? vm.envUint("CHAIN_ID") : 0;
     metadata.owner = owner;
     metadata.sender = owner;
   }
@@ -198,10 +201,21 @@ contract SetupProtocol is BatchScript {
 
   function registerDatedIrsProduct(uint256 _takerPositionsPerAccountLimit) public {
     // predict product id
-    // uint128 productId = contracts.coreProxy.getLastCreatedProductId() + 1; // todo: Alex
-    uint128 productId = 1;
-    registerProduct(address(contracts.datedIrsProxy), "Dated IRS Product");
+    uint128 productId;
+    try contracts.coreProxy.getLastCreatedProductId() returns (uint128 lastProductId) { // todo: alex remove try once mainent contracts are upgraded
+      productId = lastProductId + 1;
+    } catch {
+      productId = 1;
+    }
 
+    // todo: alex add expected product id as arguments and check against it
+    if (productId > 1) {
+      console2.log("WARNING, product id > 1! Will not register product");
+      return;
+    }
+
+    registerProduct(address(contracts.datedIrsProxy), "Dated IRS Product");
+    
     configureProduct(
       ProductConfiguration.Data({
         productId: productId,
@@ -290,11 +304,25 @@ contract SetupProtocol is BatchScript {
       mutableConfig: mutableConfig
     });
 
-    increaseObservationCardinalityNext({
-      marketId: immutableConfig.marketId,
-      maturityTimestamp: immutableConfig.maturityTimestamp,
-      observationCardinalityNext: observationCardinalityNext
+    (, , uint16 currentObservationCardinalityNext) = contracts.vammProxy.getVammObservationInfo({
+      _marketId: immutableConfig.marketId, 
+      _maturityTimestamp: immutableConfig.maturityTimestamp
     });
+
+    while (currentObservationCardinalityNext < observationCardinalityNext) {
+      uint16 nextObservationCardinalityNext = currentObservationCardinalityNext + MAX_BUFFER_GROWTH_PER_TRANSACTION;
+      if (nextObservationCardinalityNext > observationCardinalityNext) { 
+        nextObservationCardinalityNext = observationCardinalityNext;
+      }
+
+      increaseObservationCardinalityNext({
+        marketId: immutableConfig.marketId,
+        maturityTimestamp: immutableConfig.maturityTimestamp,
+        observationCardinalityNext: nextObservationCardinalityNext
+      });
+
+      currentObservationCardinalityNext = nextObservationCardinalityNext;
+    }
 
     setMakerPositionsPerAccountLimit(makerPositionsPerAccountLimit);
   }
@@ -309,6 +337,7 @@ contract SetupProtocol is BatchScript {
     int24 tickLower;
     int24 tickUpper;
     address rateOracleAddress;
+    uint256 peripheryExecuteDeadline;
   }
 
   function mintOrBurn(
@@ -359,7 +388,7 @@ contract SetupProtocol is BatchScript {
       Utils.getLiquidityForBase(params.tickLower, params.tickUpper, baseAmount)    
     );
 
-    return periphery_execute(commands, inputs, block.timestamp + 100)[inputs.length-1];  
+    return periphery_execute(commands, inputs, params.peripheryExecuteDeadline)[inputs.length-1];
   }
 
   function swap(

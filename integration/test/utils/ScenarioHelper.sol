@@ -140,7 +140,8 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
             notionalAmount: baseAmount * liquidityIndex / 1e18,
             tickLower: tickLower, // 4.67%
             tickUpper: tickUpper, // 2.35%
-            rateOracleAddress: address(contracts.aaveV3RateOracle)
+            rateOracleAddress: address(contracts.aaveV3RateOracle),
+            peripheryExecuteDeadline: block.timestamp + 360
         }));
 
         (
@@ -455,7 +456,8 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
             notionalAmount: baseAmount * liquidityIndex / 1e18,
             tickLower: tickLower,
             tickUpper: tickUpper,
-            rateOracleAddress: address(contracts.aaveV3RateOracle)
+            rateOracleAddress: address(contracts.aaveV3RateOracle),
+            peripheryExecuteDeadline: block.timestamp + 360
         }));
 
         (
