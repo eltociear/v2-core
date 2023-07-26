@@ -106,13 +106,15 @@ library Account {
      * Note: Will not fail if the account already exists, and if so, will overwrite the existing owner.
      *  Whatever calls this internal function must first check that the account doesn't exist before re-creating it.
      */
-    function create(uint128 id, address owner) internal returns (Data storage account) {
+    function create(uint128 id, address owner, uint128 trustlessProductIdTrustedByAccount) internal returns (Data storage account) {
         // Disallowing account ID 0 means we can use a non-zero accountId as an existence flag in structs like Position
+        // todo: consider layering in validation of trustlessProductIdTrustedByAccount
         require(id != 0);
         account = load(id);
 
         account.id = id;
         account.rbac.owner = owner;
+        account.trustlessProductIdTrustedByAccount = trustlessProductIdTrustedByAccount;
     }
 
     /**
