@@ -116,6 +116,23 @@ contract ProductModule is IProductModule {
         emit Collateral.CollateralUpdate(receivingAccountId, collateralType, fee.toInt(), block.timestamp);
     }
 
+    function checkAccountCanEngageWithProduct(
+        uint128 trustlessProductIdTrustedByAccount,
+        uint128 productId,
+        bool isProductTrusted
+    ) internal pure returns (bool) {
+
+        if (isProductTrusted && trustlessProductIdTrustedByAccount == type(uint128).max) {
+            return true;
+        }
+
+        if (!isProductTrusted && trustlessProductIdTrustedByAccount == productId) {
+            return true;
+        }
+
+        return false;
+    }
+
     function propagateTakerOrder(
         uint128 accountId,
         uint128 productId,
@@ -124,6 +141,7 @@ contract ProductModule is IProductModule {
         int256 annualizedNotional
     ) external override returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss) {
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
+        // todo: consider checking if the product exists or is it implicitly done in .onlyProductAddress() call
         Product.onlyProductAddress(productId, msg.sender);
 
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
@@ -132,6 +150,15 @@ contract ProductModule is IProductModule {
         );
 
         Account.Data storage account = Account.exists(accountId);
+        Product.Data storage product = Product.load(productId);
+
+        bool accountCanEngageWithProduct = checkAccountCanEngageWithProduct(
+            account.trustlessProductIdTrustedByAccount, product.id, product.isTrusted
+        );
+
+        if (!accountCanEngageWithProduct) {
+            revert AccountCannotEngageWithProduct(account.id, product.id);
+        }
 
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);

@@ -19,6 +19,14 @@ interface IProductModule {
     error IncorrectProductInterface(address product);
 
     /**
+     * @notice Thrown when an attempt to propagate an order with a product with which the account cannot engage
+     * @dev A given account can either engage with any combination of trusted products or just a single
+     * trustless product.
+     */
+    // todo: consider if more information needs to be included in this error beyond accountId and productId
+    error AccountCannotEngageWithProduct(uint128 accountId, uint128 productId);
+
+    /**
      * @notice Emitted when a new product is registered in the protocol.
      * @param product The address of the product that was registered in the system.
      * @param productId The id with which the product was registered in the system.
