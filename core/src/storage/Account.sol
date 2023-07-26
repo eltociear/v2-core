@@ -326,6 +326,7 @@ library Account {
     * @dev Returns the account stored at the specified account id.
      */
     function load(uint128 id) internal pure returns (Data storage account) {
+        // todo: consider turning below require statement into a custom error
         require(id != 0);
         bytes32 s = keccak256(abi.encode("xyz.voltz.Account", id));
         assembly {
