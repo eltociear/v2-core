@@ -200,7 +200,7 @@ contract AccountTest is Test {
     }
 
     function testFail_create_ZeroAccount() public {
-        accounts.create(0, address(1));
+        accounts.create(0, address(1), type(uint128).max);
     }
 
     function test_RevertWhen_AccountDoesNotExist() public {
