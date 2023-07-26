@@ -39,6 +39,14 @@ library Product {
          * @dev Creator of the product, which has configuration access rights for the product.
          */
         address owner;
+        /**
+        * @dev Whether the product is trusted or not.
+        * @dev Margin accounts can either engage with a trustless instrument or any of the trusted instruments.
+        * @dev A margin account that engages with any trustless instrument cannot engage with any other trusted or
+        * trustless instrument. A margin account that engages with any trusted instrument can engage with any other
+        * trusted instrument but cannot engage with a trustless instrument.
+        */
+        bool isTrusted;
     }
 
     /**

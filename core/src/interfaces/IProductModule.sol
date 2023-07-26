@@ -57,9 +57,12 @@ interface IProductModule {
      * @notice Connects a product to the system.
      * @dev Creates a product object to track the product, and returns the newly created product id.
      * @param product The address of the product that is to be registered in the system.
+     * @param isTrusted Whether the product is trusted or not.
+     * @dev Note, trusted products can only be registered by those who have access to _REGISTER_PRODUCT_FEATURE_FLAG
+     * @dev On the other hand, trustless products can be registered by anyone
      * @return newProductId The id with which the product will be registered in the system.
      */
-    function registerProduct(address product, string memory name) external returns (uint128 newProductId);
+    function registerProduct(address product, string memory name, bool isTrusted) external returns (uint128 newProductId);
 
     /// @notice attempts to close all the unfilled and filled positions of a given account in a given product (productId)
     function closeAccount(uint128 productId, uint128 accountId, address collateralType) external;

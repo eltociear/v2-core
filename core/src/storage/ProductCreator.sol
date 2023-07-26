@@ -47,7 +47,7 @@ library ProductCreator {
      * tracks, resulting in multiple ids for the same address.
      * For example if a given Product works across maturities, each maturity internally will be represented as a unique Product id
      */
-    function create(address productAddress, string memory name, address owner)
+    function create(address productAddress, string memory name, address owner, bool isTrusted)
         internal
         returns (Product.Data storage product)
     {
@@ -62,6 +62,7 @@ library ProductCreator {
         product.productAddress = productAddress;
         product.name = name;
         product.owner = owner;
+        product.isTrusted = isTrusted;
         productStore.lastCreatedProductId = id;
 
         loadIdsByAddress(productAddress).push(id);

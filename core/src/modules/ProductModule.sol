@@ -61,15 +61,20 @@ contract ProductModule is IProductModule {
     /**
      * @inheritdoc IProductModule
      */
-    function registerProduct(address product, string memory name) external override returns (uint128 productId) {
+    function registerProduct(address product, string memory name, bool isTrusted) external override returns (uint128 productId) {
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
-        FeatureFlag.ensureAccessToFeature(_REGISTER_PRODUCT_FEATURE_FLAG);
+
+        if (isTrusted) {
+            // todo: consider removing the below feature flag in favour of an ownerOnly check
+            /// unless there's a good reason to use a feature flag
+            FeatureFlag.ensureAccessToFeature(_REGISTER_PRODUCT_FEATURE_FLAG);
+        }
 
         if (!ERC165Helper.safeSupportsInterface(product, type(IProduct).interfaceId)) {
             revert IncorrectProductInterface(product);
         }
 
-        productId = ProductCreator.create(product, name, msg.sender).id;
+        productId = ProductCreator.create(product, name, msg.sender, isTrusted).id;
 
         emit ProductRegistered(product, productId, name, msg.sender, block.timestamp);
     }
