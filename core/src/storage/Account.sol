@@ -175,17 +175,6 @@ library Account {
     }
 
     /**
-     * @dev Given a collateral type, returns information about the total liquidation booster balance of the account
-     */
-    function getLiquidationBoosterBalance(Data storage self, address collateralType)
-        internal
-        view
-        returns (uint256 liquidationBoosterBalance)
-    {
-        liquidationBoosterBalance = self.collaterals[collateralType].liquidationBoosterBalance;
-    }
-
-    /**
      * @dev Loads the Account object for the specified accountId,
      * and validates that sender has the specified permission. It also resets
      * the interaction timeout. These are different actions but they are merged

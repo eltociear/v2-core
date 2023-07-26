@@ -39,38 +39,25 @@ contract CollateralModule is ICollateralModule {
         address depositFrom = msg.sender;
         address self = address(this);
 
-        uint256 actualTokenAmount = tokenAmount;
-
-        uint256 liquidationBooster = CollateralConfiguration.load(collateralType).liquidationBooster;
-        if (account.collaterals[collateralType].liquidationBoosterBalance < liquidationBooster) {
-            uint256 liquidationBoosterTopUp =
-                liquidationBooster - account.collaterals[collateralType].liquidationBoosterBalance;
-            actualTokenAmount += liquidationBoosterTopUp;
-            account.collaterals[collateralType].increaseLiquidationBoosterBalance(liquidationBoosterTopUp);
-            emit Collateral.LiquidatorBoosterUpdate(
-                accountId, collateralType, liquidationBoosterTopUp.toInt(), block.timestamp
-            );
-        }
-
         uint256 allowance = IERC20(collateralType).allowance(depositFrom, self);
-        if (allowance < actualTokenAmount) {
-            revert IERC20.InsufficientAllowance(actualTokenAmount, allowance);
+        if (allowance < tokenAmount) {
+            revert IERC20.InsufficientAllowance(tokenAmount, allowance);
         }
 
         uint256 currentBalance = IERC20(collateralType).balanceOf(self);
         uint256 collateralCap = CollateralConfiguration.load(collateralType).cap;
-        if (collateralCap < currentBalance + actualTokenAmount) {
+        if (collateralCap < currentBalance + tokenAmount) {
             revert CollateralCapExceeded(
-                collateralType, collateralCap, currentBalance, tokenAmount, actualTokenAmount - tokenAmount
+                collateralType, collateralCap, currentBalance, tokenAmount
             );
         }
 
-        collateralType.safeTransferFrom(depositFrom, self, actualTokenAmount);
+        collateralType.safeTransferFrom(depositFrom, self, tokenAmount);
 
         account.collaterals[collateralType].increaseCollateralBalance(tokenAmount);
         emit Collateral.CollateralUpdate(accountId, collateralType, tokenAmount.toInt(), block.timestamp);
 
-        emit Deposited(accountId, collateralType, actualTokenAmount, msg.sender, block.timestamp);
+        emit Deposited(accountId, collateralType, tokenAmount, msg.sender, block.timestamp);
     }
 
     /**
@@ -83,12 +70,6 @@ contract CollateralModule is ICollateralModule {
 
         uint256 collateralBalance = account.collaterals[collateralType].balance;
         if (tokenAmount > collateralBalance) {
-            uint256 liquidatorBoosterWithdrawal = tokenAmount - collateralBalance;
-            account.collaterals[collateralType].decreaseLiquidationBoosterBalance(liquidatorBoosterWithdrawal);
-            emit Collateral.LiquidatorBoosterUpdate(
-                accountId, collateralType, -liquidatorBoosterWithdrawal.toInt(), block.timestamp
-            );
-
             account.collaterals[collateralType].decreaseCollateralBalance(collateralBalance);
             emit Collateral.CollateralUpdate(accountId, collateralType, -collateralBalance.toInt(), block.timestamp);
         } else {
@@ -127,16 +108,5 @@ contract CollateralModule is ICollateralModule {
         return Account.load(accountId).getCollateralBalanceAvailable(collateralType);
     }
 
-    /**
-     * @inheritdoc ICollateralModule
-     */
-    function getAccountLiquidationBoosterBalance(uint128 accountId, address collateralType)
-        external
-        view
-        override
-        returns (uint256 collateralBalance)
-    {
-        return Account.load(accountId).getLiquidationBoosterBalance(collateralType);
-    }
 
 }
