@@ -72,6 +72,12 @@ library Account {
          * @dev Ids of all the products in which the account has active positions
          */
         SetUtil.UintSet activeProducts;
+
+        /**
+         * @dev If this value is set to max uint128, then the account is only able to interact with trusted instruments
+         * @dev
+         */
+        uint128 trustlessProductIdTrustedByAccount;
     }
 
 
