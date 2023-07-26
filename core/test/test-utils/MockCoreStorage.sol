@@ -183,14 +183,14 @@ contract CoreState is MockCoreStorage, Ownable {
         // Create product (id: 1)
         {
             products.push(new MockProduct("Product 1"));
-            uint128 productId = mockProduct(address(products[0]), "Product 1", Constants.PRODUCT_OWNER);
+            uint128 productId = mockProduct(address(products[0]), "Product 1", Constants.PRODUCT_OWNER, true);
             require(productId == 1, "Mock Core: PrdId (1)");
         }
 
         // Create product (id: 2)
         {
             products.push(new MockProduct("Product 2"));
-            uint128 productId = mockProduct(address(products[1]), "Product 2", Constants.PRODUCT_OWNER);
+            uint128 productId = mockProduct(address(products[1]), "Product 2", Constants.PRODUCT_OWNER, true);
             require(productId == 2, "Mock Core: PrdId (2)");
         }
 
