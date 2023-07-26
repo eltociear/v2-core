@@ -35,7 +35,7 @@ import {
   export type Config = JTDDataType<typeof config>;
   
   // ensure the specified contract is already deployed
-  // if not deployed, deploy the specified hardhat contract with specfied options, export
+  // if not deployed, deploy the specified hardhat contract with specified options, export
   // address, abi, etc.
   // if already deployed, reexport deployment options for usage downstream and exit with no changes
   const routerAction = {
