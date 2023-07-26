@@ -144,11 +144,6 @@ contract ProductModule is IProductModule {
         // todo: consider checking if the product exists or is it implicitly done in .onlyProductAddress() call
         Product.onlyProductAddress(productId, msg.sender);
 
-        MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
-        fee = distributeFees(
-            accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicTakerFee, collateralType, annualizedNotional
-        );
-
         Account.Data storage account = Account.exists(accountId);
         Product.Data storage product = Product.load(productId);
 
@@ -159,6 +154,12 @@ contract ProductModule is IProductModule {
         if (!accountCanEngageWithProduct) {
             revert AccountCannotEngageWithProduct(account.id, product.id);
         }
+
+        MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
+        fee = distributeFees(
+            accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicTakerFee, collateralType, annualizedNotional
+        );
+
 
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
@@ -177,14 +178,23 @@ contract ProductModule is IProductModule {
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Product.onlyProductAddress(productId, msg.sender);
 
+        Account.Data storage account = Account.exists(accountId);
+        Product.Data storage product = Product.load(productId);
+
+        bool accountCanEngageWithProduct = checkAccountCanEngageWithProduct(
+            account.trustlessProductIdTrustedByAccount, product.id, product.isTrusted
+        );
+
+        if (!accountCanEngageWithProduct) {
+            revert AccountCannotEngageWithProduct(account.id, product.id);
+        }
+
         if (annualizedNotional > 0) {
             MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
             fee = distributeFees(
                 accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicMakerFee, collateralType, annualizedNotional
             );
         }
-
-        Account.Data storage account = Account.exists(accountId);
 
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
